@@ -21,6 +21,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     persons = os.listdir(test_path)
+    total_acc = 0
 
     print('name\t\ttotal\tcorrect\twrong\tfail\tacc\tpreci\telapsed time')
     for p in persons:
@@ -53,3 +54,7 @@ if __name__ == "__main__":
 
         print('%10s\t%d\t%d\t%d\t%d\t%.3f\t%.3f\t%s'%\
             (p, total, correct, wrong, fail, correct/total, correct/(total-fail), datetime.now() - start_time))
+
+        total_acc += correct/total
+
+    print('total_acc: %.3f'%(total_acc/len(persons)))
