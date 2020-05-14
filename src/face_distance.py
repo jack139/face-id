@@ -1,4 +1,5 @@
 import face_recognition
+import sys
 
 # Often instead of just checking if two faces match or not (True or False), it's helpful to see how similar they are.
 # You can do that by using the face_distance function.
@@ -10,28 +11,31 @@ import face_recognition
 # Note: This isn't exactly the same as a "percent match". The scale isn't linear. But you can assume that images with a
 # smaller distance are more similar to each other than ones with a larger distance.
 
+if __name__ == "__main__":
+    if len(sys.argv)<3:
+        print("usage: python3 %s <known_image> <image_to_test>" % sys.argv[0])
+        sys.exit(2)
+
+    image1_file = sys.argv[1]
+    image2_file = sys.argv[2]
+
 # Load some images to compare against
-known_obama_image = face_recognition.load_image_file("obama.jpg")
-known_biden_image = face_recognition.load_image_file("biden.jpg")
+known_image = face_recognition.load_image_file(image1_file)
 
 # Get the face encodings for the known images
-obama_face_encoding = face_recognition.face_encodings(known_obama_image)[0]
-biden_face_encoding = face_recognition.face_encodings(known_biden_image)[0]
+known_image_encoding = face_recognition.face_encodings(known_image)[0]
 
 known_encodings = [
-    obama_face_encoding,
-    biden_face_encoding
+    known_image_encoding
 ]
 
 # Load a test image and get encondings for it
-image_to_test = face_recognition.load_image_file("obama2.jpg")
+image_to_test = face_recognition.load_image_file(image2_file)
 image_to_test_encoding = face_recognition.face_encodings(image_to_test)[0]
 
 # See how far apart the test image is from the known faces
 face_distances = face_recognition.face_distance(known_encodings, image_to_test_encoding)
 
 for i, face_distance in enumerate(face_distances):
-    print("The test image has a distance of {:.2} from known image #{}".format(face_distance, i))
-    print("- With a normal cutoff of 0.6, would the test image match the known image? {}".format(face_distance < 0.6))
-    print("- With a very strict cutoff of 0.5, would the test image match the known image? {}".format(face_distance < 0.5))
+    print("known/test image distance: {:.2}".format(face_distance))
     print()
