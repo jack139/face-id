@@ -8,6 +8,14 @@
 
 
 
+#### 准确率评估
+
+初步结论：face-recognition已有模型的识别准确率，对西方人比东亚人要高。
+
+https://github.com/ageitgey/face_recognition
+
+
+
 ##### 样本评估测试1（西方人）
 
 ```
