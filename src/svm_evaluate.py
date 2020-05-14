@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
+import face_recognition
+from sklearn import svm
+import pickle
 from datetime import datetime
-import knn
-
 
 if __name__ == "__main__":
     if len(sys.argv)<3:
@@ -19,6 +20,10 @@ if __name__ == "__main__":
     if not os.path.isdir(test_path):
         print('test need directory.')
         sys.exit(0)
+
+    # load model
+    with open(model_name, 'rb') as f:
+        clf = pickle.load(f)
 
     persons = os.listdir(test_path)
 
@@ -36,17 +41,23 @@ if __name__ == "__main__":
         for image_file in images:
             #print("Looking for faces in {}".format(image_file))
 
-            # Find all people in the image using a trained classifier model
-            # Note: You can pass in either a classifier file name or a classifier model instance
-            predictions = knn.predict(image_file, model_path=model_name)
+            # Load the test image with unknown faces into a numpy array
+            test_image = face_recognition.load_image_file(image_file)
 
-            # Print results on the console
-            if len(predictions)==0:
+            # Find all the faces in the test image using the default HOG-based model
+            face_locations = face_recognition.face_locations(test_image)
+            no = len(face_locations)
+            #print("Number of faces detected: ", no)
+            if no==0:
                 fail += 1
             else:
-                for name, (top, right, bottom, left) in predictions:
-                    #print("- Found {} at ({}, {})".format(name, left, top))
-                    if name==p:
+                # Predict all the faces in the test image using the trained classifier
+                #print("Found:")
+                for i in range(no):
+                    test_image_enc = face_recognition.face_encodings(test_image)[i]
+                    name = clf.predict([test_image_enc])
+                    #print(*name)
+                    if name[0]==p:
                         correct += 1
                     else:
                         wrong += 1
