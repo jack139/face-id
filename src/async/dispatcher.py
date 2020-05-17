@@ -2,7 +2,7 @@
 
 # 后台调度程序，轮询kafka，异步执行，redis返回结果
 
-import sys, json
+import sys, json, time
 from kafka import KafkaConsumer
 
 from utils import helper
@@ -17,6 +17,7 @@ if __name__ == '__main__':
             msg_body = json.loads(message.value.decode('utf-8'))
             print(msg_body)
 
-            # 收到消息
+            time.sleep(1)
 
-            helper.redis_publish(msg_body['rid'].encode('utf-8'), 'Hello world.')
+            # 收到消息
+            helper.redis_publish(msg_body['rid'], 'Hello world.')

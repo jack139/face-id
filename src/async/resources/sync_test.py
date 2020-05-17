@@ -20,9 +20,10 @@ class SyncTest(Resource):
             helper.kafka_send_msg(rid, 'Hello')
 
             # 通过redis订阅等待结果返回
-            ret = helper.redis_subscribe(rid.encode('utf-8'))
+            ret = helper.redis_subscribe(rid)
 
-            return {'code': 200, 'msg' : 'success', 'data' : ret['data'] }
+            print(ret)
+            return {'code': 200, 'msg' : 'success', 'data' : ret['data'].decode('utf-8') }
 
         except BaseException as e:
             logger.error("未知异常: %s" % e.message, exc_info=True)
