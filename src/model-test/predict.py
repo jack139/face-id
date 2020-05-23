@@ -32,8 +32,8 @@ if __name__ == "__main__":
         print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
         # Print results on the console
-        for name, (top, right, bottom, left) in predictions:
-            print("- Found {} at ({}, {})".format(name, left, top))
+        for name, (top, right, bottom, left), distance in predictions:
+            print("- Found {} at ({}, {}), distance={}".format(name, left, top, distance))
 
         # Display results overlaid on an image
         knn.show_prediction_labels_on_image(image_file, predictions)

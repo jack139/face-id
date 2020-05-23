@@ -134,12 +134,31 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     # Find encodings for faces in the test iamge
     faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
 
-    # Use the KNN model to find the best matches for the test face
-    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
-    are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
+    # Use the KNN model to find the first 5 best matches for the test face
+    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
+    #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 
     # Predict classes and remove classifications that aren't within the threshold
-    return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
+    #return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
+
+    #print(closest_distances)
+
+    # return multi results
+    results = []
+    labels = []
+    for i in range(len(X_face_locations)):
+        for j in range(len(closest_distances[0][i])):
+            if closest_distances[0][i][j]<=distance_threshold:
+                # labels are in classes_
+                l = knn_clf.classes_[knn_clf._y[closest_distances[1][i][j]]]
+                if l not in labels:
+                    results.append((
+                        l, 
+                        X_face_locations[i], 
+                        round(closest_distances[0][i][j], 6)
+                    ))
+                    labels.append(l)    
+    return results
 
 
 def show_prediction_labels_on_image(img_path, predictions):
@@ -153,7 +172,7 @@ def show_prediction_labels_on_image(img_path, predictions):
     pil_image = Image.open(img_path).convert("RGB")
     draw = ImageDraw.Draw(pil_image)
 
-    for name, (top, right, bottom, left) in predictions:
+    for name, (top, right, bottom, left), _ in predictions:
         # Draw a box around the face using the Pillow module
         draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
 
