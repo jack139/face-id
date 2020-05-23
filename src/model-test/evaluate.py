@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
             # Find all people in the image using a trained classifier model
             # Note: You can pass in either a classifier file name or a classifier model instance
-            predictions = knn.predict(image_file, model_path=model_name)
+            predictions = knn.predict(image_file, model_path=model_name, distance_threshold=0.5)
 
             # Print results on the console
             if len(predictions)==0:

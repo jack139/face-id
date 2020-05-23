@@ -135,6 +135,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
 
     # Use the KNN model to find the first 5 best matches for the test face
+    # 返回5个最佳结果
     closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
     #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 
@@ -147,6 +148,11 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     results = []
     labels = []
     for i in range(len(X_face_locations)):
+        # 第一个超过阈值，说明未匹配到
+        if closest_distances[0][i][0]>distance_threshold:
+            results.append(('unknown', X_face_locations[i], 1.0))
+            continue
+        # 将阈值范围内的结果均返回
         for j in range(len(closest_distances[0][i])):
             if closest_distances[0][i][j]<=distance_threshold:
                 # labels are in classes_
@@ -157,7 +163,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
                         X_face_locations[i], 
                         round(closest_distances[0][i][j], 6)
                     ))
-                    labels.append(l)    
+                    labels.append(l)
     return results
 
 
