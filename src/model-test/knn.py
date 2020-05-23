@@ -79,7 +79,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
                     print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_bounding_boxes) < 1 else "Found more than one face"))
             else:
                 # Add face encoding for current image to the training set
-                X.append(face_recognition.face_encodings(image, known_face_locations=face_bounding_boxes)[0])
+                X.append(face_recognition.face_encodings(image, known_face_locations=face_bounding_boxes, num_jitters=10)[0])
                 y.append(class_dir)
 
     # Determine how many neighbors to use for weighting in the KNN classifier
@@ -132,7 +132,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
         return []
 
     # Find encodings for faces in the test iamge
-    faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
+    faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations, num_jitters=1)
 
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
@@ -150,7 +150,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     for i in range(len(X_face_locations)):
         # 第一个超过阈值，说明未匹配到
         if closest_distances[0][i][0]>distance_threshold:
-            results.append(('unknown', X_face_locations[i], 1.0))
+            results.append(('unknown', X_face_locations[i], 99.0))
             continue
         # 将阈值范围内的结果均返回
         for j in range(len(closest_distances[0][i])):

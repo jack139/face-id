@@ -28,7 +28,7 @@ if __name__ == "__main__":
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
         start_time = datetime.now()
-        predictions = knn.predict(image_file, model_path=model_name, distance_threshold=0.5)
+        predictions = knn.predict(image_file, model_path=model_name, distance_threshold=0.6)
         print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
         # Print results on the console
@@ -36,4 +36,4 @@ if __name__ == "__main__":
             print("- Found {} at ({}, {}), distance={}".format(name, left, top, distance))
 
         # Display results overlaid on an image
-        knn.show_prediction_labels_on_image(image_file, predictions)
+        #knn.show_prediction_labels_on_image(image_file, predictions)
