@@ -14,4 +14,5 @@ $(TARGETS):
 clean:
 	@echo "Clean ..." 
 	@find . -name "__pycache__" | xargs rm -rf
+	@find . -name '*.pyc' -delete
 	@rm -rf $(TARGETS) $(TEMP)
