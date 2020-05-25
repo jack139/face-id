@@ -19,9 +19,8 @@ from .keras_vggface.utils import preprocess_input
 import face_recognition
 
 
-# 装入识别模型
-model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') # pooling: None, avg or max
-#model = VGGFace(model='resnet50', include_top=False, input_shape=(224, 224, 3), pooling='avg')
+# 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50
+model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') 
 
 
 # 从照片中获取人脸数据，返回所有能识别的人脸
@@ -74,8 +73,6 @@ def get_features(filename):
     samples = np.asarray(faces, 'float32')
     # prepare the face for the model, e.g. center pixels
     samples = preprocess_input(samples, version=2)
-    # create a vggface model
-    #model = VGGFace(model='resnet50', include_top=False, input_shape=(224, 224, 3), pooling='avg')
     # perform prediction
     yhat = model.predict(samples)
     yhat2 = yhat / np.linalg.norm(yhat)

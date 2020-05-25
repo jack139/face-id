@@ -71,9 +71,6 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            #image = face_recognition.load_image_file(img_path)
-            #face_bounding_boxes = face_recognition.face_locations(image)
-
             face_encodings, _ = verify.get_features(img_path)
 
             if len(face_encodings) != 1:
@@ -127,24 +124,13 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
             knn_clf = pickle.load(f)
 
     # Load image file and find face locations
-    #X_img = face_recognition.load_image_file(X_img_path)
-    #X_face_locations = face_recognition.face_locations(X_img)
-
-    
-
-    # If no faces are found in the image, return an empty result.
-    #if len(X_face_locations) == 0:
-    #    return []
-
     # Find encodings for faces in the test iamge
-    #faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations, num_jitters=1)
-
     faces_encodings, X_face_locations = verify.get_features(X_img_path)
 
     if len(X_face_locations) == 0:
         return []
 
-    print(faces_encodings)
+    #print(faces_encodings)
 
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
@@ -154,7 +140,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     # Predict classes and remove classifications that aren't within the threshold
     #return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
 
-    print(closest_distances)
+    #print(closest_distances)
 
     # return multi results
     results = []
