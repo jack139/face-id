@@ -5,3 +5,4 @@ kafka-python
 redis
 Flask==1.1.1
 Flask-Restful
+opencv-python
