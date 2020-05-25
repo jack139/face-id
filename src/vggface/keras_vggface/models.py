@@ -16,7 +16,7 @@ from keras_applications.imagenet_utils import _obtain_input_shape
 from keras.utils import layer_utils
 from keras.utils.data_utils import get_file
 from keras import backend as K
-from keras_vggface import utils
+from . import utils
 from keras.engine.topology import get_source_inputs
 import warnings
 from keras.models import Model
