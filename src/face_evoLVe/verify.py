@@ -3,31 +3,35 @@
 import cv2
 from PIL import Image
 import numpy as np
-from .backbone.model_irse import IR_50, IR_152, IR_SE_50, IR_SE_152
+#from .backbone.model_irse import IR_50, IR_152, IR_SE_50, IR_SE_152
+from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
 from .extract_feature_v2 import extract_feature
 
 # 当前使用模型的索引，选择数据模型只需要修改这里
-CURRENT_MODEL = 0
+CURRENT_MODEL = 5
 
 INPUT_SIZE = [112, 112]
 MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 MODEL_LIST = [
     ('ir50', 'bh-ir50/backbone_ir50_asia.pth'), # 0
-    ('ir50', 'bms1m-ir50/backbone_ir50_ms1m_epoch63.pth'), # 1
-    ('ir50', 'bms1m-ir50/backbone_ir50_ms1m_epoch120.pth'), # 2
+    ('ir50', 'ms1m-ir50/backbone_ir50_ms1m_epoch63.pth'), # 1
+    ('ir50', 'ms1m-ir50/backbone_ir50_ms1m_epoch120.pth'), # 2
     ('ir152', 'ms1m-ir152/Backbone_IR_152_Epoch_37_Batch_841528_Time_2019-06-06-02-06_checkpoint.pth'), # 3
     ('ir152', 'ms1m-ir152/Backbone_IR_152_Epoch_59_Batch_1341896_Time_2019-06-14-06-04_checkpoint.pth'), # 4
     ('ir152', 'ms1m-ir152/Backbone_IR_152_Epoch_112_Batch_2547328_Time_2019-07-13-02-59_checkpoint.pth'), # 5
-    ('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_37_Batch_841528_Time_2019-06-06-02-06_checkpoint.pth'), # 6
-    ('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_59_Batch_1341896_Time_2019-06-14-06-04_checkpoint.pth'), # 7
-    ('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_112_Batch_2547328_Time_2019-07-13-02-59_checkpoint.pth'), # 8
+    # 用于 HEAD，不能用于 backbone
+    #('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_37_Batch_841528_Time_2019-06-06-02-06_checkpoint.pth'), # 6
+    #('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_59_Batch_1341896_Time_2019-06-14-06-04_checkpoint.pth'), # 7
+    #('ir152', 'ms1m-ir152/Head_ArcFace_Epoch_112_Batch_2547328_Time_2019-07-13-02-59_checkpoint.pth'), # 8
 ]
-    
+
 if MODEL_LIST[CURRENT_MODEL][0]=='ir152':
     BACKBONE = IR_152(INPUT_SIZE)
 else:
     BACKBONE = IR_50(INPUT_SIZE)
+
+BACKBONE = IR_SE_152(INPUT_SIZE)
 
 MODEL_ROOT = MODEL_BASE+MODEL_LIST[CURRENT_MODEL][1]
 
