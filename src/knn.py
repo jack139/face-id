@@ -177,9 +177,13 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
                 else:
                     labels[l] += 1
 
-        # 相同人脸位置，labels 里 count最大的认为就是结果，如果count相同才返回多结果
+        # 找到labels里count最大值
         max_count = max(labels.items(), key=operator.itemgetter(1))[1]
+        # 相同人脸位置，labels 里 count最大的认为就是结果，如果count相同才返回多结果
         results.extend([i+[labels[i[0]]] for i in temp_result if labels[i[0]]==max_count])
+        # 当count最大的不是距离最短的结果时，同时返回距离最短的结果
+        #results.extend( [result+[labels[result[0]]] for i,result in enumerate(temp_result) \
+        #    if labels[result[0]]==max_count or (i==0 and labels[result[0]]!=max_count)] )
 
     return results
 
