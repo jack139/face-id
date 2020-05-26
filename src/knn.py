@@ -21,7 +21,7 @@ Usage:
 
 """
 
-import math
+import math, operator
 from sklearn import neighbors
 import os
 import os.path
@@ -157,21 +157,30 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     for i in range(len(X_face_locations)):
         # 第一个超过阈值，说明未匹配到
         if closest_distances[0][i][0]>distance_threshold:
-            results.append(('unknown', X_face_locations[i], 99.0))
+            results.append(['unknown', X_face_locations[i], round(closest_distances[0][i][0], 6), 0])
             continue
         # 将阈值范围内的结果均返回
-        labels = []
+        labels = {}
+        temp_result = []
         for j in range(len(closest_distances[0][i])):
             if closest_distances[0][i][j]<=distance_threshold:
                 # labels are in classes_
                 l = knn_clf.classes_[knn_clf._y[closest_distances[1][i][j]]]
-                if l not in labels:
-                    results.append((
+                #results.append( (l, X_face_locations[i], round(closest_distances[0][i][j], 6)) )
+                if l not in labels.keys():
+                    temp_result.append([
                         l, 
                         X_face_locations[i], 
                         round(closest_distances[0][i][j], 6)
-                    ))
-                    labels.append(l)
+                    ])
+                    labels[l] = 1
+                else:
+                    labels[l] += 1
+
+        # 相同人脸位置，labels 里 count最大的认为就是结果，如果count相同才返回多结果
+        max_count = max(labels.items(), key=operator.itemgetter(1))[1]
+        results.extend([i+[labels[i[0]]] for i in temp_result if labels[i[0]]==max_count])
+
     return results
 
 

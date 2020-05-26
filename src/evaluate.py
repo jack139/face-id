@@ -62,8 +62,7 @@ if __name__ == "__main__":
                 n = 0
                 bingo = 0
                 name_list = []
-                for name, (top, right, bottom, left), distance in predictions:
-                    #print("- Found {} at ({}, {})".format(name, left, top))
+                for name, (top, right, bottom, left), distance, count in predictions:
                     if name==p:
                         if n==0:
                             correct += 1
