@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-from settings import ALGORITHM, import_knn
+from settings import ALGORITHM
+import knn
+
 
 '''
      Structure:
@@ -29,7 +31,7 @@ if __name__ == "__main__":
         sys.exit(2)
 
     # 根据选择算法引入knn模块
-    knn=import_knn(face_algorithm)
+    knn.set_algorithm(face_algorithm)
 
     train_data_dir = sys.argv[2]
 

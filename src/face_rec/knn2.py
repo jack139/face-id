@@ -88,6 +88,9 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
         if verbose:
             print("Chose n_neighbors automatically:", n_neighbors)
 
+    print(X)
+    print(y)
+
     # Create and train the KNN classifier
     knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=knn_algo, weights='distance')
     knn_clf.fit(X, y)
@@ -133,9 +136,9 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Find encodings for faces in the test iamge
     faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations, num_jitters=1)
-
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
+
     closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
     #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 

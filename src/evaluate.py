@@ -2,7 +2,8 @@
 
 import os, sys
 from datetime import datetime
-from settings import ALGORITHM, import_knn
+from settings import ALGORITHM
+import knn
 
 
 if __name__ == "__main__":
@@ -17,7 +18,7 @@ if __name__ == "__main__":
         sys.exit(2)
 
     # 根据选择算法引入knn模块
-    knn=import_knn(face_algorithm)
+    knn.set_algorithm(face_algorithm)
 
     test_path = sys.argv[3]
     model_name = sys.argv[2]

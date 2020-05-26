@@ -11,15 +11,15 @@ def l2_norm(input, axis = 1):
 
     return output
 
-def extract_feature(img_root, backbone, model_root, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), tta = True):
+def extract_feature(img, backbone, model_root, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), tta = True):
     # pre-requisites
-    assert(os.path.exists(img_root))
-    print('Testing Data Root:', img_root)
+    #assert(os.path.exists(img_root))
+    #print('Testing Data Root:', img_root)
     assert (os.path.exists(model_root))
-    print('Backbone Model Root:', model_root)
+    #print('Backbone Model Root:', model_root)
 
     # load image
-    img = cv2.imread(img_root)
+    #img = cv2.imread(img_root)
 
     # resize image to [128, 128]
     resized = cv2.resize(img, (128, 128))
@@ -50,7 +50,7 @@ def extract_feature(img_root, backbone, model_root, device = torch.device("cuda:
 
 
     # load backbone from a checkpoint
-    print("Loading Backbone Checkpoint '{}'".format(model_root))
+    #print("Loading Backbone Checkpoint '{}'".format(model_root))
     backbone.load_state_dict(torch.load(model_root, map_location=device))
     backbone.to(device)
 

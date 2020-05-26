@@ -29,11 +29,20 @@ import pickle
 from PIL import Image, ImageDraw
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
-from . import verify
+from settings import ALGORITHM, import_verify
+
+#from . import verify
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+module_verify = None
 
+# 设置算法，引入对应verify库
+def set_algorithm(face_algorithm):
+    global module_verify
+    module_verify = import_verify(face_algorithm)
+
+# 训练
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
     """
     Trains a k-nearest neighbors classifier for face recognition.
@@ -71,7 +80,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            face_encodings, _ = verify.get_features(img_path)
+            face_encodings, _ = module_verify.get_features(img_path)
 
             if len(face_encodings) != 1:
                 # If there are no people (or too many people) in a training image, skip the image.
@@ -100,6 +109,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
     return knn_clf
 
 
+# 识别
 def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     """
     Recognizes faces in given image using a trained KNN classifier
@@ -125,7 +135,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Load image file and find face locations
     # Find encodings for faces in the test iamge
-    faces_encodings, X_face_locations = verify.get_features(X_img_path)
+    faces_encodings, X_face_locations = module_verify.get_features(X_img_path)
 
     if len(X_face_locations) == 0:
         return []
@@ -165,6 +175,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     return results
 
 
+# 在照片中显示结果
 def show_prediction_labels_on_image(img_path, predictions):
     """
     Shows the face recognition results visually.
