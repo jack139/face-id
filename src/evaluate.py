@@ -17,9 +17,6 @@ if __name__ == "__main__":
         print('Algorithm not found!')
         sys.exit(2)
 
-    # 根据选择算法引入knn模块
-    knn.set_algorithm(face_algorithm)
-
     test_path = sys.argv[3]
     model_name = sys.argv[2]
 
@@ -53,7 +50,10 @@ if __name__ == "__main__":
 
             # Find all people in the image using a trained classifier model
             # Note: You can pass in either a classifier file name or a classifier model instance
-            predictions = knn.predict(image_file, model_path=model_name, distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'])
+            predictions = knn.predict(image_file, 
+                model_path=model_name, 
+                distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+                face_algorithm=face_algorithm)
 
             # Print results on the console
             if len(predictions)==0:

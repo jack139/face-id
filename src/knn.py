@@ -35,15 +35,9 @@ from settings import ALGORITHM, import_verify
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-module_verify = None
-
-# 设置算法，引入对应verify库
-def set_algorithm(face_algorithm):
-    global module_verify
-    module_verify = import_verify(face_algorithm)
 
 # 训练
-def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
+def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False, face_algorithm='rec'):
     """
     Trains a k-nearest neighbors classifier for face recognition.
 
@@ -70,6 +64,9 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
     """
     X = []
     y = []
+
+    # 动态载入 verify库
+    module_verify = import_verify(face_algorithm)
 
     # Loop through each person in the training set
     for class_dir in os.listdir(train_dir):
@@ -110,7 +107,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
 
 # 识别
-def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
+def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, face_algorithm='rec'):
     """
     Recognizes faces in given image using a trained KNN classifier
 
@@ -132,6 +129,9 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     if knn_clf is None:
         with open(model_path, 'rb') as f:
             knn_clf = pickle.load(f)
+
+    # 动态载入 verify库
+    module_verify = import_verify(face_algorithm)
 
     # Load image file and find face locations
     # Find encodings for faces in the test iamge

@@ -30,9 +30,6 @@ if __name__ == "__main__":
         print('Algorithm not found!')
         sys.exit(2)
 
-    # 根据选择算法引入knn模块
-    knn.set_algorithm(face_algorithm)
-
     train_data_dir = sys.argv[2]
 
     if len(sys.argv)>3:
@@ -42,5 +39,8 @@ if __name__ == "__main__":
 
     # Train the KNN classifier and save it to disk
     print("Training KNN classifier...")
-    classifier = knn.train(train_data_dir, model_save_path=model_name + ALGORITHM[face_algorithm]['ext'], n_neighbors=2)
+    classifier = knn.train(train_data_dir, 
+        model_save_path=model_name + ALGORITHM[face_algorithm]['ext'], 
+        n_neighbors=2,
+        face_algorithm=face_algorithm)
     print("Training complete!")
