@@ -1,7 +1,4 @@
 
-
-
-
 ## Face-ID (FACE IDentification)
 
 #### 算法
