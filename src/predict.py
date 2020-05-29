@@ -3,7 +3,7 @@
 import os, sys
 from datetime import datetime
 from settings import ALGORITHM
-import knn
+from model import knn
 
 
 if __name__ == "__main__":

@@ -4,10 +4,7 @@
 
 import os, sys
 from datetime import datetime
-#from settings import ALGORITHM
-#import knn
-import predict2
-
+from model.predict_plus import predict_parallel
 
 
 if __name__ == "__main__":
@@ -15,17 +12,7 @@ if __name__ == "__main__":
         print("usage: python3 %s <test dir>" % sys.argv[0])
         sys.exit(2)
 
-    #face_algorithm = sys.argv[1]
-
-    #if face_algorithm not in ALGORITHM.keys():
-    #    print('Algorithm not found!')
-    #    sys.exit(2)
-
     test_path = sys.argv[1]
-    #model_name = sys.argv[2]
-
-    #if not model_name.endswith(ALGORITHM[face_algorithm]['ext']):
-    #    model_name += ALGORITHM[face_algorithm]['ext']
 
     if not os.path.isdir(test_path):
         print('test need directory.')
@@ -52,13 +39,8 @@ if __name__ == "__main__":
         for image_file in images:
             #print("Looking for faces in {}".format(image_file))
 
-            # Find all people in the image using a trained classifier model
-            # Note: You can pass in either a classifier file name or a classifier model instance
-            #predictions = knn.predict(image_file, 
-            #    model_path=model_name, 
-            #    distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
-            #    face_algorithm=face_algorithm)
-            predictions = predict2.predict_parallel(image_file)
+            # 并行识别
+            predictions = predict_parallel(image_file)
 
             # Print results on the console
             if len(predictions)==0:

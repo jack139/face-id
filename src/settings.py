@@ -6,7 +6,7 @@ ALGORITHM = {
     'rec' : { 'distance_threshold' : 0.6, 'ext' : '.rec.clf', 'module' : 'face_rec.verify' },
     'vgg'  : { 'distance_threshold' : 0.8, 'ext' : '.vgg.clf', 'module' : 'vggface.verify' },
     'evo'  : { 'distance_threshold' : 1.25, 'ext' : '.evo.clf', 'module' : 'face_evoLVe.verify' },
-    'plus'  : { 'distance_threshold' : 1.4, 'ext' : '.plus.clf', 'module' : 'verify_plus' },
+    'plus'  : { 'distance_threshold' : 1.4, 'ext' : '.plus.clf', 'module' : 'model.verify_plus' },
 }
 
 # 并行算法设置
