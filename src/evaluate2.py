@@ -4,7 +4,7 @@
 
 import os, sys
 from datetime import datetime
-from model.predict_plus import predict_parallel
+from models.predict_plus import predict_parallel
 
 
 if __name__ == "__main__":

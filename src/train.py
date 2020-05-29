@@ -2,7 +2,7 @@
 
 import os, sys
 from settings import ALGORITHM
-from model import knn
+from models import knn
 
 
 '''

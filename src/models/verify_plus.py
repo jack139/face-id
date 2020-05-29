@@ -3,8 +3,8 @@
 # 合并evo和vgg两个特征值
 
 import numpy as np
-from vggface import verify as verify1
-from face_evoLVe import verify as verify2
+from models.vggface import verify as verify1
+from models.face_evoLVe import verify as verify2
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸
 def get_features(filename):
