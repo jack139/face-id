@@ -22,6 +22,7 @@ Usage:
 """
 
 import math, operator
+from datetime import datetime
 from sklearn import neighbors
 import os
 import os.path
@@ -95,8 +96,10 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
             print("Chose n_neighbors automatically:", n_neighbors)
 
     # Create and train the KNN classifier
+    start_time = datetime.now()
     knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=knn_algo, weights='distance')
     knn_clf.fit(X, y)
+    print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     # Save the trained KNN classifier
     if model_save_path is not None:
