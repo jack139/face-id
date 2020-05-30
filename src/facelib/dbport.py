@@ -177,13 +177,17 @@ def user_add_face(group_id, user_id, face_id):
     return r.modified_count
 
 
+# 用户删除face_id
+def user_remove_face(group_id, user_id, face_id):
+    r = db.users.update_one({'group_id':group_id, 'user_id':user_id},
+        {'$pull' : {'face_list' : face_id}})
+    return r.modified_count
+
+
 #################### 特征数据操作
 
 # 新建人脸特征
-def face_new(group_id, user_id, model_id, encodings):
-    if user_info(group_id, user_id)==-1:
-        return -1 # 用户不存在
-
+def face_new(model_id, encodings):
     r2 = db.faces.insert_one({
         'model_id'  : model_id, 
         'encodings' : encodings, 
@@ -191,10 +195,6 @@ def face_new(group_id, user_id, model_id, encodings):
         'ref_count' : 1,
     })
     face_id = str(r2.inserted_id)
-
-    # 添加到用户信息中
-    r = user_add_face(group_id, user_id, face_id)
-
     return face_id
 
 
@@ -213,11 +213,18 @@ def face_remove(face_id):
         # 计数已减一，不删除
         return 0
 
+
 # 人脸引用计数增加
 def face_ref_inc(face_id):
     # 引用计数加一
     r = db.faces.update_one({'_id':ObjectId(face_id)}, {'$inc' : {'ref_count' : 1}})
     return r.modified_count
+
+# 人脸数据
+def face_info(face_id):
+    # 引用计数加一
+    r = db.faces.find_one({'_id':ObjectId(face_id)}, {'_id' : 0})
+    return r
 
 
 ######################### 日志操作
