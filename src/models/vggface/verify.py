@@ -15,8 +15,8 @@ from scipy.spatial.distance import cosine
 from keras.preprocessing import image
 from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
-
 import face_recognition
+from facelib.utils import extract_face_b64
 
 
 # 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50
@@ -89,15 +89,18 @@ def is_match(known_embedding, candidate_embedding, thresh=0.5):
         print('>face is NOT a Match (%.3f > %.3f)' % (score, thresh))
 
 
-if __name__ == '__main__':
+# 返回图片中所有人脸的特征
+def get_features_b64(base64_data):
+    # extract faces
+    faces, face_boxs = extract_face_b64(base64_data)
+    if len(faces) == 0:
+        return [], []
+    # convert into an array of samples
+    samples = np.asarray(faces, 'float32')
+    # prepare the face for the model, e.g. center pixels
+    samples = preprocess_input(samples, version=2)
+    # perform prediction
+    yhat = model.predict(samples)
+    yhat2 = yhat / np.linalg.norm(yhat)
+    return yhat2, face_boxs
 
-    filename1 = sys.argv[1]
-    filename2 = sys.argv[2]
-
-    feature1, _ = get_features(filename1)
-    feature2, _ = get_features(filename2)
-
-    if len(feature1)>0 and len(feature2)>0:
-        is_match(feature1[0], feature2[0])
-    else:
-        print('fail to get features.')

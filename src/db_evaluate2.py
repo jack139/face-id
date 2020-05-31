@@ -3,44 +3,50 @@
 # 使用两个算法模型并行识别
 
 import os, sys
+import base64
 from datetime import datetime
-from models.predict_plus import predict_parallel, predict_thread
+from models.predict_plus import predict_parallel, predict_thread_db
+from facelib import dbport
 
 
 if __name__ == "__main__":
-    if len(sys.argv)<2:
-        print("usage: python3 %s <test dir>" % sys.argv[0])
+    if len(sys.argv)<3:
+        print("usage: python3 %s <group_id> <test_group_id>" % sys.argv[0])
         sys.exit(2)
 
-    test_path = sys.argv[1]
+    group_id = sys.argv[1]
+    test_group_id = sys.argv[2]
 
-    if not os.path.isdir(test_path):
-        print('test need directory.')
-        sys.exit(0)
+    user_list = dbport.user_list_by_group(test_group_id)
 
-    persons = os.listdir(test_path)
+    #persons = os.listdir(test_path)
     total_acc = total_acc2 = 0
 
     # name      total   correct wrong   fail    multi     second        acc      acc2            preci        elapsed time
     # 样本名     总数     正确数   错误数   失败数   返回多结果  非第一结果正确   正确率    非第一结果正确率   非失败正确率    耗时
     print('name\t\ttotal\tcorrect\twrong\tfail\tmulti\tsecond\tacc\tacc2\tpreci\telapsed time')
-    for p in persons:
-        images = os.listdir(os.path.join(test_path, p))
-        images = [os.path.join(test_path, p, i) for i in images]
+    #for p in persons:
+    for i in range(len(user_list)):
+        p = user_list[i]
+
+        faces_list = dbport.user_face_list(test_group_id, user_list[i])
 
         # Using the trained classifier, make predictions for unknown images
-        total = len(images)
+        total = len(faces_list)
         correct = 0
         wrong = 0
         fail = 0
         multi = 0 # 匹配多个结果
         second = 0 # 不是首个匹配结果
         start_time = datetime.now()
-        for image_file in images:
-            #print("Looking for faces in {}".format(image_file))
+        for face in faces_list:
+            # 识别每个人脸
+            r = dbport.face_info(face)
+            if r is None:
+                continue
 
             # 并行识别
-            predictions = predict_parallel(predict_thread, image_file)
+            predictions = predict_parallel(predict_thread_db, r['encodings'], group_id, 'encodings')
 
             # Print results on the console
             if len(predictions)==0:
@@ -76,5 +82,5 @@ if __name__ == "__main__":
         total_acc += correct/total
         total_acc2 += (correct+second)/total
 
-    print('total_acc: %.3f'%(total_acc/len(persons)))
-    print('total_acc2: %.3f'%(total_acc2/len(persons)))
+    print('total_acc: %.3f'%(total_acc/len(user_list)))
+    print('total_acc2: %.3f'%(total_acc2/len(user_list)))

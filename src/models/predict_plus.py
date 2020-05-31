@@ -7,9 +7,10 @@ import concurrent.futures
 from datetime import datetime
 from settings import ALGORITHM, algorithm_settings
 from . import knn
+from . import knn_db
 
-
-def predict_thread(face_algorithm, model_name, image_file):
+# 用于文件图片的预测线程
+def predict_thread(face_algorithm, model_name, image_file, group_id=''):
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
@@ -18,12 +19,29 @@ def predict_thread(face_algorithm, model_name, image_file):
         distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
         face_algorithm=face_algorithm)
 
+# 用于db和base64图片的预测线程
+# data_type: 'base64', 'encodings'
+def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64'): 
+    # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
+    model_path, _ = os.path.split(model_name) # 取得模型所在路径
+    if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值
+        image_data = [image_data[ALGORITHM[face_algorithm]['index']]]
+    return knn_db.predict(image_data, group_id,
+        model_path=model_path, 
+        distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+        face_algorithm=face_algorithm,
+        data_type=data_type)
 
-def predict_parallel(image_file):
+# 启动并行算法
+def predict_parallel(thread_func, image_data, group_id='', data_type='base64'):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future1 = executor.submit(predict_thread, algorithm_settings[1][0], algorithm_settings[1][1], image_file)
-        future2 = executor.submit(predict_thread, algorithm_settings[2][0], algorithm_settings[2][1], image_file)
+        future1 = executor.submit(thread_func, algorithm_settings[1][0], algorithm_settings[1][1], 
+                image_data, group_id, data_type)
+        future2 = executor.submit(thread_func, algorithm_settings[2][0], algorithm_settings[2][1], 
+                image_data, group_id, data_type)
         for future in concurrent.futures.as_completed([future1, future2]):
             predictions = future.result()
             if future==future1:
@@ -32,7 +50,11 @@ def predict_parallel(image_file):
                 all_predictions[2] = predictions
     
     #print(all_predictions)
+    return merge_results(all_predictions)
 
+
+# 合并两个算法的结果为最终结果
+def merge_results(all_predictions):
     # 综合结果判断：
     # 1. 如果两个结果唯一且相同，则无异议
     # 2. 如果都为unkonw，则无结果

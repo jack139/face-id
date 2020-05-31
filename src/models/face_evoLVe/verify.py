@@ -7,6 +7,7 @@ import numpy as np
 from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
 from .extract_feature_v2 import extract_feature
+from facelib.utils import extract_face_b64
 
 # 当前使用模型的索引，选择数据模型只需要修改这里
 CURRENT_MODEL = 5
@@ -103,3 +104,15 @@ def test(filename):
 # 特征值距离
 def face_distance(face_encodings, face_to_compare):
     return face_recognition.face_distance(face_encodings, face_to_compare)
+
+# 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
+def get_features_b64(base64_data):
+    face_list, face_boxes = extract_face_b64(base64_data, required_size=INPUT_SIZE)
+    encoding_list = []
+    for face in face_list:
+        open_cv_face = face[:, :, ::-1].copy() 
+
+        face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
+        encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
+
+    return encoding_list, face_boxes

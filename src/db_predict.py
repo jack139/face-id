@@ -1,18 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# 使用两个算法模型并行识别
-
 import os, sys
+import base64
 from datetime import datetime
-from models.predict_plus import predict_parallel, predict_thread
+from settings import ALGORITHM
+from models import knn_db
 
 
 if __name__ == "__main__":
-    if len(sys.argv)<2:
-        print("usage: python3 %s <test dir or file>" % sys.argv[0])
+    if len(sys.argv)<5:
+        print("usage: python3 %s <algorithm> <group_id> <model_path> <test dir or file>" % sys.argv[0])
         sys.exit(2)
 
-    test_thing = sys.argv[1]
+    face_algorithm = sys.argv[1]
+
+    if face_algorithm not in ALGORITHM.keys():
+        print('Algorithm not found!')
+        sys.exit(2)
+
+    group_id = sys.argv[2]
+    model_path = sys.argv[3]
+    test_thing = sys.argv[4]
+
 
     if os.path.isdir(test_thing):
         images = os.listdir(test_thing)
@@ -24,20 +33,23 @@ if __name__ == "__main__":
     for image_file in images:
         print("Looking for faces in {}".format(image_file))
 
+        with open(image_file, 'rb') as f:
+            image_data = f.read()
+
+        image_b64 = base64.b64encode(image_data)
+
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
-        
         start_time = datetime.now()
-        predictions = predict_parallel(predict_thread, image_file)
+        predictions = knn_db.predict(image_b64, group_id,
+            model_path = model_path,
+            distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+            face_algorithm=face_algorithm)
         print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
         # Print results on the console
         for name, (top, right, bottom, left), distance, count in predictions:
             print("- Found {} at ({}, {}), distance={}, count={}".format(name, left, top, distance, count))
+
         if len(predictions)==0:
             print('Face not found!')
-
-        # Display results overlaid on an image
-        #knn.show_prediction_labels_on_image(image_file, predictions)
-
-

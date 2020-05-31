@@ -8,15 +8,22 @@ For example, if k=3, and the three closest face images to the given image in the
 and two images of Obama, The result would be 'Obama'.
 
 """
-
+import os
 import math, operator
 from datetime import datetime
 from sklearn import neighbors
 import pickle
 from facelib import dbport
+from settings import ALGORITHM, import_verify
+
+
+CLF_CACHE = {}
+
 
 # 训练
-def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False, face_algorithm='rec'):
+# face_algorithm 只 支持 evo 和 vgg
+def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', 
+    verbose=False, face_algorithm='rec'):
     """
     Trains a k-nearest neighbors classifier for face recognition.
 
@@ -60,25 +67,46 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
 
 
 # 识别
-def predict(faces_encodings, knn_clf=None, model_path=None, distance_threshold=0.6, face_algorithm='rec'):
+def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algorithm='vgg', data_type='base64'): 
     """
     Recognizes faces in given image using a trained KNN classifier
 
-    :param knn_clf: (optional) a knn classifier object. if not specified, model_save_path must be specified.
-    :param model_path: (optional) path to a pickled knn classifier. if not specified, model_save_path must be knn_clf.
+    :param X_base64: image data in base64 coding
+    :param model_path: (optional) 已训练模型路径，默认当前路径
     :param distance_threshold: (optional) distance threshold for face classification. the larger it is, the more chance
            of mis-classifying an unknown person as a known one.
     :return: a list of names and face locations for the recognized faces in the image: [(name, bounding box), ...].
         For faces of unrecognized persons, the name 'unknown' will be returned.
     """
-
-    if knn_clf is None and model_path is None:
-        raise Exception("Must supply knn classifier either thourgh knn_clf or model_path")
+    global CLF_CACHE
 
     # Load a trained KNN model (if one was passed in)
-    if knn_clf is None:
-        with open(model_path, 'rb') as f:
+    clf_path = os.path.join(model_path, group_id+ALGORITHM[face_algorithm]['ext'])
+
+    # 检查是否已缓存clf
+    if clf_path in CLF_CACHE.keys(): 
+        knn_clf = CLF_CACHE[clf_path]
+    else:
+        with open(clf_path, 'rb') as f:
             knn_clf = pickle.load(f)
+        # 放进cache
+        CLF_CACHE[clf_path] = knn_clf
+        print('feeding clf cache: ', CLF_CACHE.keys())
+
+    if data_type=='base64':
+        # 动态载入 verify库
+        module_verify = import_verify(face_algorithm)
+
+        # Load image file and find face locations
+        # Find encodings for faces in the test iamge
+        faces_encodings, X_face_locations = module_verify.get_features_b64(X_base64)
+
+        if len(X_face_locations) == 0:
+            return []
+    else:
+        # data_type = 'encodings'
+        faces_encodings = X_base64
+        X_face_locations = [(0,0,0,0)] # 从db来的数据没有人脸框坐标，只有一个人脸
 
     #print(faces_encodings)
 
