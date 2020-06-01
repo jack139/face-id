@@ -41,3 +41,19 @@ algorithm_settings = {
     #1 : [ 'rec', 'data/model/train2.rec.clf' ],
     #2 : [ 'evo', 'data/model/train2_5.evo.clf' ],
 }
+
+
+############  app server 相关设置
+
+APP_NAME = 'face-id'
+APP_NAME_FORMATED = 'Face-ID'
+
+# 私钥
+SECRET_KEY = {
+    'localhost' : 'V4cCI6MTU4NTAzNDcxMCwiaWF0IjoxNTg1MDMxMT',
+} 
+
+# 参数设置
+DEBUG_MODE = False
+BIND_ADDR = '127.0.0.1'
+BIND_PORT = '5000'

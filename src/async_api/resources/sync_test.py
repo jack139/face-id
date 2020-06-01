@@ -3,8 +3,8 @@
 import os, time, hashlib
 from flask_restful import reqparse, abort, Api, Resource, fields, marshal, request
 
-from utils import helper
-import logger
+from ..utils import helper
+from .. import logger
 
 logger = logger.get_logger(__name__)
 

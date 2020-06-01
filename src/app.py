@@ -3,8 +3,8 @@
 from flask import Flask
 from flask_restful import Api
 
-from resources import *
-from settings import *
+from async_api.resources import *
+from config.settings import BIND_ADDR, BIND_PORT, DEBUG_MODE
 
 app = Flask(__name__)
 api = Api(app)

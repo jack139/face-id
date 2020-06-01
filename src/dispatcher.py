@@ -5,8 +5,8 @@
 import sys, json, time
 from kafka import KafkaConsumer
 
-from utils import helper
-import logger
+from async_api.utils import helper
+from async_api import logger
 
 
 if __name__ == '__main__':

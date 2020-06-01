@@ -4,7 +4,7 @@ import sys, time, os, shutil, json
 import threading
 import functools
 
-import logger
+from .. import logger
 
 logger = logger.get_logger(__name__)
 
@@ -28,7 +28,7 @@ def time_str(t=None, format=0):
 
 # 检查token修饰器
 def token_required(view_func):
-    from settings import SECRET_KEY
+    from config.settings import SECRET_KEY
     
     @functools.wraps(view_func)
     def verify_token(*args,**kwargs):
