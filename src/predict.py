@@ -2,7 +2,8 @@
 
 import os, sys
 from datetime import datetime
-from settings import ALGORITHM
+from config.settings import ALGORITHM
+from facelib.utils import import_verify
 from models import knn
 
 

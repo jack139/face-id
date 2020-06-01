@@ -3,7 +3,7 @@
 import os, sys
 import base64
 from datetime import datetime
-from settings import ALGORITHM
+from config.settings import ALGORITHM
 from models import knn_db
 
 

@@ -92,7 +92,7 @@ def is_match(known_embedding, candidate_embedding, thresh=0.5):
 # 返回图片中所有人脸的特征
 def get_features_b64(base64_data):
     # extract faces
-    faces, face_boxs = extract_face_b64(base64_data)
+    faces, face_boxs = extract_face_b64(base64_data, required_size=(224, 224))
     if len(faces) == 0:
         return [], []
     # convert into an array of samples
@@ -104,3 +104,20 @@ def get_features_b64(base64_data):
     yhat2 = yhat / np.linalg.norm(yhat)
     return yhat2, face_boxs
 
+
+# 特征值距离
+def face_distance(face_encodings, face_to_compare):
+    return face_recognition.face_distance([np.array(face_encodings)], np.array(face_to_compare))
+
+
+# 比较两个人脸是否同一人
+def is_match_b64(b64_data1, b64_data2):
+    # calculate distance between embeddings
+    encoding_list1, face_boxes1 = get_features_b64(b64_data1)
+    encoding_list2, face_boxes2 = get_features_b64(b64_data2)
+
+    if len(face_boxes1)==0 or len(face_boxes2)==0:
+        return False
+
+    distance = face_distance(encoding_list1[0], encoding_list2[0])
+    return distance <= ALGORITHM['vgg']['distance_threshold'], distance

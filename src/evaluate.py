@@ -2,7 +2,7 @@
 
 import os, sys
 from datetime import datetime
-from settings import ALGORITHM
+from config.settings import ALGORITHM
 from models import knn
 
 

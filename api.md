@@ -17,10 +17,10 @@
 | --------- | ---- | ----- | -------------------- |
 | face_num  | 是   | int   | 检测到的图片人脸数量 |
 | locations | 是   | array | 人脸位置坐标列表     |
-| + left    | 是   | int   | 人脸左上角x坐标      |
-| + top     | 是   | int   | 人脸左上角y坐标      |
-| + width   | 是   | int   | 人脸宽               |
-| + height  | 是   | int   | 人脸高               |
+| + top     | 是   | int   | 人脸上边界           |
+| + right   | 是   | int   | 人脸右边界           |
+| + botton  | 是   | int   | 人脸下边界           |
+| + left    | 是   | int   | 人脸左边界           |
 
 
 
@@ -59,13 +59,14 @@
 
 返回结果
 
-| 参数          | 必选 | 类型   | 说明                          |
-| ------------- | ---- | ------ | ----------------------------- |
-| user_list     | 是   | string | 匹配到的用户列表              |
-| + group_id    | 是   | string | 用户所属分组                  |
-| + user_id     | 是   | string | 用户id                        |
-| + mobile_tail | 否   | string | 手机号后4位，如果注册了手机号 |
-| + score       | 是   | float  | 相似度得分                    |
+| 参数          | 必选 | 类型   | 说明                                  |
+| ------------- | ---- | ------ | ------------------------------------- |
+| user_list     | 是   | string | 匹配到的用户列表                      |
+| + user_id     | 是   | string | 用户id                                |
+| + name        | 是   | string | 用户姓名，如果注册时有提供            |
+| + mobile_tail | 是   | string | 手机号后4位，如果注册了手机号         |
+| + score       | 是   | float  | 相似度得分                            |
+| + location    | 是   | array  | 人脸的位置 (top, right, bottom, left) |
 
 
 

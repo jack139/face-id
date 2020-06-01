@@ -14,7 +14,8 @@ from datetime import datetime
 from sklearn import neighbors
 import pickle
 from facelib import dbport
-from settings import ALGORITHM, import_verify
+from config.settings import ALGORITHM
+from facelib.utils import import_verify
 
 
 CLF_CACHE = {}

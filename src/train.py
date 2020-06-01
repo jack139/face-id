@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-from settings import ALGORITHM
+from config.settings import ALGORITHM
 from models import knn
 
 

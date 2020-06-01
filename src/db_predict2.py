@@ -4,9 +4,9 @@
 
 import os, sys
 import base64
-from datetime import datetime
-from models.predict_plus import predict_parallel, predict_thread_db
-
+#from datetime import datetime
+#from models.predict_plus import predict_parallel, predict_thread_db
+from facelib import api_func
 
 
 if __name__ == "__main__":
@@ -35,16 +35,21 @@ if __name__ == "__main__":
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
         
-        start_time = datetime.now()
-        predictions = predict_parallel(predict_thread_db, image_b64, group_id)
-        print('[Time taken: {!s}]'.format(datetime.now() - start_time))
+        predictions = api_func.face_search(image_b64, group_id)
+
+        #start_time = datetime.now()
+        #predictions = predict_parallel(predict_thread_db, image_b64, group_id)
+        #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
         # Print results on the console
-        for name, (top, right, bottom, left), distance, count in predictions:
-            print("- Found {} at ({}, {}), distance={}, count={}".format(name, left, top, distance, count))
+        #for name, (top, right, bottom, left), distance, count in predictions:
+        #    print("- Found {} at ({}, {}), distance={}, count={}".format(name, left, top, distance, count))
+        for i in predictions:
+            print("- Found {} at {}, distance={}".format(i['user_id'], i['location'], i['score']))
         if len(predictions)==0:
             print('Face not found!')
 
+        #print(predictions)
         # Display results overlaid on an image
         #knn.show_prediction_labels_on_image(image_file, predictions)
 

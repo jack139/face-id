@@ -101,9 +101,7 @@ def test(filename):
         cv2.imwrite(str(n)+'.jpg', open_cv_face)
         n+=1
 
-# 特征值距离
-def face_distance(face_encodings, face_to_compare):
-    return face_recognition.face_distance(face_encodings, face_to_compare)
+
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
 def get_features_b64(base64_data):
@@ -116,3 +114,22 @@ def get_features_b64(base64_data):
         encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
 
     return encoding_list, face_boxes
+
+
+# 特征值距离
+def face_distance(face_encodings, face_to_compare):
+    return face_recognition.face_distance([np.array(face_encodings)], np.array(face_to_compare))
+
+
+# 比较两个人脸是否同一人
+def is_match_b64(b64_data1, b64_data2):
+    # calculate distance between embeddings
+    encoding_list1, face_boxes1 = get_features_b64(b64_data1)
+    encoding_list2, face_boxes2 = get_features_b64(b64_data2)
+
+    if len(face_boxes1)==0 or len(face_boxes2)==0:
+        return False
+
+    distance = face_distance(encoding_list1[0], encoding_list2[0])
+    return distance <= ALGORITHM['evo']['distance_threshold'], distance
+

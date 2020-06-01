@@ -30,7 +30,8 @@ import pickle
 from PIL import Image, ImageDraw
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
-from settings import ALGORITHM, import_verify
+from config.settings import ALGORITHM
+from facelib.utils import import_verify
 
 #from . import verify
 
