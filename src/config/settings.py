@@ -34,8 +34,8 @@ ALGORITHM = {
 
 # 并行算法设置
 algorithm_settings = {
-    1 : [ 'vgg', 'data/model/train9.vgg.clf' ], # 优先返回
-    2 : [ 'evo', 'data/model/train9.evo.clf' ],
+    1 : [ 'vgg', '../data/model/train9.vgg.clf' ], # 优先返回
+    2 : [ 'evo', '../data/model/train9.evo.clf' ],
     #1 : [ 'rec', 'data/model/train2.rec.clf' ],
     #2 : [ 'vgg', 'data/model/train2_senet50.vgg.clf' ],
     #1 : [ 'rec', 'data/model/train2.rec.clf' ],

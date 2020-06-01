@@ -11,22 +11,22 @@
 
 #### 训练
 
-`python3 src/train.py <algorithm> <train_data_dir> [model_name]`
+`python3 -m test.train.py <algorithm> <train_data_dir> [model_name]`
 
 > \<algorithm\> 参数：rec, vgg, evo, plus
 
 #### 识别
-`python3 src/predict.py <algorithm> <model_name> <test dir or file>`
+`python3 -m test.predict <algorithm> <model_name> <test dir or file>`
 
 #### 评估
 
 单模型
 
-`python3 src/evaluate.py <algorithm> <model_name> <test dir>`
+`python3 -m test.evaluate <algorithm> <model_name> <test dir>`
 
 双模型并行
 
-`python3 src/evaluate2.py <test dir>`
+`python3 -m test.evaluate2 <test dir>`
 
 1. 数据来源：
 
