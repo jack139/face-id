@@ -1,3 +1,3 @@
 from .sync_test import SyncTest
-#from .face import Face
+from .db_user import DbUserInfo
 

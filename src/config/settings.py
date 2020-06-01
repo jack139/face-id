@@ -54,6 +54,6 @@ SECRET_KEY = {
 } 
 
 # 参数设置
-DEBUG_MODE = False
+DEBUG_MODE = True
 BIND_ADDR = '127.0.0.1'
 BIND_PORT = '5000'

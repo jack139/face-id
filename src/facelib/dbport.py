@@ -107,7 +107,7 @@ def user_update(group_id, user_id, name=None, mobile=None, memo=None):
 
 # 用户信息
 def user_info(group_id, user_id):
-    r = db.users.find_one({'group_id' : group_id, 'user_id' : user_id}, {'_id' : 0, 'face_list' : 0})
+    r = db.users.find_one({'group_id' : group_id, 'user_id' : user_id}, {'_id' : 0})
     if r is None:
         return -1
     else:

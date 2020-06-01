@@ -78,6 +78,7 @@ def token_required(view_func):
     return verify_token
 
 
+########## 异步接口调用
 
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError

@@ -26,6 +26,6 @@ class SyncTest(Resource):
             return {'code': 200, 'msg' : 'success', 'data' : ret['data'].decode('utf-8') }
 
         except BaseException as e:
-            logger.error("未知异常: %s" % e.message, exc_info=True)
-            return {"code": 9999, "msg": "%s : %s" % (e.__class__.__name__, e.message) }
+            logger.error("未知异常: %s" % e, exc_info=True)
+            return {"code": 9999, "msg": "%s : %s" % (e.__class__.__name__, e) }
 

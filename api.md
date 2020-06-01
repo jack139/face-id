@@ -102,6 +102,7 @@
 | image    | 是   | string | base64编码图片数据                                           |
 | group_id | 是   | string | 用户分组id                                                   |
 | user_id  | 是   | string | 用户id（由数字、字母、下划线组成），必须唯一，建议使用身份证号码 |
+| name     | 是   | string | 用户姓名                                                     |
 | mobile   | 否   | string | 手机号码                                                     |
 | memo     | 否   | string | 用户其他信息，例如：姓名                                     |
 
@@ -119,13 +120,14 @@
 
 输入参数
 
-| 参数     | 必选 | 类型   | 说明                     |
-| -------- | ---- | ------ | ------------------------ |
-| image    | 是   | string | base64编码图片数据       |
-| group_id | 是   | string | 用户分组id               |
-| user_id  | 是   | string | 用户id                   |
-| mobile   | 否   | string | 手机号码                 |
-| memo     | 否   | string | 用户其他信息，例如：姓名 |
+| 参数     | 必选 | 类型   | 说明               |
+| -------- | ---- | ------ | ------------------ |
+| image    | 是   | string | base64编码图片数据 |
+| group_id | 是   | string | 用户分组id         |
+| user_id  | 是   | string | 用户id             |
+| mobile   | 否   | string | 手机号码           |
+| name     | 是   | string | 用户姓名           |
+| memo     | 否   | string | 用户其他信息       |
 
 返回结果
 
@@ -172,9 +174,11 @@
 | --------- | ---- | ------ | ------------------------------ |
 | group_id  | 是   | string | 分组id                         |
 | user_id   | 是   | string | 用户id                         |
+| name      | 是   | string | 用户姓名                       |
 | mobile    | 否   | string | 手机号码，如果注册时有提供     |
 | memo      | 否   | string | 用户其他信息，如果注册时有提供 |
 | image_num | 是   | int    | 此user_id下已注册的照片数量    |
+| ctime     | 是   | string | 注册时间                       |
 
 
 
