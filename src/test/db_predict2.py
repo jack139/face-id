@@ -6,7 +6,7 @@ import os, sys
 import base64
 #from datetime import datetime
 #from models.predict_plus import predict_parallel, predict_thread_db
-from facelib import api_func
+
 
 
 if __name__ == "__main__":
@@ -14,6 +14,8 @@ if __name__ == "__main__":
         print("usage: python3 %s <group_id> <test dir or file>" % sys.argv[0])
         sys.exit(2)
 
+    from facelib import api_func
+    
     group_id = sys.argv[1]
     test_thing = sys.argv[2]
 
