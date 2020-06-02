@@ -93,7 +93,7 @@ def kafka_send_msg(request_id, data):
     }
     msg_body = json.dumps(msg_body).encode('utf-8')
 
-    logger.info('send to kafka: '+str(msg_body)) 
+    logger.info('send to kafka: ' + request_id) 
 
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
 
@@ -120,7 +120,7 @@ def kafka_recieve_msg():
         msg_body = json.loads(message.value.decode('utf-8'))
         message_list.append(msg_body)
 
-        logger.info('kafka recieved: '+str(msg_body))
+        logger.info('kafka recieved.')
 
     return message_list
 
@@ -132,10 +132,10 @@ def redis_subscribe(request_id):
     ps.subscribe(request_id)  #从liao订阅消息
     logger.info('subscribe to : '+str((request_id))) 
     for item in ps.listen():        #监听状态：有消息发布了就拿过来
-        logger.info('subscribe 2: '+str((request_id, item))) 
+        logger.debug('subscribe 2: '+str((request_id, item))) 
         if item['type'] == 'message':
             #print(item)
-            logger.info('subscribe: '+str((request_id, item))) 
+            logger.info('subscribe: '+request_id) 
             break
     return item
 
@@ -145,5 +145,5 @@ def redis_publish(request_id, data):
 
     rc = redis.StrictRedis(host='localhost', port='6379', db=1, password=None)
     rc.publish(request_id, msg_body)
-    logger.info('publish: '+str((request_id, msg_body))) 
+    logger.info('publish: '+request_id) 
 

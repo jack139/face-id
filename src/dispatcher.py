@@ -10,15 +10,18 @@ from async_api import logger
 
 from facelib import api_func
 
+logger = logger.get_logger(__name__)
 
 if __name__ == '__main__':
     while 1:
         consumer = KafkaConsumer('synchronous-asynchronous-queue', bootstrap_servers=['localhost:9092'])
+
         for message in consumer:
             # message value and key are raw bytes -- decode if necessary
             msg_body = json.loads(message.value.decode('utf-8'))
             request = msg_body['data']
-            print(request.keys())
+            #print(request.keys())
+            logger.info('Calling api: '+request['api']) 
 
             if request['api']=='face_search':
                 if request['user_id'] is None: # 1:N
@@ -33,7 +36,7 @@ if __name__ == '__main__':
                 helper.redis_publish(msg_body['request_id'], json.dumps(result))
 
             else:
-                print('Unknown api: ', request['api'])
+                logger.error('Unknown api: '+request['api']) 
 
                 # 发送消息
                 helper.redis_publish(msg_body['request_id'], 'Hello world.')

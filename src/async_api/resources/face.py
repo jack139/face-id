@@ -2,7 +2,7 @@
 
 import os, time, hashlib
 import json
-from flask_restful import reqparse, abort, Api, Resource, fields, marshal, request
+from flask_restful import reqparse, abort, Resource, fields, request
 
 from ..utils import helper
 from .. import logger

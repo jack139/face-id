@@ -1,6 +1,6 @@
 # coding:utf-8
 
-from flask_restful import reqparse, abort, Api, Resource, fields, marshal, request
+from flask_restful import reqparse, abort, Resource, fields, request
 
 import json
 from ..utils import helper
