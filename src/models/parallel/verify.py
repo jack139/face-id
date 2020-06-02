@@ -95,7 +95,7 @@ def is_match_b64_serial(b64_data1, b64_data2):
     return False, distance_vgg # 只返回 vgg 结果
 
 
-# 比较两个人脸是否同一人, encoding_list1来自已知db用户
+# 比较两个人脸是否同一人, encoding_list1来自已知db用户, 多对1, db里可能有多个脸，base64只取一个脸， 多线程处理
 def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list1 = [[], []]
     for i in range(len(encoding_list_db)):
@@ -103,17 +103,29 @@ def is_match_b64_2(encoding_list_db, b64_data):
         encoding_list1[1].append(encoding_list_db[i][1])
 
     # calculate distance between embeddings
-    encoding_list2, face_boxes = get_features_b64(b64_data)
+    #encoding_list2, face_boxes = get_features_b64(b64_data)
+    #if len(face_boxes)==0:
+    #    return False, [-1]
 
-    if len(face_boxes)==0:
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_list = [
+            executor.submit(get_features_b64_thread, 'vgg', b64_data), # 0
+            executor.submit(get_features_b64_thread, 'evo', b64_data), # 1
+        ]
+        for future in concurrent.futures.as_completed(future_list):
+            pos = future_list.index(future)
+            results[pos] = future.result()
+
+    if len(results[0][1])==0:
         return False, [-1]
 
-    distance_vgg = face_distance(encoding_list1[0], encoding_list2[0])
+    distance_vgg = face_distance(encoding_list1[0], results[0][0][0])
     x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
     if x.any():
         return True, distance_vgg
 
-    distance_evo = face_distance(encoding_list1[1], encoding_list2[1])
+    distance_evo = face_distance(encoding_list1[1], results[1][0][0])
     x = distance_evo <= ALGORITHM['evo']['distance_threshold']
     if x.any():
         return True, distance_evo

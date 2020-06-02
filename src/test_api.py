@@ -17,7 +17,7 @@ if __name__ == '__main__':
         'image'    : base64.b64encode(img_data2).decode('utf-8'),
         #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
         'group_id' : 'test',
-        #'user_id'  : 'gt',
+        'user_id'  : 'gt',
         #'max_face_num' : 10
     }
 
