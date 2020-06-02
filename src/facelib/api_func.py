@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from facelib import utils
-from facelib.dbport import user_info
+from facelib.dbport import user_info, user_face_list, face_info
 
 #FACE_MODEL = 'para'
 #
@@ -32,7 +32,23 @@ def face_verify(b64_data1, b64_data2):
     is_match, score = verify.is_match_b64(b64_data1, b64_data2)
     print('[Time taken: {!s}]'.format(datetime.now() - start_time))
     if type(score)!=type([]):
-        score = score.tolist()[0] # np.array
+        score = score.tolist() # np.array
+    return is_match, score
+
+
+# 人脸对比, 使用特征库人脸
+def face_verify_db(b64_data, group_id, user_id):
+    # 获取已知用户的特征数据
+    face_list = user_face_list(group_id, user_id)
+    if face_list==-1: # user_id 不存在
+        return None, -1
+    face_encodings = [face_info(i)['encodings'] for i in face_list]
+    # 进行比较验证
+    start_time = datetime.now()
+    is_match, score = verify.is_match_b64_2(face_encodings, b64_data)
+    print('[Time taken: {!s}]'.format(datetime.now() - start_time))
+    if type(score)!=type([]):
+        score = score.tolist() # np.array
     return is_match, score
 
 

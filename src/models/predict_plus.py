@@ -4,7 +4,6 @@
 
 import os, sys
 import concurrent.futures
-from datetime import datetime
 from config.settings import ALGORITHM, algorithm_settings
 from . import knn
 from . import knn_db

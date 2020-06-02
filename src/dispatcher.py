@@ -17,24 +17,38 @@ import binascii
 logger = logger.get_logger(__name__)
 
 def process_thread(request):
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
+
     try:
-        if request['api']=='face_search':
+        if request['api']=='face_search': # 人脸识别
             if request['user_id'] is None: # 1:N
                 r = api_func.face_search(request['image'], request['group_id'], request['max_user_num'])
-            else: # 1:1
-                r = []
+                # 准备结果
+                result = { 'code' : 200, 'data' : { 'user_list' : r } }
 
+            else: # 1:1 
+                r = api_func.face_verify_db(request['image'], request['group_id'], request['user_id'])
+                # 准备结果
+                result = { 'code' : 200, 'data' : { 'is_match' : r[0], 'score' : r[1] } }
+
+        elif request['api']=='face_verify': # 人脸验证
+            r = api_func.face_verify(request['image1'], request['image2'])
             # 准备结果
-            result = { 'code' : 200, 'data' : { 'user_list' : r } }
+            result = { 'code' : 200, 'data' : { 'is_match' : r[0], 'score' : r[1] } }
 
-            # 发送消息
-            helper.redis_publish(msg_body['request_id'], result)
+        elif request['api']=='face_locate': # 人脸定位
+            r = api_func.face_locations(request['image'], request['max_face_num'])
+            # 准备结果
+            result = { 'code' : 200, 'data' : { 'face_num' : r[0], 'locations' : r[1] } }
 
-        else:
+        else: # 未知 api
             logger.error('Unknown api: '+request['api']) 
 
-            # 发送消息
-            helper.redis_publish(msg_body['request_id'], { 'code' : 9900, 'msg' : '未知 api 调用'})
+            result = { 'code' : 9900, 'msg' : '未知 api 调用'}
+
+        # 发送消息
+        helper.redis_publish(msg_body['request_id'], result)
 
     except binascii.Error as e:
         logger.error("编码转换异常: %s" % e)

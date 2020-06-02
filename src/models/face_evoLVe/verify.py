@@ -118,7 +118,7 @@ def get_features_b64(base64_data):
 
 # 特征值距离
 def face_distance(face_encodings, face_to_compare):
-    return face_recognition.face_distance([np.array(face_encodings)], np.array(face_to_compare))
+    return face_recognition.face_distance(np.array(face_encodings), np.array(face_to_compare))
 
 
 # 比较两个人脸是否同一人
@@ -128,8 +128,24 @@ def is_match_b64(b64_data1, b64_data2):
     encoding_list2, face_boxes2 = get_features_b64(b64_data2)
 
     if len(face_boxes1)==0 or len(face_boxes2)==0:
-        return False
+        return False, [-1]
 
-    distance = face_distance(encoding_list1[0], encoding_list2[0])
+    distance = face_distance([encoding_list1[0]], encoding_list2[0])
     return distance <= ALGORITHM['evo']['distance_threshold'], distance
 
+# 比较两个人脸是否同一人, encoding_list1来自已知db用户
+def is_match_b64_2(encoding_list_db, b64_data):
+    encoding_list1 = [[], []]
+    for i in range(len(encoding_list_db)):
+        encoding_list1[0].append(encoding_list_db[i][0])
+        encoding_list1[1].append(encoding_list_db[i][1])
+
+    # calculate distance between embeddings
+    encoding_list2, face_boxes = get_features_b64(b64_data)
+
+    if len(face_boxes)==0:
+        return False, [-1]
+
+    distance_evo = face_distance(encoding_list1[1], encoding_list2[1])
+    x = distance_evo <= ALGORITHM['evo']['distance_threshold']
+    return x.any(), distance_evo
