@@ -3,7 +3,7 @@
 import os, time, hashlib
 import json
 from flask_restful import reqparse, abort, Resource, fields, request
-
+from config.settings import MAX_IMAGE_SIZE
 from ..utils import helper
 from .. import logger
 
@@ -29,6 +29,9 @@ class FaceSearch(Resource):
             if image is None:
                 return {"code": 9001, "msg": "缺少参数"}
 
+            if len(image)>MAX_IMAGE_SIZE:
+                return {"code": 9002, "msg": "图片数据太大"}
+
             if not max_user_num.isdigit():
                 max_user_num = 5
             else:
@@ -47,16 +50,20 @@ class FaceSearch(Resource):
             }
 
             # 发消息给 kafka
-            helper.kafka_send_msg(request_id, request_msg)
+            r = helper.kafka_send_msg(request_id, request_msg)
+            if r is None:
+                logger.error("消息队列异常")
+                return {"code": 9099, "msg": "系统忙"}
 
             # 通过redis订阅等待结果返回
             ret = helper.redis_subscribe(request_id)
+            ret2 = json.loads(ret['data'].decode('utf-8'))
+            if ret2['code']==200:
+                return {'code': 200, 'msg' : 'success', 'data' : ret2['data']}
+            else:
+                return ret2
 
-            ret = json.loads(ret['data'].decode('utf-8'))
-
-            return {'code': 200, 'msg' : 'success', 'data' :  ret}
-
-        except BaseException as e:
+        except Exception as e:
             logger.error("未知异常: %s" % e, exc_info=True)
             return {"code": 9999, "msg": "%s : %s" % (e.__class__.__name__, e) }
 

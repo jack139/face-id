@@ -40,7 +40,7 @@ class DbUserInfo(Resource):
                 'image_num' : len(r['face_list']),
             } }
 
-        except BaseException as e:
+        except Exception as e:
             logger.error("未知异常: %s" % e, exc_info=True)
             return {"code": 9999, "msg": "%s : %s" % (e.__class__.__name__, e) }
 

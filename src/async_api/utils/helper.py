@@ -4,6 +4,7 @@ import sys, time, os, shutil, json
 import threading
 import functools
 
+from config.settings import MAX_MESSAGE_SIZE
 from .. import logger
 
 logger = logger.get_logger(__name__)
@@ -91,38 +92,41 @@ def kafka_send_msg(request_id, data):
         'request_id' : request_id, # request id
         'data' : data,
     }
-    msg_body = json.dumps(msg_body).encode('utf-8')
+    #msg_body = json.dumps(msg_body).encode('utf-8')
 
     logger.info('send to kafka: ' + request_id) 
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], 
+        value_serializer = lambda v: json.dumps(v).encode('utf-8'),
+        max_request_size=MAX_MESSAGE_SIZE)
 
     future = producer.send('synchronous-asynchronous-queue', msg_body)
 
     # Block for 'synchronous' sends
     try:
         record_metadata = future.get(timeout=10)
-    except KafkaError:
+    except KafkaError as e:
         # Decide what to do if produce request failed...
-        logger.error("send Kafka message timeout") 
+        logger.error("send Kafka message fail: %s"%e) 
         return None
 
     return record_metadata
 
 
 # 从kafka取消息
-def kafka_recieve_msg():
-    # To consume latest messages and auto-commit offsets
-    message_list = []
-    consumer = KafkaConsumer('synchronous-asynchronous-queue', bootstrap_servers=['localhost:9092'])
-    for message in consumer:
-        # message value and key are raw bytes -- decode if necessary
-        msg_body = json.loads(message.value.decode('utf-8'))
-        message_list.append(msg_body)
-
-        logger.info('kafka recieved.')
-
-    return message_list
+#def kafka_recieve_msg():
+#    # To consume latest messages and auto-commit offsets
+#    message_list = []
+#    consumer = KafkaConsumer('synchronous-asynchronous-queue', bootstrap_servers=['localhost:9092'])
+#    for message in consumer:
+#        # message value and key are raw bytes -- decode if necessary
+#        msg_body = json.loads(value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
+#            fetch_max_bytes=2097152) # 最大收 2M
+#        message_list.append(msg_body)
+#
+#        logger.info('kafka recieved.')
+#
+#    return message_list
 
 
 # redis订阅
