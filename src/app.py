@@ -17,9 +17,9 @@ def hello_world():
 api.add_resource(SyncTest, '/test')
 
 # 人脸识别api，异步调用
-#api.add_resource(Face, '/face/locate')
-#api.add_resource(Face, '/face/verify')
-#api.add_resource(Face, '/face/search')
+#api.add_resource(FaceLocate, '/face/locate')
+#api.add_resource(FaceVerify, '/face/verify')
+api.add_resource(FaceSearch, '/face/search')
 
 # 人脸特征库管理api，同步调用
 #api.add_resource(DbFaceReg,    '/facedb/face/reg')

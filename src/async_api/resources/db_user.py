@@ -15,15 +15,17 @@ class DbUserInfo(Resource):
     #@helper.token_required
     def post(self): 
         try:
+            # 获取入参
             body_data = request.get_data().decode('utf-8') # bytes to str
             json_data = json.loads(body_data)
 
-            # 
-            group_id = json_data.get('group_id')
+            group_id = json_data.get('group_id', 'DEFAULT')
             user_id = json_data.get('user_id')
 
             logger.info("入参: %s %s"%(group_id, user_id))
-            if None in (group_id, user_id):
+
+            # 检查参数
+            if user_id is None:
                 return {"code": 9001, "msg": "缺少参数"}
 
             r = dbport.user_info(group_id, user_id)

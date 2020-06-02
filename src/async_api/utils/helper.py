@@ -86,9 +86,9 @@ import redis
 
 
 # 向kafka发消息
-def kafka_send_msg(rid, data):
+def kafka_send_msg(request_id, data):
     msg_body = {
-        'rid' : rid, # request id
+        'request_id' : request_id, # request id
         'data' : data,
     }
     msg_body = json.dumps(msg_body).encode('utf-8')
@@ -126,24 +126,24 @@ def kafka_recieve_msg():
 
 
 # redis订阅
-def redis_subscribe(rid):
+def redis_subscribe(request_id):
     rc = redis.StrictRedis(host='localhost', port='6379', db=1, password=None)
     ps = rc.pubsub()
-    ps.subscribe(rid)  #从liao订阅消息
-    logger.info('subscribe to : '+str((rid))) 
+    ps.subscribe(request_id)  #从liao订阅消息
+    logger.info('subscribe to : '+str((request_id))) 
     for item in ps.listen():        #监听状态：有消息发布了就拿过来
-        logger.info('subscribe 2: '+str((rid, item))) 
+        logger.info('subscribe 2: '+str((request_id, item))) 
         if item['type'] == 'message':
             #print(item)
-            logger.info('subscribe: '+str((rid, item))) 
+            logger.info('subscribe: '+str((request_id, item))) 
             break
     return item
 
 # redis发布
-def redis_publish(rid, data):
+def redis_publish(request_id, data):
     msg_body = json.dumps(data)
 
     rc = redis.StrictRedis(host='localhost', port='6379', db=1, password=None)
-    rc.publish(rid, msg_body)
-    logger.info('publish: '+str((rid, msg_body))) 
+    rc.publish(request_id, msg_body)
+    logger.info('publish: '+str((request_id, msg_body))) 
 

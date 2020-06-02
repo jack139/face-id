@@ -8,6 +8,8 @@ from kafka import KafkaConsumer
 from async_api.utils import helper
 from async_api import logger
 
+from facelib import api_func
+
 
 if __name__ == '__main__':
     while 1:
@@ -15,9 +17,26 @@ if __name__ == '__main__':
         for message in consumer:
             # message value and key are raw bytes -- decode if necessary
             msg_body = json.loads(message.value.decode('utf-8'))
-            print(msg_body)
+            request = msg_body['data']
+            print(request.keys())
+
+            if request['api']=='face_search':
+                if request['user_id'] is None: # 1:N
+                    r = api_func.face_search(request['image'], request['group_id'], request['max_user_num'])
+                else: # 1:1
+                    r = []        
+
+                # 准备结果
+                result = { 'user_list' : r }
+
+                # 发送消息
+                helper.redis_publish(msg_body['request_id'], json.dumps(result))
+
+            else:
+                print('Unknown api: ', request['api'])
+
+                # 发送消息
+                helper.redis_publish(msg_body['request_id'], 'Hello world.')
 
             time.sleep(1)
 
-            # 收到消息
-            helper.redis_publish(msg_body['rid'], 'Hello world.')

@@ -37,7 +37,7 @@ def face_verify(b64_data1, b64_data2):
 
 
 # 人脸搜索
-def face_search(b64_data, group_id='DEFAULT', user_id=None, max_user_num=5):
+def face_search(b64_data, group_id='DEFAULT', max_user_num=5):
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
