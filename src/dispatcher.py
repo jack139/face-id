@@ -42,6 +42,11 @@ def process_thread(request):
             # 准备结果
             result = { 'code' : 200, 'data' : { 'face_num' : r[0], 'locations' : r[1] } }
 
+        elif request['api']=='face_features': # 计算特征值
+            encodings, boxes = api_func.face_features(request['image'])
+            # 准备结果
+            result = { 'code' : 200, 'data' : { 'encodings' : encodings, 'boxes' : boxes } }
+
         else: # 未知 api
             logger.error('Unknown api: '+request['api']) 
 

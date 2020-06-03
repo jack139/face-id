@@ -82,3 +82,9 @@ def face_search(b64_data, group_id='DEFAULT', max_user_num=5):
 
     return user_list
 
+
+# 计算特征值
+def face_features(b64_data):
+    encodings, boxes = verify.get_features_b64(b64_data)
+    encodings = [i.tolist() if type(i)!=type([]) else i for i in encodings]
+    return encodings, boxes

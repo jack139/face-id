@@ -59,7 +59,7 @@ def group_remove(group_id):
 def group_list(start=0, length=100):
     length = 100 if length>100 else length
     r = db.groups.find({}, {'_id':0}, sort=[('_id', 1)], limit=length, skip=start)
-    return [i for i in r]
+    return [i['group_id'] for i in r]
 
 
 ##################### 用户操作

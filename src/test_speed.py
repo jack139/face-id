@@ -3,7 +3,8 @@ from datetime import datetime
 import urllib3, json, base64
 
 #from models.vggface import verify
-from models.face_evoLVe import verify
+#from models.face_evoLVe import verify
+from facelib import api_func
 
 from facelib import utils 
 import face_recognition
@@ -22,7 +23,7 @@ with open('../data/me/2.jpg', 'rb') as f:
 if __name__ == '__main__':
 
     start_time = datetime.now()
-    encoding_list, face_boxes = verify.get_features_b64(img_data2)
+    encoding_list, face_boxes = api_func.face_features(img_data2)
     print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     print(face_boxes)
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     print('*'*20)
 
     start_time = datetime.now()
-    encoding_list, face_boxes = verify.get_features_b64(img_data)
+    encoding_list, face_boxes = api_func.face_features(img_data)
     print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     print(face_boxes)
