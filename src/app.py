@@ -14,7 +14,7 @@ def hello_world():
     return 'Hello World!'
 
 # 对外同步api 测试
-api.add_resource(SyncTest, '/test')
+#api.add_resource(SyncTest, '/test')
 
 # 人脸识别api，异步调用
 api.add_resource(FaceLocate, '/face/locate')

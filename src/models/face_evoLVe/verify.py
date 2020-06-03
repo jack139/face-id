@@ -128,7 +128,7 @@ def is_match_b64(b64_data1, b64_data2):
     encoding_list2, face_boxes2 = get_features_b64(b64_data2)
 
     if len(face_boxes1)==0 or len(face_boxes2)==0:
-        return False, [-1]
+        return False, [999]
 
     distance = face_distance([encoding_list1[0]], encoding_list2[0])
     return distance <= ALGORITHM['evo']['distance_threshold'], distance
@@ -144,7 +144,7 @@ def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list2, face_boxes = get_features_b64(b64_data)
 
     if len(face_boxes)==0:
-        return False, [-1]
+        return False, [999]
 
     distance_evo = face_distance(encoding_list1[1], encoding_list2[1])
     x = distance_evo <= ALGORITHM['evo']['distance_threshold']

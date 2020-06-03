@@ -140,7 +140,8 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
                     temp_result.append([
                         l, 
                         X_face_locations[i], 
-                        round(closest_distances[0][i][j], 6)
+                        #round(closest_distances[0][i][j], 6)
+                        closest_distances[0][i][j]/distance_threshold
                     ])
                     labels[l] = 1
                 else:

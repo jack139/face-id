@@ -7,7 +7,7 @@ from PIL import Image
 from config.settings import ALGORITHM
 from importlib import import_module
 import face_recognition
-
+#from datetime import datetime
 
 
 # 时间函数
@@ -32,8 +32,11 @@ def load_image_b64(b64_data, mode='RGB'):
     img = Image.open(tmp_buff)
     if mode:
         img = img.convert(mode)
+    if img.size>(500,500): # 处理的尺寸不超过500
+        img.thumbnail((500, 500)) 
     pixels =  np.array(img)
     tmp_buff.close()
+    #print('pixels size: ', pixels.nbytes)
     return pixels
 
 # 人脸定位
@@ -54,10 +57,13 @@ def face_locations_b64(b64_data):
 
 # 从照片中获取人脸数据，返回所有能识别的人脸， 图片输入为 base64 编码
 def extract_face_b64(b64_data, required_size=(224, 224)):
+    #start_time = datetime.now()
     # load image from file
     pixels = load_image_b64(b64_data)
+    #print('[1 Time taken: {!s}]'.format(datetime.now() - start_time))
     # extract the bounding box from the first face
     face_bounding_boxes = face_recognition.face_locations(pixels)
+    #print('[2 Time taken: {!s}]'.format(datetime.now() - start_time))
 
     # 可能返回 >0, 多个人脸
     if len(face_bounding_boxes) == 0:
@@ -80,6 +86,7 @@ def extract_face_b64(b64_data, required_size=(224, 224)):
         image = image.resize(required_size)
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
+        #print('[3 Time taken: {!s}]'.format(datetime.now() - start_time))
 
     return face_list, face_bounding_boxes
 

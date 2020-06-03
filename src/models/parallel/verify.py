@@ -41,18 +41,18 @@ def is_match_b64(b64_data1, b64_data2):
             results[pos] = future.result()
 
     if len(results[0][1])==0 or len(results[2][1])==0:
-        return False, [-1]
+        return False, [999]
 
     distance_vgg = face_distance([results[0][0][0]], results[2][0][0])
     if distance_vgg <= ALGORITHM['vgg']['distance_threshold']:
-        return True, distance_vgg
+        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold']
 
     distance_evo = face_distance([results[1][0][0]], results[3][0][0])
     if distance_evo <= ALGORITHM['evo']['distance_threshold']:
-        return True, distance_evo
+        return True, distance_evo/ALGORITHM['evo']['distance_threshold']
 
     # 均为匹配
-    return False, distance_vgg # 只返回 vgg 结果
+    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
@@ -81,7 +81,7 @@ def is_match_b64_serial(b64_data1, b64_data2):
     print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     if len(face_boxes1)==0 or len(face_boxes2)==0:
-        return False, [-1]
+        return False, [999]
 
     distance_vgg = face_distance([encoding_list1[0]], encoding_list2[0])
     if distance_vgg <= ALGORITHM['vgg']['distance_threshold']:
@@ -105,7 +105,7 @@ def is_match_b64_2(encoding_list_db, b64_data):
     # calculate distance between embeddings
     #encoding_list2, face_boxes = get_features_b64(b64_data)
     #if len(face_boxes)==0:
-    #    return False, [-1]
+    #    return False, [999]
 
     results = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -118,17 +118,17 @@ def is_match_b64_2(encoding_list_db, b64_data):
             results[pos] = future.result()
 
     if len(results[0][1])==0:
-        return False, [-1]
+        return False, [999]
 
     distance_vgg = face_distance(encoding_list1[0], results[0][0][0])
     x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
     if x.any():
-        return True, distance_vgg
+        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold']
 
     distance_evo = face_distance(encoding_list1[1], results[1][0][0])
     x = distance_evo <= ALGORITHM['evo']['distance_threshold']
     if x.any():
-        return True, distance_evo
+        return True, distance_evo/ALGORITHM['evo']['distance_threshold']
 
     # 均未匹配
-    return False, distance_vgg # 只返回 vgg 结果
+    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
