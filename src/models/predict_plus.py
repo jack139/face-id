@@ -4,7 +4,7 @@
 
 import os, sys
 import concurrent.futures
-from config.settings import ALGORITHM, algorithm_settings
+from config.settings import TRAINED_MODEL_PATH, ALGORITHM, algorithm_settings
 from . import knn
 from . import knn_db
 
@@ -24,11 +24,11 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
-    model_path, _ = os.path.split(model_name) # 取得模型所在路径
+    #model_path, _ = os.path.split(model_name) # 取得模型所在路径
     if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值
         image_data = [image_data[ALGORITHM[face_algorithm]['index']]]
     return knn_db.predict(image_data, group_id,
-        model_path=model_path, 
+        model_path=TRAINED_MODEL_PATH, 
         distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
         face_algorithm=face_algorithm,
         data_type=data_type)

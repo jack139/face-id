@@ -7,7 +7,7 @@ urllib3.disable_warnings()
 with open('../data/me/3.jpg', 'rb') as f:
     img_data = f.read()
 
-with open('../data/me/idcard150.jpg', 'rb') as f:
+with open('../data/test/kit_with_rose.jpg', 'rb') as f:
     img_data2 = f.read()
 
 
@@ -22,8 +22,8 @@ if __name__ == '__main__':
     #}
 
     body = {
-        'image'    : base64.b64encode(img_data).decode('utf-8'),
-        'group_id' : 'test',
+        'image'    : base64.b64encode(img_data2).decode('utf-8'),
+        'group_id' : 'group1',
         #'user_id'  : 'gt3',
     }
 

@@ -14,7 +14,7 @@ from datetime import datetime
 from sklearn import neighbors
 import pickle
 from facelib import dbport
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, TRAINED_MODEL_PATH
 from facelib.utils import import_verify
 
 
@@ -85,14 +85,17 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
     clf_path = os.path.join(model_path, group_id+ALGORITHM[face_algorithm]['ext'])
 
     # 检查是否已缓存clf
-    if clf_path in CLF_CACHE.keys(): 
-        knn_clf = CLF_CACHE[clf_path]
+    mtime = int(os.path.getmtime(clf_path)) # 模型最近修改时间
+
+    if (clf_path in CLF_CACHE.keys()) and (CLF_CACHE[clf_path][1]==mtime): 
+        knn_clf = CLF_CACHE[clf_path][0]
+        print('Bingo clf cache!', group_id)
     else:
         with open(clf_path, 'rb') as f:
             knn_clf = pickle.load(f)
         # 放进cache
-        CLF_CACHE[clf_path] = knn_clf
-        print('feeding clf cache: ', CLF_CACHE.keys())
+        CLF_CACHE[clf_path] = (knn_clf, mtime)
+        print('Feeding CLF cache: ', CLF_CACHE.keys())
 
     if data_type=='base64':
         # 动态载入 verify库

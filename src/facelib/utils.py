@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-`
-import time
-import base64
+import time, os, base64
 import numpy as np
+from datetime import datetime
 from io import BytesIO
 from PIL import Image
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, TRAINED_MODEL_PATH
 from importlib import import_module
 import face_recognition
 #from datetime import datetime
@@ -91,6 +91,21 @@ def extract_face_b64(b64_data, required_size=(224, 224)):
     return face_list, face_bounding_boxes
 
 
+# 训练特征值， 按用户组
+def train_by_group(group_id):
+    from models import knn_db
+
+    face_algorithm = ['vgg', 'evo']
+
+    start_time = datetime.now()
+    for algorithm in face_algorithm:
+        # Train the KNN classifier and save it to disk
+        classifier = knn_db.train(group_id, 
+            encodings_index=ALGORITHM[algorithm]['index'],
+            model_save_path=os.path.join(TRAINED_MODEL_PATH, group_id + ALGORITHM[algorithm]['ext']), 
+            n_neighbors=2,
+            face_algorithm=algorithm)
+        print('[Time taken: {!s} ({}, {})]'.format(datetime.now() - start_time, algorithm, group_id))
 
 
 # 图片文件转base64编码

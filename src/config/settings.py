@@ -42,6 +42,9 @@ algorithm_settings = {
     #2 : [ 'evo', 'data/model/train2_5.evo.clf' ],
 }
 
+# 特征值训练模型保存路径
+TRAINED_MODEL_PATH = '../data/model'
+
 
 ############  app server 相关设置
 

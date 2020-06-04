@@ -5,7 +5,7 @@ from flask_restful import reqparse, abort, Resource, fields, request
 import json, hashlib, time
 from ..utils import helper
 from .. import logger
-from facelib import dbport
+from facelib import dbport, utils
 from config.settings import MAX_IMAGE_SIZE
 
 logger = logger.get_logger(__name__)
@@ -72,6 +72,8 @@ class DbFaceReg(Resource):
             # 添加人脸信息
             face_id = dbport.face_new("vgg_evo", encodings)
             dbport.user_add_face(group_id, user_id, face_id)
+            # 重新训练模型
+            utils.train_by_group(group_id)
 
             return { "code" : 200, "msg" : "success", 'data' : { 'face_id'  : face_id } }
 
@@ -142,6 +144,8 @@ class DbFaceUpdate(Resource):
                 # 添加人脸信息
                 face_id = dbport.face_new("vgg_evo", encodings)
                 dbport.user_add_face(group_id, user_id, face_id)
+                # 重新训练模型
+                utils.train_by_group(group_id)
             else:
                 face_id = 0
 

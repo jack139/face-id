@@ -5,7 +5,7 @@ from flask_restful import reqparse, abort, Resource, fields, request
 import json
 from ..utils import helper
 from .. import logger
-from facelib import dbport
+from facelib import dbport, utils
 
 logger = logger.get_logger(__name__)
 
@@ -103,6 +103,9 @@ class DbUserCopy(Resource):
             if r==-2:
                 return {"code": 9003, "msg": "user_id在目的用户组已存在"}
 
+            # 重新训练模型
+            utils.train_by_group(dst_group_id)
+
             return { "code" : 200, "msg" : "success", 'data' : { "type" : "SUCCESS" } }
 
         except Exception as e:
@@ -132,6 +135,9 @@ class DbUserRemove(Resource):
             r = dbport.user_remove(group_id, user_id)
             if r==-1:
                 return {"code": 9002, "msg": "user_id不存在"}
+
+            # 重新训练模型
+            utils.train_by_group(group_id)
 
             return { "code" : 200, "msg" : "success", 'data' : { "type" : "SUCCESS" } }
 

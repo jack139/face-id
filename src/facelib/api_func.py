@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-`
 
+import os
 from datetime import datetime
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info
+from config.settings import ALGORITHM
 
 #FACE_MODEL = 'para'
 #
@@ -85,6 +87,11 @@ def face_search(b64_data, group_id='DEFAULT', max_user_num=5):
 
 # 计算特征值
 def face_features(b64_data):
+    start_time = datetime.now()
     encodings, boxes = verify.get_features_b64(b64_data)
     encodings = [i.tolist() if type(i)!=type([]) else i for i in encodings]
+    print('[Time taken: {!s}]'.format(datetime.now() - start_time))
     return encodings, boxes
+
+
+
