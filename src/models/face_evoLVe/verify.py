@@ -6,7 +6,7 @@ import numpy as np
 #from .backbone.model_irse import IR_50, IR_152, IR_SE_50, IR_SE_152
 from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
-from .extract_feature_v2 import extract_feature
+from .extract_feature_v2 import extract_feature, load_model
 from facelib.utils import extract_face_b64
 
 # 当前使用模型的索引，选择数据模型只需要修改这里
@@ -35,8 +35,10 @@ else:
 MODEL_ROOT = MODEL_BASE+MODEL_LIST[CURRENT_MODEL][1]
 
 print('Model: ', MODEL_LIST[CURRENT_MODEL][0])
-print('Model path: ', MODEL_ROOT)
+#print('Model path: ', MODEL_ROOT)
 
+# 装入 model 文件
+BACKBONE = load_model(BACKBONE, MODEL_ROOT)
 
 # 从照片中获取人脸数据，返回所有能识别的人脸
 def extract_face(filename, required_size=[112, 112]):

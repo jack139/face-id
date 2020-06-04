@@ -5,17 +5,24 @@ import numpy as np
 import os
 
 
+# load trained model file into backbone
+def load_model(backbone, model_root, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")):
+    assert (os.path.exists(model_root))
+    backbone.load_state_dict(torch.load(model_root, map_location=device))
+    backbone.to(device)
+    print('face.evoLVe loading backbone: ', model_root)
+    return backbone
+
 def l2_norm(input, axis = 1):
     norm = torch.norm(input, 2, axis, True)
     output = torch.div(input, norm)
-
     return output
 
 def extract_feature(img, backbone, model_root, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), tta = True):
     # pre-requisites
     #assert(os.path.exists(img_root))
     #print('Testing Data Root:', img_root)
-    assert (os.path.exists(model_root))
+    #assert (os.path.exists(model_root))
     #print('Backbone Model Root:', model_root)
 
     # load image
@@ -51,8 +58,8 @@ def extract_feature(img, backbone, model_root, device = torch.device("cuda:0" if
 
     # load backbone from a checkpoint
     #print("Loading Backbone Checkpoint '{}'".format(model_root))
-    backbone.load_state_dict(torch.load(model_root, map_location=device))
-    backbone.to(device)
+    #backbone.load_state_dict(torch.load(model_root, map_location=device))
+    #backbone.to(device)
 
     # extract features
     backbone.eval() # set to evaluation mode

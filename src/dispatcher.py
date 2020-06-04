@@ -78,7 +78,7 @@ if __name__ == '__main__':
             #print(request.keys())
             logger.info('Calling api: '+request['api']) 
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
                 future = executor.submit(process_thread, request)
                 logger.info('Thread future: '+str(future)) 
 
