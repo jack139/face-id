@@ -2,6 +2,7 @@
 
 import os, time, hashlib
 import json
+from datetime import datetime
 from flask_restful import reqparse, abort, Resource, fields, request
 from config.settings import MAX_IMAGE_SIZE
 from ..utils import helper
@@ -40,6 +41,8 @@ class FaceVerify(Resource):
             }
 
             # 发消息给 kafka
+            start_time = datetime.now()
+
             r = helper.kafka_send_msg(request_id, request_msg)
             if r is None:
                 logger.error("消息队列异常")
@@ -48,6 +51,9 @@ class FaceVerify(Resource):
             # 通过redis订阅等待结果返回
             ret = helper.redis_subscribe(request_id)
             ret2 = json.loads(ret['data'].decode('utf-8'))
+
+            logger.info('[Time taken: {!s}]'.format(datetime.now() - start_time))
+
             if ret2['code']==200:
                 return {'code': 200, 'msg' : 'success', 'data' : ret2['data']}
             else:

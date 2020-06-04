@@ -89,7 +89,7 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
     if (clf_path in CLF_CACHE.keys()) and (CLF_CACHE[clf_path][1]==mtime): 
         knn_clf = CLF_CACHE[clf_path][0]
-        print('Bingo clf cache!', group_id)
+        #print('Bingo clf cache!', group_id)
     else:
         with open(clf_path, 'rb') as f:
             knn_clf = pickle.load(f)

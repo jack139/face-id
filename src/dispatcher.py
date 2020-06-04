@@ -4,6 +4,7 @@
 
 import sys, json, time
 import concurrent.futures
+from datetime import datetime
 from kafka import KafkaConsumer
 
 from async_api.utils import helper
@@ -16,10 +17,9 @@ import binascii
 
 logger = logger.get_logger(__name__)
 
-def process_thread(request):
-    import keras.backend.tensorflow_backend as tb
-    tb._SYMBOLIC_SCOPE.value = True
 
+def process_api(request_msg):
+    request = request_msg
     try:
         if request['api']=='face_search': # 人脸识别
             if request['user_id'] is None: # 1:N
@@ -52,16 +52,32 @@ def process_thread(request):
 
             result = { 'code' : 9900, 'msg' : '未知 api 调用'}
 
-        # 发送消息
-        helper.redis_publish(msg_body['request_id'], result)
-
     except binascii.Error as e:
         logger.error("编码转换异常: %s" % e)
-        helper.redis_publish(msg_body['request_id'], { 'code' : 9901, 'msg' : 'base64编码异常: '+str(e)})
+        result = { 'code' : 9901, 'msg' : 'base64编码异常: '+str(e)}
 
     except Exception as e:
         logger.error("未知异常: %s" % e, exc_info=True)
-        helper.redis_publish(msg_body['request_id'], { 'code' : 9998, 'msg' : '未知错误: '+str(e)})
+        result = { 'code' : 9998, 'msg' : '未知错误: '+str(e)}
+
+    return result
+
+
+
+def process_thread(msg_body):
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
+
+    logger.info('{} Calling api: {}'.format(msg_body['request_id'], msg_body['data'].get('api', 'Unknown'))) 
+
+    start_time = datetime.now()
+
+    api_result = process_api(msg_body['data'])
+
+    # 发送消息
+    helper.redis_publish(msg_body['request_id'], api_result)
+
+    logger.info('{} [Time taken: {!s}]'.format(msg_body['request_id'], datetime.now() - start_time))
 
 
 if __name__ == '__main__':
@@ -70,17 +86,17 @@ if __name__ == '__main__':
             value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
             fetch_max_bytes=MAX_MESSAGE_SIZE)
 
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=8) # 建议与cpu核数相同
+
         for message in consumer:
             # message value and key are raw bytes -- decode if necessary
             #msg_body = json.loads(message.value.decode('utf-8'))
             msg_body = message.value
-            request = msg_body['data']
-            #print(request.keys())
-            logger.info('Calling api: '+request['api']) 
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-                future = executor.submit(process_thread, request)
-                logger.info('Thread future: '+str(future)) 
+            #print('!!!', msg_body['request_id'], helper.time_str())
 
-            time.sleep(1)
+            future = executor.submit(process_thread, msg_body)
+            #logger.info('Thread future: '+str(future)) 
+
+            #time.sleep(1)
 
