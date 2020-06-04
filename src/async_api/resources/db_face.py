@@ -60,14 +60,14 @@ class DbFaceReg(Resource):
             encodings, boxes = ret2['data']['encodings'], ret2['data']['boxes']
 
             if len(boxes)==0:
-                return {"code": 9004, "msg": "未定位到人脸"}
+                return {"code": 9003, "msg": "未定位到人脸"}
 
             # 注册用户信息
             r = dbport.user_new(group_id, user_id, name=name, mobile=mobile, memo=memo)
             if r==-1:
-                return {"code": 9002, "msg": "用户组不存在"}
+                return {"code": 9004, "msg": "用户组不存在"}
             if r==-2:
-                return {"code": 9003, "msg": "user_id已存在"}
+                return {"code": 9005, "msg": "user_id已存在"}
 
             # 添加人脸信息
             face_id = dbport.face_new("vgg_evo", encodings)
@@ -133,12 +133,12 @@ class DbFaceUpdate(Resource):
                 encodings, boxes = ret2['data']['encodings'], ret2['data']['boxes']
 
                 if len(boxes)==0:
-                    return {"code": 9004, "msg": "未定位到人脸"}
+                    return {"code": 9003, "msg": "未定位到人脸"}
 
             # 更新用户信息
             r = dbport.user_update(group_id, user_id, name=name, mobile=mobile, memo=memo)
             if r==-1:
-                return {"code": 9003, "msg": "user_id不存在"}
+                return {"code": 9004, "msg": "user_id不存在"}
 
             if len(image)>0:
                 # 添加人脸信息
