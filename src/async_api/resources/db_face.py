@@ -45,15 +45,22 @@ class DbFaceReg(Resource):
                 'image' : image,
             }
 
+            # 在发kafka消息前生成 consumer, 防止消息漏掉
+            consumer = helper.kafka_get_return_consumer()
+
             # 发消息给 kafka
             r = helper.kafka_send_msg(request_id, request_msg)
             if r is None:
                 logger.error("消息队列异常")
                 return {"code": 9099, "msg": "消息队列异常"}
 
-            # 通过redis订阅等待结果返回
-            ret = helper.redis_subscribe(request_id)
-            ret2 = json.loads(ret['data'].decode('utf-8'))
+            ## 通过redis订阅等待结果返回
+            #ret = helper.redis_subscribe(request_id)
+            #ret2 = json.loads(ret['data'].decode('utf-8'))
+
+            # 通过kafka 等待结果返回
+            ret = helper.kafka_recieve_return(consumer, request_id)
+            ret2 = ret['data']
             if ret2['code']!=200:
                 return ret2
 
@@ -118,6 +125,9 @@ class DbFaceUpdate(Resource):
                     'image' : image,
                 }
 
+                # 在发kafka消息前生成 consumer, 防止消息漏掉
+                consumer = helper.kafka_get_return_consumer()
+
                 # 发消息给 kafka
                 r = helper.kafka_send_msg(request_id, request_msg)
                 if r is None:
@@ -125,8 +135,12 @@ class DbFaceUpdate(Resource):
                     return {"code": 9099, "msg": "消息队列异常"}
 
                 # 通过redis订阅等待结果返回
-                ret = helper.redis_subscribe(request_id)
-                ret2 = json.loads(ret['data'].decode('utf-8'))
+                #ret = helper.redis_subscribe(request_id)
+                #ret2 = json.loads(ret['data'].decode('utf-8'))
+
+                # 通过kafka 等待结果返回
+                ret = helper.kafka_recieve_return(consumer, request_id)
+                ret2 = ret['data']
                 if ret2['code']!=200:
                     return ret2
 

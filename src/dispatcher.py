@@ -2,7 +2,7 @@
 
 # 后台调度程序，轮询kafka，异步执行，redis返回结果
 
-import sys, json, time
+import sys, json, time, random
 import concurrent.futures
 from datetime import datetime
 from kafka import KafkaConsumer
@@ -47,6 +47,10 @@ def process_api(request_msg):
             # 准备结果
             result = { 'code' : 200, 'data' : { 'encodings' : encodings, 'boxes' : boxes } }
 
+        elif request['api']=='sync_test': # 测试
+            time.sleep(random.random())
+            result = { 'code' : 200, 'data' : { 'txt' : request['txt']+' world!' } }
+
         else: # 未知 api
             logger.error('Unknown api: '+request['api']) 
 
@@ -74,10 +78,12 @@ def process_thread(msg_body):
 
     api_result = process_api(msg_body['data'])
 
-    # 发送消息
-    helper.redis_publish(msg_body['request_id'], api_result)
-
-    logger.info('{} [Time taken: {!s}]'.format(msg_body['request_id'], datetime.now() - start_time))
+    # 发布redis消息
+    #helper.redis_publish(msg_body['request_id'], api_result)
+    # 送lkafka消息
+    helper.kafka_send_return(msg_body['request_id'], api_result)
+    
+    logger.info('{} {} [Time taken: {!s}]'.format(msg_body['request_id'], msg_body['data']['api'], datetime.now() - start_time))
 
 
 if __name__ == '__main__':

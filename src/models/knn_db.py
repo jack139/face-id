@@ -57,7 +57,7 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
     start_time = datetime.now()
     knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=knn_algo, weights='distance')
     knn_clf.fit(X, y)
-    print('[Time taken: {!s}]'.format(datetime.now() - start_time))
+    #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     # Save the trained KNN classifier
     if model_save_path is not None:

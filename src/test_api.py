@@ -14,28 +14,23 @@ with open('../data/me/3.jpg', 'rb') as f:
 if __name__ == '__main__':
 
     body = {
-        'image1'    : base64.b64encode(img_data).decode('utf-8'),
-        'image2'    : base64.b64encode(img_data2).decode('utf-8'),
-        'group_id' : 'test',
-        #'user_id'  : 'gt',
+        'image'    : base64.b64encode(img_data).decode('utf-8'),
+        #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
+        'group_id' : 'group1',
+        'user_id'  : 'gt23',
+        'name'     : 'gt',
         #'max_face_num' : 10
     }
-
-    #body = {
-    #    'image'    : base64.b64encode(img_data2).decode('utf-8'),
-    #    'group_id' : 'group1',
-    #    #'user_id'  : 'gt3',
-    #}
 
     body = json.dumps(body)
     #print(body)
 
     pool = urllib3.PoolManager(num_pools=2, timeout=180, retries=False)
-    url = 'http://127.0.0.1:5000/face/verify'
+    #url = 'http://127.0.0.1:5000/face/verify'
     #url = 'http://127.0.0.1:5000/face/locate'
     #url = 'http://127.0.0.1:5000/face/search'
     #url = 'http://127.0.0.1:5000/facedb/face/reg'
-    #url = 'http://127.0.0.1:5000/facedb/face/update'
+    url = 'http://127.0.0.1:5000/facedb/face/update'
 
     start_time = datetime.now()
     r = pool.urlopen('POST', url, body=body)

@@ -59,6 +59,9 @@ class FaceSearch(Resource):
             else:
                 # 异步处理
 
+                # 在发kafka消息前生成 consumer, 防止消息漏掉
+                consumer = helper.kafka_get_return_consumer()
+
                 # 发消息给 kafka
                 #print('-->', request_id, helper.time_str())
                 r = helper.kafka_send_msg(request_id, request_msg)
@@ -67,8 +70,12 @@ class FaceSearch(Resource):
                     return {"code": 9099, "msg": "消息队列异常"}
 
                 # 通过redis订阅等待结果返回
-                ret = helper.redis_subscribe(request_id)
-                ret2 = json.loads(ret['data'].decode('utf-8'))
+                #ret = helper.redis_subscribe(request_id)
+                #ret2 = json.loads(ret['data'].decode('utf-8'))
+
+                # 通过kafka 等待结果返回
+                ret = helper.kafka_recieve_return(consumer, request_id)
+                ret2 = ret['data']
 
             #print('<--', request_id, helper.time_str(), datetime.now() - start_time)
             logger.info('[Time taken: {!s}]'.format(datetime.now() - start_time))

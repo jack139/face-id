@@ -4,6 +4,10 @@ import sys, time, os, shutil, json
 import threading
 import functools
 
+from kafka import KafkaProducer, KafkaConsumer
+from kafka.errors import KafkaError
+import redis
+
 from config.settings import MAX_MESSAGE_SIZE
 from .. import logger
 
@@ -81,9 +85,7 @@ def token_required(view_func):
 
 ########## 异步接口调用
 
-from kafka import KafkaProducer, KafkaConsumer
-from kafka.errors import KafkaError
-import redis
+
 
 
 # 向kafka发消息
@@ -113,21 +115,6 @@ def kafka_send_msg(request_id, data):
     return record_metadata
 
 
-# 从kafka取消息
-#def kafka_recieve_msg():
-#    # To consume latest messages and auto-commit offsets
-#    message_list = []
-#    consumer = KafkaConsumer('synchronous-asynchronous-queue', bootstrap_servers=['localhost:9092'])
-#    for message in consumer:
-#        # message value and key are raw bytes -- decode if necessary
-#        msg_body = json.loads(value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
-#            fetch_max_bytes=2097152) # 最大收 2M
-#        message_list.append(msg_body)
-#
-#        logger.info('kafka recieved.')
-#
-#    return message_list
-
 
 # redis订阅
 def redis_subscribe(request_id):
@@ -150,4 +137,55 @@ def redis_publish(request_id, data):
     rc = redis.StrictRedis(host='localhost', port='6379', db=1, password=None)
     rc.publish(request_id, msg_body)
     logger.info('publish: '+request_id) 
+
+
+
+# 向kafka发返回结果
+def kafka_send_return(request_id, data):
+    msg_body = {
+        'request_id' : request_id, # request id
+        'data' : data,
+    }
+    #msg_body = json.dumps(msg_body).encode('utf-8')
+
+    logger.info('send RETURN to kafka: ' + request_id) 
+
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], 
+        value_serializer = lambda v: json.dumps(v).encode('utf-8'),
+        max_request_size=MAX_MESSAGE_SIZE)
+
+    future = producer.send('synchronous-asynchronous-return', msg_body)
+
+    # Block for 'synchronous' sends
+    try:
+        record_metadata = future.get(timeout=10)
+    except KafkaError as e:
+        # Decide what to do if produce request failed...
+        logger.error("send RETURN to Kafka FAIL: %s"%e) 
+        return None
+
+    return record_metadata
+
+
+# 返回kafka消费者
+def kafka_get_return_consumer():
+    return KafkaConsumer('synchronous-asynchronous-return', bootstrap_servers=['localhost:9092'],
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')), # auto_offset_reset='earliest',
+        fetch_max_bytes=MAX_MESSAGE_SIZE)
+
+
+# 从kafka取返回结果
+def kafka_recieve_return(consumer, request_id):
+    # To consume latest messages and auto-commit offsets
+    message_list = []
+    for message in consumer:
+        # message value and key are raw bytes -- decode if necessary
+        msg_body = message.value
+
+        if msg_body['request_id'] == request_id:
+            break
+
+        #logger.info('kafka RETURN recieved: ' + msg_body['request_id'])
+
+    return msg_body
 

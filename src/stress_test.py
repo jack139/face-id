@@ -18,7 +18,7 @@ with open('../data/me/3.jpg', 'rb') as f:
 
 BODY = {
     'image'    : base64.b64encode(img_data).decode('utf-8'),
-    'image2'    : base64.b64encode(img_data2).decode('utf-8'),
+    #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
     'group_id' : 'test',
     #'user_id'  : 'gt',
     #'max_face_num' : 10
@@ -33,6 +33,7 @@ def main_loop(tname, test_server):
     #url = 'http://%s/face/verify'%test_server
     #url = 'http://%s/face/locate'%test_server
     url = 'http://%s/face/search'%test_server
+    #url = 'http://%s/test'%test_server
 
     tick_start = time.time()
 
