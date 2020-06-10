@@ -45,6 +45,8 @@ algorithm_settings = {
 # 特征值训练模型保存路径
 TRAINED_MODEL_PATH = '../data/model'
 
+# face.evoLVe 模型l路径
+EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 ############  app server 相关设置
 

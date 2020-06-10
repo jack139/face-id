@@ -8,12 +8,13 @@ from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_
 import face_recognition
 from .extract_feature_v2 import extract_feature, load_model
 from facelib.utils import extract_face_b64
+from config.settings import EVO_MODEL_BASE as MODEL_BASE
 
 # 当前使用模型的索引，选择数据模型只需要修改这里
 CURRENT_MODEL = 5
 
 INPUT_SIZE = [112, 112]
-MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
+
 MODEL_LIST = [
     ('ir50', 'bh-ir50/backbone_ir50_asia.pth'), # 0
     ('ir50', 'ms1m-ir50/backbone_ir50_ms1m_epoch63.pth'), # 1
