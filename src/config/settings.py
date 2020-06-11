@@ -68,3 +68,9 @@ BIND_PORT = '5000'
 MAX_MESSAGE_SIZE = 5242880  # 5MB
 # 图片数据最大尺寸
 MAX_IMAGE_SIZE = 2097152  # 2MB
+
+# dispatcher 中 最大线程数
+MAX_DISPATCHER_WORKERS = 8
+
+# 结果返回消息超时，单位：毫秒
+MESSAGE_TIMEOUT = 10000

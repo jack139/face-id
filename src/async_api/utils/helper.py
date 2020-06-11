@@ -6,9 +6,9 @@ import functools
 
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
-import redis
+#import redis
 
-from config.settings import MAX_MESSAGE_SIZE
+from config.settings import MAX_MESSAGE_SIZE, MESSAGE_TIMEOUT
 from .. import logger
 
 logger = logger.get_logger(__name__)
@@ -170,7 +170,9 @@ def kafka_send_return(request_id, data):
 # 返回kafka消费者
 def kafka_get_return_consumer():
     return KafkaConsumer('synchronous-asynchronous-return', bootstrap_servers=['localhost:9092'],
-        value_deserializer=lambda m: json.loads(m.decode('utf-8')), # auto_offset_reset='earliest',
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
+        # auto_offset_reset='earliest',
+        consumer_timeout_ms=MESSAGE_TIMEOUT, # 超时返回错误结果
         fetch_max_bytes=MAX_MESSAGE_SIZE)
 
 
@@ -178,6 +180,10 @@ def kafka_get_return_consumer():
 def kafka_recieve_return(consumer, request_id):
     # To consume latest messages and auto-commit offsets
     message_list = []
+    msg_body = {
+        'request_id' : request_id,
+        'data'       : {"code": 9997, "msg": "消息队列超时"},
+    }   
     for message in consumer:
         # message value and key are raw bytes -- decode if necessary
         msg_body = message.value

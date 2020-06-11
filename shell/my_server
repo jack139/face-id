@@ -1,0 +1,104 @@
+#!/bin/sh
+
+APP_DIR="/usr/share/nginx/html/face-id"
+LOG_PATH="/var/log/nginx"
+
+start_web() {
+        uwsgi  -s /tmp/uwsgi_face.sock -C -M -p 4 -t 60 --limit-as 1024 -R 1000 --uid nobody --gid nobody \
+               -d $LOG_PATH"/uwsgi_face.log" --pidfile /tmp/uwsgi_face.pid --pythonpath $APP_DIR
+	nginx
+	return 0
+}
+
+start_back() {
+        nohup python3 $APP_DIR"/daemon.pyc" $APP_DIR $LOG_PATH >> $LOG_PATH"/daemon.log"  &
+    	return 0 
+}
+
+stop_web() {
+	nginx -s quit
+	kill -9 `pgrep -f "uwsgi"`
+	sleep 1
+	kill -9 `pgrep -f "nginx"`
+	return 0
+}
+
+stop_back() {
+        kill -9 `pgrep -f "daemon.py"`
+        kill -9 `pgrep -f "dispatcher.py"`
+    	return 0
+}
+
+status() {
+	ps -f -C uwsgi -C nginx -C python3
+    	return 0
+}
+
+reload() {
+	nginx -s reload
+	return 0
+}
+
+restart() {
+    	stop_web
+	stop_back
+	sleep 1
+    	start_web
+	start_back
+}
+
+
+case "$1" in
+    start)
+	case "$2" in
+	  web)
+		start_web
+		RETVAL=$?
+		;;
+	  back)
+		start_back
+		RETVAL=$?
+		;;
+	  *)
+		start_web
+		start_back
+		RETVAL=$?
+		;;
+	esac
+	;;
+    stop)
+	case "$2" in
+	  web)
+		stop_web
+		RETVAL=$?
+		;;
+	  back)
+		stop_back
+		RETVAL=$?
+		;;
+	  *)
+		stop_web
+		stop_back
+		RETVAL=$?
+		;;
+	esac 
+	;;
+    restart)
+	restart
+	RETVAL=$?
+	;;
+    reload)
+	reload
+	RETVAL=$?
+	;;
+    status)
+	status
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: my_server {start|stop|restart} {web|back|all} | reload | status"
+	RETVAL=2
+	;;
+esac
+
+exit $RETVAL

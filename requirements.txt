@@ -1,7 +1,3 @@
-pip3 install -U pip
-yum install cmake
-
-
 face-recognition
 Keras
 tensorflow
@@ -13,3 +9,5 @@ Flask==1.1.1
 Flask-Restful
 opencv-python
 pymongo
+
+

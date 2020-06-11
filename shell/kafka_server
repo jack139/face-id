@@ -1,0 +1,49 @@
+#!/bin/sh
+
+
+KAFKA_PATH="/opt/kafka_2.12-2.5.0"
+LOG_PATH="/tmp"
+
+
+start() {
+	nohup $KAFKA_PATH"/bin/zookeeper-server-start.sh" $KAFKA_PATH"/config/zookeeper.properties" > $LOG_PATH"/zookeeper.out" &
+	sleep 8
+	nohup $KAFKA_PATH"/bin/kafka-server-start.sh" $KAFKA_PATH"/config/server.properties" > $LOG_PATH"/kafka.out" &
+
+    	return 0 
+}
+
+stop() {
+	$KAFKA_PATH"/bin/kafka-server-stop.sh"
+	sleep 8
+	$KAFKA_PATH"/bin/zookeeper-server-stop.sh"
+
+    	return 0
+}
+
+status() {
+	ps -ef|grep kafka
+    	return 0
+}
+
+
+case "$1" in
+    start)
+	start
+	RETVAL=$?
+	;;
+    stop)
+	stop
+	RETVAL=$?
+	;;
+    status)
+	status
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: kafka_server {start|stop|status}"
+	RETVAL=2
+	;;
+esac
+
+exit $RETVAL

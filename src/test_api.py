@@ -16,9 +16,9 @@ if __name__ == '__main__':
     body = {
         'image'    : base64.b64encode(img_data).decode('utf-8'),
         #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
-        'group_id' : 'group1',
-        'user_id'  : 'gt23',
-        'name'     : 'gt',
+        'group_id' : 'test',
+        #'user_id'  : 'gt23',
+        #'name'     : 'gt',
         #'max_face_num' : 10
     }
 
@@ -30,11 +30,15 @@ if __name__ == '__main__':
     #url = 'http://127.0.0.1:5000/face/locate'
     #url = 'http://127.0.0.1:5000/face/search'
     #url = 'http://127.0.0.1:5000/facedb/face/reg'
-    url = 'http://127.0.0.1:5000/facedb/face/update'
+    #url = 'http://127.0.0.1:5000/facedb/face/update'
+    url = 'http://10.10.6.197:5000/face/search'
 
     start_time = datetime.now()
     r = pool.urlopen('POST', url, body=body)
     print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     print(r.status)
-    print(json.loads(r.data.decode('utf-8')))
+    if r.status==200:
+        print(json.loads(r.data.decode('utf-8')))
+    else:
+        print(r.data)

@@ -7,7 +7,8 @@ import urllib3
 urllib3.disable_warnings()
 
 TEST_SERVER = [
-    '127.0.0.1:5000'
+    #'127.0.0.1:5000'
+    '10.10.6.197:5000',
 ]
 
 with open('../data/me/2.jpg', 'rb') as f:
