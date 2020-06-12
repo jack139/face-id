@@ -1,6 +1,6 @@
 # coding:utf-8
 
-import sys, time, os, shutil, json
+import sys, time, os, shutil, json, random, hashlib
 import threading
 import functools
 
@@ -22,6 +22,13 @@ def allowed_file(filename, category=0):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS[category]
 
+# 返回指定长度的随机字符串
+def ranstr(num):
+    H = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    salt = ''
+    for i in range(num):
+        salt += random.choice(H)
+    return salt
 
 # 按格式输出时间字符串
 ISOTIMEFORMAT=['%Y-%m-%d %X', '%Y-%m-%d', '%Y%m%d', '%Y%m%d%H%M%S']
@@ -29,63 +36,69 @@ def time_str(t=None, format=0):
     return time.strftime(ISOTIMEFORMAT[format], time.localtime(t))
 
 
-###### about token
+###### about 签名
 
-# 检查token修饰器
-def token_required(view_func):
+# 生成参数字符串
+def gen_param_str(param):
+    name_list = sorted(param.keys())
+    return ''.join([str(param[i]) for i in name_list])
+
+
+# 检查signature修饰器
+def signature_required(view_func):
     from config.settings import SECRET_KEY
     
     @functools.wraps(view_func)
-    def verify_token(*args,**kwargs):
-        return view_func(*args,**kwargs)  ## 测试时，关闭token校验
+    def verify_signature(*args,**kwargs):
+        #return view_func(*args,**kwargs)  ## 测试时，关闭签名校验
 
         from flask_restful import request
-        from itsdangerous.exc import BadSignature, SignatureExpired
-        from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
         try:
-            #在请求头上拿到token
-            #print(request.headers)
-            token = request.headers["faceid-token"]
+            # 获取入参
+            body_data = request.get_data().decode('utf-8') # bytes to str
+            json_data = json.loads(body_data)
+
+            #print(json_data)
+
+            appid = json_data['appid']
+            unixtime = json_data['unixtime']
+            signature = json_data['signature']
+
+            # 调用时间不能超过前后5分钟
+            if abs(int(time.time())-int(unixtime))>300:
+                logger.error("verify_signature: 调用时间错误") 
+                return {'code': 9802, 'msg' : '调用时间错误' }
+
+            # 三个固定参数不参与计算参数字符串
+            json_data.pop('appid')
+            json_data.pop('unixtime')
+            json_data.pop('signature')
+
+            # 获取私钥
+            secret = SECRET_KEY[appid]
+
         except Exception as e:
-            #没接收的到token
-            logger.error("verify_token: 异常: %s" % e.message) 
-            return {'code': 9998, 'msg' : '缺少token' }
-        
-        token_pass = False
-        for secret in SECRET_KEY.values():
-            s = Serializer(secret)
-            try:
-                data = s.loads(token)
-                logger.info("verify_token: login: %s %s"%(data['appid'],data['remote_addr']))
-                if request.remote_addr!=data['remote_addr']: # 核对 remote_addr
-                    logger.error("verify_token: 客户端ip异常")
-                    return {'code': 9994, 'msg' : '客户端ip异常' }      
-                token_pass = True
-                break
-            except SignatureExpired:
-                # token 过期
-                logger.error("verify_token: token过期")
-                return {'code': 9997, 'msg' : 'token已过期' }
-            except BadSignature:
-                # secret不对，尝试下一个, 适应SECRET_KEY有多个私钥的情况
-                #logger.warning("verify_token: BadSignature")
-                continue
-            except Exception as e:
-                logger.error("verify_token: 异常: %s" % e.message) 
-                return {'code': 9996, 'msg' : '其它异常' }
-        if token_pass:
+            logger.error("verify_signature: 异常: %s : %s" % (e.__class__.__name__, e))
+            return {'code': 9801, 'msg' : '签名参数有错误' }
+
+        # 生成参数字符串
+        param_str = gen_param_str(json_data)
+
+        sign_str = '%s%s%s%s' % (appid, str(unixtime), secret, param_str)
+        signature_str =  hashlib.sha256(sign_str.encode('utf-8')).hexdigest().upper()
+        print(signature_str, signature)
+
+        if signature==signature_str:
             return view_func(*args,**kwargs)
         else:
-            logger.error("verify_token: 无效token") 
-            return {'code': 9995, 'msg' : '无效token' }            
+            logger.error("verify_signature: 无效signature") 
+            return {'code': 9800, 'msg' : '无效签名' }            
 
-    return verify_token
+    return verify_signature
 
 
 ########## 异步接口调用
-
-
 
 
 # 向kafka发消息

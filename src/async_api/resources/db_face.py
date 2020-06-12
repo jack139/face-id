@@ -12,7 +12,7 @@ logger = logger.get_logger(__name__)
 
 # 人脸注册
 class DbFaceReg(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -91,7 +91,7 @@ class DbFaceReg(Resource):
 
 # 人脸更新
 class DbFaceUpdate(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -172,7 +172,7 @@ class DbFaceUpdate(Resource):
 
 # 人脸删除
 class DbFaceRemove(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参

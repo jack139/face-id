@@ -3,12 +3,13 @@
 import time, hashlib, json, sys, random, base64
 import threading
 import urllib3
+from async_api.utils import helper
 
 urllib3.disable_warnings()
 
 TEST_SERVER = [
-    #'127.0.0.1:5000'
-    '10.10.6.197:5000',
+    '127.0.0.1:5000'
+    #'10.10.6.197:5000',
 ]
 
 with open('../data/me/2.jpg', 'rb') as f:
@@ -24,6 +25,17 @@ BODY = {
     #'user_id'  : 'gt',
     #'max_face_num' : 10
 }
+
+appid = 'THISISTEST'
+unixtime = int(time.time())
+param_str = helper.gen_param_str(BODY)
+sign_str = '%s%s%s%s' % (appid, str(unixtime), 'F9OAZ4nbxYmz8NkLKJwivR5ZUasmePq7sL27v5HvHpY3wSHo', param_str)
+signature_str =  hashlib.sha256(sign_str.encode('utf-8')).hexdigest().upper()
+
+BODY['unixtime'] = unixtime
+BODY['appid'] = appid
+BODY['signature'] = signature_str
+
 
 def main_loop(tname, test_server):
 
@@ -55,7 +67,7 @@ def main_loop(tname, test_server):
         else:
             print(tname, test_server, '200', 'time_used=', time_used, 'in_data_len=', len(body), 'out_data_len=', len(r.data))
     except Exception as e:
-        print('Exception: ', type(e))
+        print("异常: %s : %s" % (e.__class__.__name__, e))
 
 class MainLoop(threading.Thread):
     def __init__(self, rounds):

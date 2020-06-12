@@ -10,7 +10,6 @@ logger = logger.get_logger(__name__)
 
 # api测试
 class SyncTest(Resource):
-    #@helper.token_required
     def post(self):  #  request --> kafka --> dispatcher --> redis --> return
         try:
             #time.sleep(1) # for test

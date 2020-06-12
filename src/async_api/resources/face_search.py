@@ -13,7 +13,7 @@ logger = logger.get_logger(__name__)
 
 # 人脸识别 1:N
 class FaceSearch(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参

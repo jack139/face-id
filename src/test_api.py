@@ -1,10 +1,12 @@
 # coding:utf-8
+
+import urllib3, json, base64, time, hashlib
 from datetime import datetime
-import urllib3, json, base64
+from async_api.utils import helper
 
 urllib3.disable_warnings()
 
-with open('../data/me/2.jpg', 'rb') as f:
+with open('../data/me/idcard40.jpg', 'rb') as f:
     img_data = f.read()
 
 with open('../data/me/3.jpg', 'rb') as f:
@@ -22,16 +24,26 @@ if __name__ == '__main__':
         #'max_face_num' : 10
     }
 
+    appid = 'THISISTEST'
+    unixtime = int(time.time())
+    param_str = helper.gen_param_str(body)
+    sign_str = '%s%s%s%s' % (appid, str(unixtime), 'F9OAZ4nbxYmz8NkLKJwivR5ZUasmePq7sL27v5HvHpY3wSHo', param_str)
+    signature_str =  hashlib.sha256(sign_str.encode('utf-8')).hexdigest().upper()
+
+    body['unixtime'] = unixtime
+    body['appid'] = appid
+    body['signature'] = signature_str
+
     body = json.dumps(body)
     #print(body)
 
     pool = urllib3.PoolManager(num_pools=2, timeout=180, retries=False)
     #url = 'http://127.0.0.1:5000/face/verify'
     #url = 'http://127.0.0.1:5000/face/locate'
-    #url = 'http://127.0.0.1:5000/face/search'
+    url = 'http://127.0.0.1:5000/face/search'
     #url = 'http://127.0.0.1:5000/facedb/face/reg'
     #url = 'http://127.0.0.1:5000/facedb/face/update'
-    url = 'http://10.10.6.197:5000/face/search'
+    #url = 'http://10.10.6.197:5000/face/search'
 
     start_time = datetime.now()
     r = pool.urlopen('POST', url, body=body)

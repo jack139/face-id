@@ -12,7 +12,7 @@ logger = logger.get_logger(__name__)
 
 # 人脸验证 1:1
 class FaceVerify(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参

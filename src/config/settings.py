@@ -53,11 +53,6 @@ EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 APP_NAME = 'face-id'
 APP_NAME_FORMATED = 'Face-ID'
 
-# 私钥
-SECRET_KEY = {
-    'localhost' : 'V4cCI6MTU4NTAzNDcxMCwiaWF0IjoxNTg1MDMxMT',
-} 
-
 # 参数设置
 DEBUG_MODE = False
 BIND_ADDR = '127.0.0.1'
@@ -74,3 +69,13 @@ MAX_DISPATCHER_WORKERS = 8
 
 # 结果返回消息超时，单位：毫秒
 MESSAGE_TIMEOUT = 10000
+
+
+############# appid - 私钥
+
+SECRET_KEY = {
+    'THISISTEST' : 'F9OAZ4nbxYmz8NkLKJwivR5ZUasmePq7sL27v5HvHpY3wSHo',
+    'uScwXmfq0S' : 'MeBYr9HDqxhXxrJ6yw7fmOL0S2gwpsbOMDOK4kUYSlwgqOlj',
+    'HRdxkDxMls' : 'hSZ45OB44dLoNmgW7A8iuR5i8Ui7rRB2y54AKXuM5FVBDAvv',
+    'Xl5Bp9Y5g9' : 'Ne9GO9IQT0gkJkVpN9TZGIupZlHkoVxT8zKqTmKT7HTJvdzV',
+}

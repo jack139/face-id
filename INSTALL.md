@@ -17,6 +17,11 @@ pip3 install uwsgi
 
 
 
+### python3 需要安装的包
+见 requirement.txt
+
+
+
 ### nginx配置文件
 
 > nginx.conf:
@@ -58,3 +63,9 @@ message.max.bytes=5242880
 replica.fetch.max.bytes=6291456
 ```
 
+
+
+### 相关shell脚本
+shell/kafka_server  启停zookeeper和kafka
+shell/mongo_server  启停mongodb
+shell/my_server 启停应用服务

@@ -11,7 +11,7 @@ logger = logger.get_logger(__name__)
 
 # 人脸定位
 class FaceLocate(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参

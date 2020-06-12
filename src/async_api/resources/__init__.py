@@ -1,4 +1,4 @@
-from .sync_test import SyncTest
+#from .sync_test import SyncTest
 from .face_search import FaceSearch
 from .face_verify import FaceVerify
 from .face_locate import FaceLocate

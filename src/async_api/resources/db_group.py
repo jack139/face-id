@@ -12,7 +12,7 @@ logger = logger.get_logger(__name__)
 
 # 用户组新建
 class DbGroupNew(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -41,7 +41,7 @@ class DbGroupNew(Resource):
 
 # 用户组删除
 class DbGroupRemove(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -69,7 +69,7 @@ class DbGroupRemove(Resource):
 
 # 用户组列表
 class DbGroupList(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参

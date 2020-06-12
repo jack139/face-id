@@ -12,7 +12,7 @@ logger = logger.get_logger(__name__)
 # 用户信息
 class DbUserInfo(Resource):
     # curl -X POST --data '{"group_id":"test","user_id":"obama"}' http://127.0.0.1:5000/facedb/user/info
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -50,7 +50,7 @@ class DbUserInfo(Resource):
 
 # 用户人脸列表
 class DbUserFaceList(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -79,7 +79,7 @@ class DbUserFaceList(Resource):
 
 # 用户复制
 class DbUserCopy(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -115,7 +115,7 @@ class DbUserCopy(Resource):
 
 # 用户删除
 class DbUserRemove(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
@@ -147,7 +147,7 @@ class DbUserRemove(Resource):
 
 # 用户列表
 class DbUserList(Resource):
-    #@helper.token_required
+    @helper.signature_required
     def post(self): 
         try:
             # 获取入参
