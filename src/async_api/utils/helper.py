@@ -8,7 +8,7 @@ from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
 #import redis
 
-from config.settings import MAX_MESSAGE_SIZE, MESSAGE_TIMEOUT
+from config.settings import KAFKA_CONFIG
 from .. import logger
 
 logger = logger.get_logger(__name__)
@@ -87,7 +87,7 @@ def signature_required(view_func):
 
         sign_str = '%s%s%s%s' % (appid, str(unixtime), secret, param_str)
         signature_str =  hashlib.sha256(sign_str.encode('utf-8')).hexdigest().upper()
-        print(signature_str, signature)
+        #print(signature_str, signature)
 
         if signature==signature_str:
             return view_func(*args,**kwargs)
@@ -111,11 +111,11 @@ def kafka_send_msg(request_id, data):
 
     logger.info('send to kafka: ' + request_id) 
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], 
+    producer = KafkaProducer(bootstrap_servers=KAFKA_CONFIG['SERVER'], 
         value_serializer = lambda v: json.dumps(v).encode('utf-8'),
-        max_request_size=MAX_MESSAGE_SIZE)
+        max_request_size=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
 
-    future = producer.send('synchronous-asynchronous-queue', msg_body)
+    future = producer.send(KAFKA_CONFIG['REQUEST-QUEUE'], msg_body)
 
     # Block for 'synchronous' sends
     try:
@@ -163,11 +163,11 @@ def kafka_send_return(request_id, data):
 
     logger.info('send RETURN to kafka: ' + request_id) 
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], 
+    producer = KafkaProducer(bootstrap_servers=KAFKA_CONFIG['SERVER'], 
         value_serializer = lambda v: json.dumps(v).encode('utf-8'),
-        max_request_size=MAX_MESSAGE_SIZE)
+        max_request_size=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
 
-    future = producer.send('synchronous-asynchronous-return', msg_body)
+    future = producer.send(KAFKA_CONFIG['RETURN-QUEUE'], msg_body)
 
     # Block for 'synchronous' sends
     try:
@@ -182,11 +182,11 @@ def kafka_send_return(request_id, data):
 
 # 返回kafka消费者
 def kafka_get_return_consumer():
-    return KafkaConsumer('synchronous-asynchronous-return', bootstrap_servers=['localhost:9092'],
+    return KafkaConsumer(KAFKA_CONFIG['RETURN-QUEUE'], bootstrap_servers=KAFKA_CONFIG['SERVER'],
         value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
         # auto_offset_reset='earliest',
-        consumer_timeout_ms=MESSAGE_TIMEOUT, # 超时返回错误结果
-        fetch_max_bytes=MAX_MESSAGE_SIZE)
+        consumer_timeout_ms=KAFKA_CONFIG['MESSAGE_TIMEOUT'], # 超时返回错误结果
+        fetch_max_bytes=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
 
 
 # 从kafka取返回结果

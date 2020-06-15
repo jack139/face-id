@@ -8,11 +8,11 @@ from async_api.utils import helper
 urllib3.disable_warnings()
 
 TEST_SERVER = [
-    '127.0.0.1:5000'
+    '172.17.0.3:5000'
     #'10.10.6.197:5000',
 ]
 
-with open('../data/me/2.jpg', 'rb') as f:
+with open('../data/me/idcard40.jpg', 'rb') as f:
     img_data = f.read()
 
 with open('../data/me/3.jpg', 'rb') as f:

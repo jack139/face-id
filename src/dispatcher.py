@@ -11,7 +11,7 @@ from async_api.utils import helper
 from async_api import logger
 
 from facelib import api_func
-from config.settings import MAX_MESSAGE_SIZE, MAX_DISPATCHER_WORKERS
+from config.settings import KAFKA_CONFIG, MAX_DISPATCHER_WORKERS
 
 import binascii
 
@@ -88,10 +88,10 @@ def process_thread(msg_body):
 
 if __name__ == '__main__':
     while 1:
-        consumer = KafkaConsumer('synchronous-asynchronous-queue', bootstrap_servers=['localhost:9092'],
+        consumer = KafkaConsumer(KAFKA_CONFIG['REQUEST-QUEUE'], bootstrap_servers=KAFKA_CONFIG['SERVER'],
             value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
             group_id='dispatcher',  # 相同分组，同时启动多个dispatcher不会重复处理请求
-            fetch_max_bytes=MAX_MESSAGE_SIZE)
+            fetch_max_bytes=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_DISPATCHER_WORKERS) # 建议与cpu核数相同
 

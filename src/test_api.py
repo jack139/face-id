@@ -40,7 +40,7 @@ if __name__ == '__main__':
     pool = urllib3.PoolManager(num_pools=2, timeout=180, retries=False)
     #url = 'http://127.0.0.1:5000/face/verify'
     #url = 'http://127.0.0.1:5000/face/locate'
-    url = 'http://127.0.0.1:5000/face/search'
+    url = 'http://172.17.0.3:5000/face/search'
     #url = 'http://127.0.0.1:5000/facedb/face/reg'
     #url = 'http://127.0.0.1:5000/facedb/face/update'
     #url = 'http://10.10.6.197:5000/face/search'
