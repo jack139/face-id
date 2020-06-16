@@ -4,7 +4,7 @@ import os
 #from datetime import datetime
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, TRAINED_MODEL_PATH
 
 #FACE_MODEL = 'para'
 #
@@ -17,7 +17,7 @@ from config.settings import ALGORITHM
 
 from models.parallel import verify
 from models.predict_plus import predict_parallel, predict_thread_db
-
+from models.knn_db import predict
 
 # 人脸定位
 def face_locations(b64_data, max_face_num=1):
@@ -54,13 +54,21 @@ def face_verify_db(b64_data, group_id, user_id):
     return is_match, score
 
 
-# 人脸搜索
-def face_search(b64_data, group_id='DEFAULT', max_user_num=5):
+# 人脸搜索， face_algorithm 取值： 'parallel' , 'vgg', 'evo'
+def face_search(b64_data, group_id='DEFAULT', max_user_num=5, face_algorithm='parallel'):
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
     #start_time = datetime.now()
-    predictions = predict_parallel(predict_thread_db, b64_data, group_id)
+    if face_algorithm=='parallel':
+        predictions = predict_parallel(predict_thread_db, b64_data, group_id)
+    elif face_algorithm in ('evo', 'vgg'):
+        predictions = predict(b64_data, group_id,
+            model_path=TRAINED_MODEL_PATH,
+            distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+            face_algorithm=face_algorithm)
+    else:
+        return []
     #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     #print(predictions)
