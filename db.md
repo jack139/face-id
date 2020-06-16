@@ -77,3 +77,12 @@
 | extra  | 附加信息   | string |      |      | 各接自己定义具体内容 |
 | time_t | 创建时间   | string |      |      |                      |
 
+
+
+## mongodb索引
+
+```js
+db.groups.createIndex({group_id:1},{ background: true })
+db.users.createIndex({group_id:1, user_id:1},{ background: true })
+db.users.createIndex({user_id:1},{ background: true })
+```

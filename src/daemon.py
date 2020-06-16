@@ -6,14 +6,16 @@
 import sys
 import time, shutil, os
 from async_api.utils import helper
+from config.settings import KAFKA_CONFIG
 
 
 APP_DIR=''
 LOG_DIR=''
 
-def start_processor(pname):
-    cmd0="nohup python3 %s/%s.pyc >> %s/%s.log 2>&1 &" % \
-        (APP_DIR, pname, LOG_DIR, pname)
+def start_processor(pname, param=''):
+    cmd0="nohup python3 %s/%s.pyc %s >> %s/%s.log 2>&1 &" % \
+        (APP_DIR, pname, param, LOG_DIR, pname+param.replace(' ',''))
+    print('start process: ', cmd0)
     os.system(cmd0)
 
 def get_processor_pid(pname):
@@ -44,7 +46,8 @@ if __name__=='__main__':
     #启动后台进程
     #
     kill_processor('%s/dispatcher' % APP_DIR)
-    start_processor('dispatcher')
+    for i in range(KAFKA_CONFIG['REQUEST-QUEUE-NUM']):
+        start_processor('dispatcher', str(i+1))
 
     try:    
         _count=_ins=0
@@ -54,7 +57,8 @@ if __name__=='__main__':
             if pid==None:
                 # 进程已死, 重启进程
                 kill_processor('%s/dispatcher' % APP_DIR)
-                start_processor('dispatcher')
+                for i in range(KAFKA_CONFIG['REQUEST-QUEUE-NUM']):
+                    start_processor('dispatcher', str(i+1))
                 _ins+=1
                 print("%s\tdispatcher restart" % helper.time_str())
 

@@ -36,8 +36,10 @@ BODY['unixtime'] = unixtime
 BODY['appid'] = appid
 BODY['signature'] = signature_str
 
+SCORE = {}
 
 def main_loop(tname, test_server):
+    global SCORE
 
     body = json.dumps(BODY)
     #print(body)
@@ -61,6 +63,7 @@ def main_loop(tname, test_server):
         tick_end = time.time()
 
         time_used =  int((tick_end-tick_start)*1000)
+        SCORE[tname] += time_used
 
         if r.status!=200:
             print(tname, test_server, '!!!!!! HTTP ret=', r.status, 'time_used=', time_used)
@@ -76,9 +79,10 @@ class MainLoop(threading.Thread):
         self._round = rounds
 
     def run(self):
-        global count, mutex
+        global count, mutex, SCORE
         self._tname = threading.currentThread().getName()
-        
+        SCORE[self._tname] = 0        
+
         print('Thread - %s started.' % self._tname)
 
         #while 1:
@@ -98,12 +102,15 @@ if __name__=='__main__':
 
     print("STRESS TEST started: " , time.ctime())
 
+    thread_num = int(sys.argv[1])
+    round_per_thread = int(sys.argv[2])
+
     #线程池
     threads = []
         
     # 创建线程对象
-    for x in range(0, int(sys.argv[1])):
-        threads.append(MainLoop(int(sys.argv[2])))
+    for x in range(0, thread_num):
+        threads.append(MainLoop(round_per_thread))
     
     # 启动线程
     for t in threads:
@@ -112,5 +119,12 @@ if __name__=='__main__':
     # 等待子线程结束
     for t in threads:
         t.join()  
+
+    total = 0
+    for i in SCORE.keys():
+        total += SCORE[i]
+        print('%s - %.3f'%( i, SCORE[i]/round_per_thread ))
+
+    print('Average: %.3f'%(total/(thread_num*round_per_thread)) )
 
     print("STRESS TEST exited: ", time.ctime())

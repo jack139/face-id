@@ -87,8 +87,16 @@ def process_thread(msg_body):
 
 
 if __name__ == '__main__':
+    if len(sys.argv)<2:
+        print("usage: dispatcher.py <QUEUE_NO.>")
+        sys.exit(2)
+
+    queue_no = sys.argv[1]
+
+    print('Request queue NO. ', queue_no)
+
     while 1:
-        consumer = KafkaConsumer(KAFKA_CONFIG['REQUEST-QUEUE'], bootstrap_servers=KAFKA_CONFIG['SERVER'],
+        consumer = KafkaConsumer(KAFKA_CONFIG['REQUEST-QUEUE']+queue_no, bootstrap_servers=KAFKA_CONFIG['SERVER'],
             value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
             group_id='dispatcher',  # 相同分组，同时启动多个dispatcher不会重复处理请求
             fetch_max_bytes=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])

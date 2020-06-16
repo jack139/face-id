@@ -100,6 +100,10 @@ def signature_required(view_func):
 
 ########## 异步接口调用
 
+# 返回　请求队列　随机id
+def choose_queue():
+    # 随机返回
+    return random.randint(1, KAFKA_CONFIG['REQUEST-QUEUE-NUM'])
 
 # 向kafka发消息
 def kafka_send_msg(request_id, data):
@@ -115,7 +119,11 @@ def kafka_send_msg(request_id, data):
         value_serializer = lambda v: json.dumps(v).encode('utf-8'),
         max_request_size=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
 
-    future = producer.send(KAFKA_CONFIG['REQUEST-QUEUE'], msg_body)
+    # 设置发送的queue
+    queue = KAFKA_CONFIG['REQUEST-QUEUE']+str(choose_queue())
+    print('queue:', queue)
+
+    future = producer.send(queue, msg_body)
 
     # Block for 'synchronous' sends
     try:
