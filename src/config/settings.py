@@ -43,6 +43,10 @@ TRAINED_MODEL_PATH = '/opt/data/model'
 # face.evoLVe 模型l路径
 EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
 
+# faceNET 模型l路径
+#FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'
+FACENET_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/20180402-114759/'
+
 ############  app server 相关设置
 
 APP_NAME = 'face-id'
