@@ -29,7 +29,7 @@ def extract_embeddings(G, images):
             embedding_size = embeddings.get_shape()[1]
             
             # Run forward pass to calculate embeddings
-            print('Calculating features for images')
+            #print('Calculating features for images')
             nrof_images = len(images)
             #nrof_batches_per_epoch = int(math.ceil(1.0*nrof_images / batch_size))
             emb_array = np.zeros((nrof_images, embedding_size))

@@ -17,6 +17,7 @@ from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
 import face_recognition
 from facelib.utils import extract_face_b64
+from config.settings import ALGORITHM
 
 
 # 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50

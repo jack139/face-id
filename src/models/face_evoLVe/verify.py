@@ -9,6 +9,7 @@ import face_recognition
 from .extract_feature_v2 import extract_feature, load_model
 from facelib.utils import extract_face_b64
 from config.settings import EVO_MODEL_BASE as MODEL_BASE
+from config.settings import ALGORITHM
 
 # 当前使用模型的索引，选择数据模型只需要修改这里
 CURRENT_MODEL = 5

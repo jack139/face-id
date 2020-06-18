@@ -8,7 +8,8 @@ import face_recognition
 from .extract_embeddings import extract_embeddings
 from facelib.utils import extract_face_b64
 from config.settings import FACENET_MODEL_BASE as MODEL_BASE
-from .facenet import load_model, load_data
+from config.settings import ALGORITHM
+from .facenet import load_model, load_data, load_data_array
 
 
 INPUT_SIZE = [160, 160]
@@ -61,14 +62,8 @@ def extract_face(filename, required_size=INPUT_SIZE):
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸
 def get_features(filename):
     face_list, face_boxes = extract_face(filename, required_size=INPUT_SIZE)
-    encoding_list = []
-    #for face in face_list:
-    #    open_cv_face = face[:, :, ::-1].copy() 
-    #    face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
-    #    encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
-
-    encoding_list = extract_embeddings(G, face_list)
-
+    images = load_data_array(face_list, False, False, INPUT_SIZE[0])
+    encoding_list = extract_embeddings(G, images)
     return encoding_list, face_boxes
 
 # 直接返回特征值
@@ -77,36 +72,12 @@ def get_features2(filename):
     face_encodings = extract_embeddings(G, images)
     return face_encodings
 
-# 直接返回特征值
-def get_features3(filename):
-    pixels = face_recognition.load_image_file(filename)
-    image = Image.fromarray(pixels)
-    open_cv_image = np.array(image) 
-    face_encodings = extract_embeddings(G, [open_cv_image])
-    return face_encodings
-
-
-# 定位人脸测试
-def test(filename):
-    face_list, face_boxes = extract_face(filename, required_size=INPUT_SIZE)
-    print(face_boxes)
-
-    n=0
-    for face in face_list:
-        open_cv_face = face[:, :, ::-1].copy() 
-        cv2.imwrite(str(n)+'.jpg', open_cv_face)
-        n+=1
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
 def get_features_b64(base64_data):
     face_list, face_boxes = extract_face_b64(base64_data, required_size=INPUT_SIZE)
-    encoding_list = []
-    for face in face_list:
-        open_cv_face = face[:, :, ::-1].copy() 
-
-        face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
-        encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
-
+    images = load_data_array(face_list, False, False, INPUT_SIZE[0])
+    encoding_list = extract_embeddings(G, images)
     return encoding_list, face_boxes
 
 
@@ -125,8 +96,9 @@ def is_match_b64(b64_data1, b64_data2):
         return False, [999]
 
     distance = face_distance([encoding_list1[0]], encoding_list2[0])
-    return distance <= ALGORITHM['evo']['distance_threshold'], distance
+    return distance <= ALGORITHM['fnet']['distance_threshold'], distance
 
+'''
 # 比较两个人脸是否同一人, encoding_list1来自已知db用户
 def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list1 = [[], []]
@@ -141,5 +113,6 @@ def is_match_b64_2(encoding_list_db, b64_data):
         return False, [999]
 
     distance_evo = face_distance(encoding_list1[1], encoding_list2[1])
-    x = distance_evo <= ALGORITHM['evo']['distance_threshold']
+    x = distance_evo <= ALGORITHM['fnet']['distance_threshold']
     return x.any(), distance_evo
+'''
