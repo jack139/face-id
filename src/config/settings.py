@@ -26,6 +26,7 @@ ALGORITHM = {
     'evo'   : { 'index': 1, 'distance_threshold' : 1.2, 'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },
     'plus'  : { 'index': 3, 'distance_threshold' : 1.4, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },
     'fnet'  : { 'index': 4, 'distance_threshold' : 0.9, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },
+    'deep'  : { 'index': 5, 'distance_threshold' : 0.9, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },
 }
 
 # 并行算法设置
