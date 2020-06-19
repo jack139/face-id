@@ -22,7 +22,7 @@ db_primary = db_web
 
 ALGORITHM = {
     'rec'   : { 'index': 2, 'distance_threshold' : 0.6, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },
-    'vgg'   : { 'index': 0, 'distance_threshold' : 0.8, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },
+    'vgg'   : { 'index': 0, 'distance_threshold' : 0.86, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },
     'evo'   : { 'index': 1, 'distance_threshold' : 1.2, 'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },
     'plus'  : { 'index': 3, 'distance_threshold' : 1.4, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },
     'fnet'  : { 'index': 4, 'distance_threshold' : 0.9, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },
@@ -43,7 +43,8 @@ algorithm_settings = {
 TRAINED_MODEL_PATH = '/opt/data/model'
 
 # face.evoLVe 模型l路径
-EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+#EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 # faceNET 模型l路径
 #FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'
