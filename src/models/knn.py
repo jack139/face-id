@@ -107,6 +107,10 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
         with open(model_save_path, 'wb') as f:
             pickle.dump(knn_clf, f)
 
+        # 保存 X,y
+        with open(model_save_path+'.xy', 'wb') as f:
+            pickle.dump((X, y), f)
+
     return knn_clf
 
 
@@ -222,3 +226,46 @@ def show_prediction_labels_on_image(img_path, predictions):
 
     # Display the resulting image
     pil_image.show()
+
+
+# 计算X.y的f1和acc,确定threshold值
+def score_acc_f1(X, y, face_algorithm='rec'):
+    from sklearn.metrics import f1_score, accuracy_score
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+
+    distances = [] # squared L2 distance between pairs
+    identical = [] # 1 if same identity, 0 otherwise
+
+    module_verify = import_verify(face_algorithm)
+
+    num = len(y)
+
+    for i in range(num - 1):
+        for j in range(i + 1, num):
+            distances.append(module_verify.face_distance([X[i]], X[j]))
+            identical.append(1 if y[i] == y[j] else 0)
+            
+    distances = np.array(distances)
+    identical = np.array(identical)
+
+    thresholds = np.arange(0.1, 2.0, 0.01)
+
+    f1_scores = [f1_score(identical, distances < t) for t in thresholds]
+    acc_scores = [accuracy_score(identical, distances < t) for t in thresholds]
+
+    opt_idx = np.argmax(f1_scores)
+    # Threshold at maximal F1 score
+    opt_tau = thresholds[opt_idx]
+    # Accuracy at maximal F1 score
+    opt_acc = accuracy_score(identical, distances < opt_tau)
+
+    # Plot F1 score and accuracy as function of distance threshold
+    plt.plot(thresholds, f1_scores, label='F1 score')
+    plt.plot(thresholds, acc_scores, label='Accuracy')
+    plt.axvline(x=opt_tau, linestyle='--', lw=1, c='lightgrey', label='Threshold')
+    plt.title('Accuracy at threshold {:.4} = {:.4}'.format(opt_tau, opt_acc))
+    plt.xlabel('Distance threshold')
+    plt.legend()
+    plt.show()

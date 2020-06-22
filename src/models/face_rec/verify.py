@@ -17,3 +17,6 @@ def get_features(filename):
 
     return features, face_bounding_boxes
 
+# 特征值距离
+def face_distance(face_encodings, face_to_compare):
+    return face_recognition.face_distance(np.array(face_encodings), np.array(face_to_compare))

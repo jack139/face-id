@@ -32,8 +32,8 @@ class FaceDetectorDlib(FaceDetector):
         dets, scores, idx = self.detector.run(npimg, self.upsample_scale, -1)
         faces = []
         for det, score in zip(dets, scores):
-            if score < DeepFaceConfs.get()['detector']['dlib']['score_th']:
-                continue
+            #if score < DeepFaceConfs.get()['detector']['dlib']['score_th']:
+            #    continue
 
             x = max(det.left(), 0)
             y = max(det.top(), 0)
