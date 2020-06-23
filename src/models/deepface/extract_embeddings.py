@@ -7,7 +7,7 @@ import face_recognition
 
 from models.deepface.deepface import get_detector, get_recognizer
 
-detector = get_detector(name='dlib')
+detector = get_detector(name='dlib') # ssd_mobilenet_v2, dlib
 recognizer = get_recognizer(name='vgg2')
 
 

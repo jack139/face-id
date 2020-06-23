@@ -77,10 +77,18 @@ class DbFaceReg(Resource):
                 return {"code": 9005, "msg": "user_id已存在"}
 
             # 添加人脸信息
-            face_id = dbport.face_new("vgg_evo", encodings)
+            face_id = dbport.face_new("vgg_x_rec", encodings)
             dbport.user_add_face(group_id, user_id, face_id)
-            # 重新训练模型
-            utils.train_by_group(group_id)
+
+            r2 = dbport.user_list_by_group(group_id)
+            if len(r2)>0: 
+                # 重新训练模型, 至少需要1个用户
+                request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
+                # 发消息给 kafka
+                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                if r is None:
+                    logger.error("消息队列异常")
+                    return {"code": 9099, "msg": "消息队列异常"}
 
             return { "code" : 200, "msg" : "success", 'data' : { 'face_id'  : face_id } }
 
@@ -158,8 +166,17 @@ class DbFaceUpdate(Resource):
                 # 添加人脸信息
                 face_id = dbport.face_new("vgg_evo", encodings)
                 dbport.user_add_face(group_id, user_id, face_id)
-                # 重新训练模型
-                utils.train_by_group(group_id)
+
+                r2 = dbport.user_list_by_group(group_id)
+                if len(r2)>0: 
+                    # 重新训练模型, 至少需要1个用户
+                    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
+                    # 发消息给 kafka
+                    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                    if r is None:
+                        logger.error("消息队列异常")
+                        return {"code": 9099, "msg": "消息队列异常"}
+
             else:
                 face_id = 0
 

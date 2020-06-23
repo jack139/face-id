@@ -23,7 +23,7 @@ from facelib import dbport
         └── ...
 '''
 
-# 导入图片特征： vgg evo
+# 导入图片特征： vgg evo rec
 
 if __name__ == "__main__":
     if len(sys.argv)<3:
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     dbport.group_new(group_id)
 
     # 动态载入 verify库
-    module_verify = [ import_verify('vgg'), import_verify('evo') ]
+    module_verify = [ import_verify('vgg'), import_verify('evo'), import_verify('rec') ]
 
     # Loop through each person in the training set
     for class_dir in os.listdir(train_dir):
@@ -54,6 +54,7 @@ if __name__ == "__main__":
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
             face_encodings_vgg, _ = module_verify[0].get_features(img_path)
             face_encodings_evo, _ = module_verify[1].get_features(img_path)
+            face_encodings_rec, _ = module_verify[2].get_features(img_path)
 
             if len(face_encodings_vgg) != 1:
                 # If there are no people (or too many people) in a training image, skip the image.
@@ -64,13 +65,16 @@ if __name__ == "__main__":
                 #y.append(class_dir)
                 encoding_vgg = face_encodings_vgg[0]
                 encoding_evo = face_encodings_evo[0]
+                encoding_rec = face_encodings_rec[0]
                 if type(encoding_vgg)!=type([]):
                     encoding_vgg = encoding_vgg.tolist()
                 if type(encoding_evo)!=type([]):
                     encoding_evo = encoding_evo.tolist()
+                if type(encoding_rec)!=type([]):
+                    encoding_rec = encoding_rec.tolist()
 
                 # 添加人脸特征
-                face_id = dbport.face_new('vgg_evo', [encoding_vgg, encoding_evo])
+                face_id = dbport.face_new('vgg_evo_rec', [ encoding_vgg, encoding_evo, encoding_rec] )
                 # 人脸数据添加到用户信息
                 dbport.user_add_face(group_id, class_dir, face_id)
 

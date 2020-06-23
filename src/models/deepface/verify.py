@@ -9,7 +9,7 @@ from facelib.utils import extract_face_b64
 from config.settings import FACENET_MODEL_BASE as MODEL_BASE
 from config.settings import ALGORITHM
 
-from .test import extract_embeddings
+from .extract_embeddings import extract_embeddings
 
 INPUT_SIZE = [160, 160]
 

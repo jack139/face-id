@@ -12,7 +12,7 @@ from ..confs.conf import DeepFaceConfs
 from ..recognizers.recognizer_base import FaceRecognizer
 from ..utils.common import grouper, rotate_dot, faces_to_rois
 
-tf.compat.v1.disable_eager_execution()
+tf.disable_eager_execution()
 
 def conv_block(input_tensor, filters, stage, block, strides=(2, 2), bias=False):
     layer_name = 'conv' + str(stage) + '_' + str(block)
@@ -195,18 +195,18 @@ class FaceRecognizerResnet(FaceRecognizer):
         self.network = network
         self.db = None
 
-        if custom_db:
-            db_path = custom_db
-        else:
-            db_path = DeepFaceConfs.get()['recognizer']['resnet'].get('db', '')
-            db_path = os.path.join(dir_path, db_path)
-        try:
-            with open(db_path, 'rb') as f:
-                u = pickle._Unpickler(f)
-                u.encoding = 'latin1'
-                self.db = u.load()
-        except Exception as e:
-            logging.warning('db file not loaded, %s, err=%s' % (db_path, str(e)))
+        #if custom_db:
+        #    db_path = custom_db
+        #else:
+        #    db_path = DeepFaceConfs.get()['recognizer']['resnet'].get('db', '')
+        #    db_path = os.path.join(dir_path, db_path)
+        #try:
+        #    with open(db_path, 'rb') as f:
+        #        u = pickle._Unpickler(f)
+        #        u.encoding = 'latin1'
+        #        self.db = u.load()
+        #except Exception as e:
+        #    logging.warning('db file not loaded, %s, err=%s' % (db_path, str(e)))
 
     def name(self):
         return FaceRecognizerResnet.NAME

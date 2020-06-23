@@ -103,8 +103,15 @@ class DbUserCopy(Resource):
             if r==-2:
                 return {"code": 9003, "msg": "user_id在目的用户组已存在"}
 
-            # 重新训练模型
-            utils.train_by_group(dst_group_id)
+            r2 = dbport.user_list_by_group(dst_group_id)
+            if len(r2)>0: 
+                # 重新训练模型, 至少需要1个用户
+                request_msg = { 'api' : 'train_by_group', 'group_id' : dst_group_id }
+                # 发消息给 kafka
+                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                if r is None:
+                    logger.error("消息队列异常")
+                    return {"code": 9099, "msg": "消息队列异常"}
 
             return { "code" : 200, "msg" : "success", 'data' : { "type" : "SUCCESS" } }
 
@@ -136,8 +143,15 @@ class DbUserRemove(Resource):
             if r==-1:
                 return {"code": 9002, "msg": "user_id不存在"}
 
-            # 重新训练模型
-            utils.train_by_group(group_id)
+            r2 = dbport.user_list_by_group(group_id)
+            if len(r2)>0: 
+                # 重新训练模型, 至少需要1个用户
+                request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
+                # 发消息给 kafka
+                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                if r is None:
+                    logger.error("消息队列异常")
+                    return {"code": 9099, "msg": "消息队列异常"}
 
             return { "code" : 200, "msg" : "success", 'data' : { "type" : "SUCCESS" } }
 

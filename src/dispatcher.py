@@ -10,7 +10,7 @@ from kafka import KafkaConsumer
 from async_api.utils import helper
 from async_api import logger
 
-from facelib import api_func
+from facelib import api_func, utils
 from config.settings import KAFKA_CONFIG, MAX_DISPATCHER_WORKERS
 
 import binascii
@@ -47,9 +47,14 @@ def process_api(request_msg):
             # 准备结果
             result = { 'code' : 200, 'data' : { 'encodings' : encodings, 'boxes' : boxes } }
 
+        elif request['api']=='train_by_group': # 重新训练模型
+            utils.train_by_group(request['group_id'])
+            result = { 'code' : 200, 'data' : {} }
+
         elif request['api']=='sync_test': # 测试
             time.sleep(random.random())
             result = { 'code' : 200, 'data' : { 'txt' : request['txt']+' world!' } }
+
 
         else: # 未知 api
             logger.error('Unknown api: '+request['api']) 
@@ -95,6 +100,8 @@ if __name__ == '__main__':
 
     print('Request queue NO. ', queue_no)
 
+    sys.stdout.flush()
+    
     while 1:
         consumer = KafkaConsumer(KAFKA_CONFIG['REQUEST-QUEUE']+queue_no, bootstrap_servers=KAFKA_CONFIG['SERVER'],
             value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
@@ -114,4 +121,4 @@ if __name__ == '__main__':
             #logger.info('Thread future: '+str(future)) 
 
             #time.sleep(1)
-
+            sys.stdout.flush()

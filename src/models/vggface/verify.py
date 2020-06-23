@@ -19,11 +19,18 @@ import face_recognition
 from facelib.utils import extract_face_b64
 from config.settings import ALGORITHM
 
+import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
 
-# 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50
-model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') 
-# https://stackoverflow.com/questions/40850089/is-keras-thread-safe
-model._make_predict_function() # have to initialize before threading
+graph = tf.Graph()  # 解决多线程不同模型时，keras或tensorflow冲突的问题
+session = tf.Session(graph=graph)
+with graph.as_default():
+    with session.as_default():
+
+        # 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50
+        model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') 
+        # https://stackoverflow.com/questions/40850089/is-keras-thread-safe
+        model._make_predict_function() # have to initialize before threading
 
 # 从照片中获取人脸数据，返回所有能识别的人脸
 def extract_face(filename, required_size=(224, 224)):
@@ -76,7 +83,9 @@ def get_features(filename):
     # prepare the face for the model, e.g. center pixels
     samples = preprocess_input(samples, version=2)
     # perform prediction
-    yhat = model.predict(samples)
+    with graph.as_default(): # 解决多线程不同模型时，keras或tensorflow冲突的问题
+        with session.as_default():
+            yhat = model.predict(samples)
     yhat2 = yhat / np.linalg.norm(yhat)
     return yhat2, face_boxs
 
@@ -102,7 +111,9 @@ def get_features_b64(base64_data):
     # prepare the face for the model, e.g. center pixels
     samples = preprocess_input(samples, version=2)
     # perform prediction
-    yhat = model.predict(samples)
+    with graph.as_default(): # 解决多线程不同模型时，keras或tensorflow冲突的问题
+        with session.as_default():
+            yhat = model.predict(samples)
     yhat2 = yhat / np.linalg.norm(yhat)
     return yhat2, face_boxs
 

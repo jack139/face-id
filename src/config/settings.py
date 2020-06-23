@@ -31,22 +31,20 @@ db_primary = db_web
     deep                0.84    1.03
 '''
 ALGORITHM = {
-    'rec'   : { 'index': 2, 'distance_threshold' : 0.43, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
+    'rec'   : { 'index': 2, 'distance_threshold' : 0.58, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
     'vgg'   : { 'index': 0, 'distance_threshold' : 0.92, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },   # 0.86
     'evo'   : { 'index': 1, 'distance_threshold' : 1.22, 'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },  # 1.2,
     'plus'  : { 'index': 3, 'distance_threshold' : 1.45, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },  # 1.4,
-    'fnet'  : { 'index': 4, 'distance_threshold' : 1.0, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
+    'fnet'  : { 'index': 4, 'distance_threshold' : 0.78, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
     'deep'  : { 'index': 5, 'distance_threshold' : 1.03, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },  # 0.9,
 }
 
 # 并行算法设置
 algorithm_settings = {
-    1 : [ 'vgg', '../data/model/train2_senet.vgg.clf' ], # 优先返回
-    2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
-    #1 : [ 'rec', 'data/model/train2.rec.clf' ],
-    #2 : [ 'vgg', 'data/model/train2_senet50.vgg.clf' ],
-    #1 : [ 'rec', 'data/model/train2.rec.clf' ],
-    #2 : [ 'evo', 'data/model/train2_5.evo.clf' ],
+    1 : [ 'vgg', '/opt/data/model/train2_senet.vgg.clf' ], # 优先返回
+    #2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
+    #2 : [ 'deep', '../data/model/train2.deep.clf' ],
+    2 : [ 'rec', '/opt/data/model/train2.rec.clf' ],
 }
 
 # 特征值训练模型保存路径
@@ -91,7 +89,7 @@ SECRET_KEY = {
 KAFKA_CONFIG = {
     'SERVER' : ['172.17.0.1:9092'],
     'REQUEST-QUEUE' : 'synchronous-asynchronous-queue',
-    'REQUEST-QUEUE-NUM' : 2,
+    'REQUEST-QUEUE-NUM' : 1,
     'RETURN-QUEUE' : 'synchronous-asynchronous-return',
     'MESSAGE_TIMEOUT' : 10000, # 结果返回消息超时，单位：毫秒
     'MAX_MESSAGE_SIZE' : 5242880,  # 消息最大尺寸 5MB

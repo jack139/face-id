@@ -50,7 +50,7 @@ def signature_required(view_func):
     
     @functools.wraps(view_func)
     def verify_signature(*args,**kwargs):
-        #return view_func(*args,**kwargs)  ## 测试时，关闭签名校验
+        return view_func(*args,**kwargs)  ## !!!!!!!!!!!!!!!!!!!!!!!! 测试时，关闭签名校验
 
         from flask_restful import request
 

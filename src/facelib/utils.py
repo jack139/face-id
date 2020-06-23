@@ -95,7 +95,7 @@ def extract_face_b64(b64_data, required_size=(224, 224)):
 def train_by_group(group_id):
     from models import knn_db
 
-    face_algorithm = ['vgg', 'evo']
+    face_algorithm = ['vgg', 'rec']
 
     start_time = datetime.now()
     for algorithm in face_algorithm:

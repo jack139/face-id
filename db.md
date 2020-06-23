@@ -62,6 +62,7 @@
 | encodings | 特征数据   | string |      |      |                      |
 | ref_count | 引用计数   | int    |      |      | 计数为0，说明可删除  |
 | time_t    | 创建时间   | string |      |      |                      |
+| file_ref  | 上传文件名 | string |      |      | 仅做参考             |
 
 
 
