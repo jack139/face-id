@@ -90,6 +90,8 @@ def process_thread(msg_body):
     
     logger.info('{} {} [Time taken: {!s}]'.format(msg_body['request_id'], msg_body['data']['api'], datetime.now() - start_time))
 
+    sys.stdout.flush()
+
 
 if __name__ == '__main__':
     if len(sys.argv)<2:

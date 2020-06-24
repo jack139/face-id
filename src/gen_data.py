@@ -4,17 +4,17 @@ import os, shutil
 import face_recognition
 
 ratio = 0.5  # train/total
-max_person = 50 # 人脸数量
+max_person = 5000 # 人脸数量
 max_images = 20 # 使用的照片数量
 
 
-path = '../../face_data/AFDB_face_dataset'
-train = 'data/train2a'
-test = 'data/test2a'
+#path = '../../face_data/AFDB_face_dataset'
+#train = 'data/train8'
+#test = 'data/test8'
 
-#path = '../../face_data/CASIA-maxpy-clean'
-#train = 'data/train3a'
-#test = 'data/test3a'
+path = '../../face_data/CASIA-maxpy-clean'
+train = 'data/train9'
+test = 'data/test9'
 
 # 获取能取得人脸的照片
 def get_face_image(path, file_list): 

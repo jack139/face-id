@@ -229,7 +229,7 @@ def show_prediction_labels_on_image(img_path, predictions):
 
 
 # 计算X.y的f1和acc,确定threshold值
-def score_acc_f1(X, y, face_algorithm='rec'):
+def score_acc_f1(X, y, face_algorithm='rec', title=''):
     from sklearn.metrics import f1_score, accuracy_score
     import matplotlib.pyplot as plt
     import numpy as np
@@ -242,7 +242,8 @@ def score_acc_f1(X, y, face_algorithm='rec'):
 
     num = len(y)
 
-    for i in range(num - 1):
+    from tqdm import tqdm
+    for i in tqdm(range(num - 1)):
         for j in range(i + 1, num):
             distances.append(module_verify.face_distance([X[i]], X[j]))
             identical.append(1 if y[i] == y[j] else 0)
@@ -266,6 +267,6 @@ def score_acc_f1(X, y, face_algorithm='rec'):
     plt.plot(thresholds, acc_scores, label='Accuracy')
     plt.axvline(x=opt_tau, linestyle='--', lw=1, c='lightgrey', label='Threshold')
     plt.title('Accuracy at threshold {:.4} = {:.4}'.format(opt_tau, opt_acc))
-    plt.xlabel('Distance threshold')
+    plt.xlabel(title + ' Distance threshold')
     plt.legend()
     plt.show()

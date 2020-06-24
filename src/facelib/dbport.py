@@ -187,12 +187,13 @@ def user_remove_face(group_id, user_id, face_id):
 #################### 特征数据操作
 
 # 新建人脸特征
-def face_new(model_id, encodings):
+def face_new(model_id, encodings, file_ref=''):
     r2 = db.faces.insert_one({
         'model_id'  : model_id, 
         'encodings' : encodings, 
         'time_t'    : utils.time_str(),
         'ref_count' : 1,
+        'file_ref'  : file_ref,
     })
     face_id = str(r2.inserted_id)
     return face_id
