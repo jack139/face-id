@@ -16,7 +16,7 @@ import pickle
 from facelib import dbport
 from config.settings import ALGORITHM, TRAINED_MODEL_PATH
 from facelib.utils import import_verify
-
+from tqdm import tqdm
 
 CLF_CACHE = {}
 
@@ -37,15 +37,27 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
     X = []
     y = []
 
-    # 按用户分组从db装入特征数据
-    user_list = dbport.user_list_by_group(group_id)
-    for i in range(len(user_list)):
-        faces = dbport.user_face_list(group_id, user_list[i])
-        for f in faces:
-            r = dbport.face_info(f)
-            if r:
-                X.append(r['encodings'][encodings_index])
-                y.append(user_list[i])
+    # 按用户分组从db装入特征数据, 装入所有数据
+    start = 0
+    max_length = 1000
+    total = 0
+    while 1:
+        user_list = dbport.user_list_by_group(group_id, start=start, length=max_length)
+        for i in tqdm(range(len(user_list))):
+            faces = dbport.user_face_list(group_id, user_list[i])
+            for f in faces:
+                r = dbport.face_info(f)
+                if r:
+                    X.append(r['encodings'][encodings_index])
+                    y.append(user_list[i])
+
+        total += len(user_list)
+        if len(user_list)<max_length: 
+            break
+        else: # 未完，继续
+            start += max_length
+
+    print('Data loaded:', total)
 
     # Determine how many neighbors to use for weighting in the KNN classifier
     if n_neighbors is None:

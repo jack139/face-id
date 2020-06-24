@@ -17,7 +17,7 @@ if __name__ == "__main__":
     group_id = sys.argv[1]
     test_group_id = sys.argv[2]
 
-    user_list = dbport.user_list_by_group(test_group_id)
+    user_list = dbport.user_list_by_group(test_group_id, length=1000)
 
     #persons = os.listdir(test_path)
     total_acc = total_acc2 = 0

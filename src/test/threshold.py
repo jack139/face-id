@@ -24,7 +24,7 @@ if __name__ == "__main__":
     elif method in ('db_vgg', 'db_evo', 'db_rec'):
         X = []
         y = []
-        user_list = dbport.user_list_by_group(group_id)
+        user_list = dbport.user_list_by_group(group_id, length=1000)
         for i in range(len(user_list)):
             faces_list = dbport.user_face_list(group_id, user_list[i])
 

@@ -57,7 +57,7 @@ def group_remove(group_id):
 
 # 返回用户组列表
 def group_list(start=0, length=100):
-    length = 100 if length>100 else length
+    length = 1000 if length>1000 else length
     r = db.groups.find({}, {'_id':0}, sort=[('_id', 1)], limit=length, skip=start)
     return [i['group_id'] for i in r]
 
@@ -135,7 +135,7 @@ def user_remove(group_id, user_id):
 
 # 用户组里所有用户 user_id， 返回列表
 def user_list_by_group(group_id, start=0, length=100):
-    length = 100 if length>100 else length
+    length = 1000 if length>1000 else length
     r = db.users.find({'group_id' : group_id}, {'user_id' : 1}, sort=[('_id', 1)], limit=length, skip=start)
     return [i['user_id'] for i in r if i.get('user_id')]
 

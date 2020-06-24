@@ -20,9 +20,9 @@ db_primary = db_web
 ############# 算法相关设置
 
 '''
-                        train2  train3
-    rec                 0.43    0.58
-    vgg     senet50     0.79    0.92
+                        train2  train3  train8  train9
+    rec                 0.43    0.58    0.38    0.52
+    vgg     senet50     0.79    0.92    0.73    0.85
     vgg     resnet50    0.86    0.99
     evo     ir152       1.15    1.22
     evo     bh-ir50     1.12    1.14
