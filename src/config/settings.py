@@ -41,14 +41,14 @@ ALGORITHM = {
 
 # 并行算法设置
 algorithm_settings = {
-    1 : [ 'vgg', '/opt/data/model/train2_senet.vgg.clf' ], # 优先返回
+    1 : [ 'vgg', '../data/model/train2_senet.vgg.clf' ], # 优先返回
     #2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
     #2 : [ 'deep', '../data/model/train2.deep.clf' ],
-    2 : [ 'rec', '/opt/data/model/train2.rec.clf' ],
+    2 : [ 'rec', '../data/model/train2.rec.clf' ],
 }
 
 # 特征值训练模型保存路径
-TRAINED_MODEL_PATH = '/opt/data/model'
+TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
 #EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'

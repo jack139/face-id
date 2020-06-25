@@ -55,15 +55,22 @@ def predict_parallel(thread_func, image_data, group_id='', data_type='base64'):
 # 合并两个算法的结果为最终结果
 def merge_results(all_predictions):
     # 综合结果判断：
-    # 1. 如果两个结果唯一且相同，则无异议
-    # 2. 如果都为unkonw，则无结果
-    # 3. 如果有一个为unknown， 则返回非unknown的
-    # 4. 如果有一个为multi, 则返回非multi的
-    # 5. 如果都是multi, 优先返回算法1的
-    # 6. 如果两个都有唯一结果，优先返回算法1的
     # 7. 如果结果都为0，则无结果
     # 8. 如果有一个为0， 则返回非0的
+    # 2. 如果都为unkonw，则无结果
+    # 3. 如果有一个为unknown， 则返回非unknown的
+    # 1. 如果两个结果唯一且相同，则无异议
+    # 8. 如果count数不同，返回count数大的 - 2020-06-25
+    # 6. 如果两个都有唯一结果，优先返回算法1的/评分低的（评分越低，越相似）
+    # 4. 如果有一个为multi, 则返回非multi的
+    # 5. 如果都是multi, 优先返回算法1的/评分低的（评分越低，越相似）
     # 9. 最后优先返回算法1的结果
+
+    return all_predictions[1]
+    
+    # predictions 格式 [ user_id, 人脸位置, 评估得分, 重复计数count ]
+    #print(all_predictions)
+
     final_result=[]
     len1 = len(all_predictions[1])
     len2 = len(all_predictions[2])
@@ -91,17 +98,48 @@ def merge_results(all_predictions):
             final_result = all_predictions[2]
         else:
             final_result = all_predictions[1]
-    # 条件 1, 6
-    elif len1==len2==1: 
+    # 条件 1
+    elif len1==len2==1 and name1==name2: 
         final_result = all_predictions[1]
-    # 条件 4, 5
-    elif len1>1 or len2>1:
-        if len2==1:
-            final_result = all_predictions[2]
-        else:
-            final_result = all_predictions[1]
-    # 条件 9
     else:
-        final_result = all_predictions[1]
+        # 统计 name1 在 两个结果的 count
+        name1_count = all_predictions[1][0][3]
+        for i in all_predictions[2]:
+            if i[0]==name1:
+                name1_count += i[3]
+        # 统计 name2 在 两个结果的 count
+        name2_count = all_predictions[2][0][3]
+        for i in all_predictions[1]:
+            if i[0]==name2:
+                name2_count += i[3]
+        # 条件 8
+        if name1_count!=name2_count:
+            if name1_count>name2_count:
+                final_result = all_predictions[1]
+            else:
+                final_result = all_predictions[2]
+        # 条件 6
+        elif len1==len2==1:
+            final_result = all_predictions[1] # 优先返回算法1
+            #if all_predictions[1][0][2]<all_predictions[2][0][2]: # 优先返回评分低的
+            #    final_result = all_predictions[1]
+            #else:
+            #    final_result = all_predictions[2]
+        # 条件 4, 5
+        elif len1>1 or len2>1:
+            if len2==1:
+                final_result = all_predictions[2]
+            elif len1==1:
+                final_result = all_predictions[1]
+            else:
+                final_result = all_predictions[1] # 优先返回算法1
+                #if all_predictions[1][0][2]<all_predictions[2][0][2]: # 优先返回评分低的
+                #    final_result = all_predictions[1]
+                #else:
+                #    final_result = all_predictions[2]
+        # 条件 9
+        else:
+            final_result = all_predictions[1] # 优先返回算法1
+
     return final_result
 
