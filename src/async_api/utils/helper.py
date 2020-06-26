@@ -46,11 +46,12 @@ def gen_param_str(param):
 
 # 检查signature修饰器
 def signature_required(view_func):
-    from config.settings import SECRET_KEY
+    from config.settings import SECRET_KEY, DEBUG_MODE
     
     @functools.wraps(view_func)
     def verify_signature(*args,**kwargs):
-        return view_func(*args,**kwargs)  ## !!!!!!!!!!!!!!!!!!!!!!!! 测试时，关闭签名校验
+        if DEBUG_MODE:
+            return view_func(*args,**kwargs)  ## !!!!!!!!!!!!!!!!!!!!!!!! 测试时，关闭签名校验
 
         from flask_restful import request
 

@@ -48,12 +48,12 @@ algorithm_settings = {
 }
 
 # 特征值训练模型保存路径
-#TRAINED_MODEL_PATH = '/opt/data/model'
-TRAINED_MODEL_PATH = '../data/model'
+TRAINED_MODEL_PATH = '/opt/data/model'
+#TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
-#EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
-EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
+EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+#EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 # faceNET 模型l路径
 #FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'
@@ -65,7 +65,7 @@ APP_NAME = 'face-id'
 APP_NAME_FORMATED = 'Face-ID'
 
 # 参数设置
-DEBUG_MODE = False
+DEBUG_MODE = True
 BIND_ADDR = '0.0.0.0'
 BIND_PORT = '5000'
 
