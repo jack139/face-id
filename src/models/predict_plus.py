@@ -60,7 +60,7 @@ def merge_results(all_predictions):
     # 2. 如果都为unkonw，则无结果
     # 3. 如果有一个为unknown， 则返回非unknown的
     # 1. 如果两个结果唯一且相同，则无异议
-    # 8. 如果count数不同，返回count数大的 - 2020-06-25
+    # 10. 如果count数不同，返回count数大的 - 2020-06-25
     # 6. 如果两个都有唯一结果，优先返回算法1的/评分低的（评分越低，越相似）
     # 4. 如果有一个为multi, 则返回非multi的
     # 5. 如果都是multi, 优先返回算法1的/评分低的（评分越低，越相似）
@@ -112,7 +112,7 @@ def merge_results(all_predictions):
         for i in all_predictions[1]:
             if i[0]==name2:
                 name2_count += i[3]
-        # 条件 8
+        # 条件 10
         if name1_count!=name2_count:
             if name1_count>name2_count:
                 final_result = all_predictions[1]
