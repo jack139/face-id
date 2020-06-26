@@ -8,9 +8,8 @@ import concurrent.futures
 import face_recognition
 from config.settings import ALGORITHM
 
-# 双算法： vggface + face-rec （在用）/  vggface + evoLVe （不用）
+# 双算法： vggface + face-rec
 from models.vggface import verify as verify_vgg
-#from models.face_evoLVe import verify as verify_evo
 from models.face_rec import verify as verify_rec
 
 
@@ -65,8 +64,8 @@ def get_features_b64(b64_data):
     if len(face_boxes1) == 0:
         return [], []
     else:
-        # 返回3个，第2个位置留给evo，保持一直， 2020-06-23
-        return [encoding_list1[0], [], encoding_list2[0]], face_boxes1
+        # 返回4个，第2个位置留给evo，第4个留给deep，保持一直， 2020-06-23
+        return [encoding_list1[0], [], encoding_list2[0], []], face_boxes1
 
 
 # 特征值距离

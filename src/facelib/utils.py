@@ -95,7 +95,7 @@ def extract_face_b64(b64_data, required_size=(224, 224)):
 def train_by_group(group_id):
     from models import knn_db
 
-    face_algorithm = ['vgg', 'rec']
+    face_algorithm = ['vgg', 'evo']
 
     start_time = datetime.now()
     for algorithm in face_algorithm:
@@ -103,7 +103,7 @@ def train_by_group(group_id):
         classifier = knn_db.train(group_id, 
             encodings_index=ALGORITHM[algorithm]['index'],
             model_save_path=os.path.join(TRAINED_MODEL_PATH, group_id + ALGORITHM[algorithm]['ext']), 
-            n_neighbors=2,
+            n_neighbors=10,
             face_algorithm=algorithm)
         print('[Time taken: {!s} ({}, {})]'.format(datetime.now() - start_time, algorithm, group_id))
 

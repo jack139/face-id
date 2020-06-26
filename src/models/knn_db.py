@@ -128,7 +128,7 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
-    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
+    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=10)
     #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 
     # Predict classes and remove classifications that aren't within the threshold

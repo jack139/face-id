@@ -22,6 +22,6 @@ if __name__ == "__main__":
         classifier = knn_db.train(group_id, 
             encodings_index=ALGORITHM[algorithm]['index'],
             model_save_path=group_id + ALGORITHM[algorithm]['ext'], 
-            n_neighbors=2,
+            n_neighbors=10,
             face_algorithm=algorithm)
         print("Training complete!")

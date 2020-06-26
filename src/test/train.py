@@ -41,6 +41,6 @@ if __name__ == "__main__":
     print("Training KNN classifier...")
     classifier = knn.train(train_data_dir, 
         model_save_path=model_name + ALGORITHM[face_algorithm]['ext'], 
-        n_neighbors=2,
+        n_neighbors=10,
         face_algorithm=face_algorithm)
     print("Training complete!")
