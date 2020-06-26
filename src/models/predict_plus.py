@@ -66,7 +66,7 @@ def merge_results(all_predictions):
     # 5. 如果都是multi, 优先返回算法1的/评分低的（评分越低，越相似）
     # 9. 最后优先返回算法1的结果
 
-    #return all_predictions[1]
+    #return all_predictions[2]
 
     # predictions 格式 [ user_id, 人脸位置, 评估得分, 重复计数count ]
     #print(all_predictions)
