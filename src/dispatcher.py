@@ -74,8 +74,9 @@ def process_api(request_msg):
 
 
 def process_thread(msg_body):
-    import keras.backend.tensorflow_backend as tb
-    tb._SYMBOLIC_SCOPE.value = True
+    # for keras 2.3
+    #import keras.backend.tensorflow_backend as tb
+    #tb._SYMBOLIC_SCOPE.value = True
 
     logger.info('{} Calling api: {}'.format(msg_body['request_id'], msg_body['data'].get('api', 'Unknown'))) 
 

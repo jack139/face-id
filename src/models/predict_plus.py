@@ -11,8 +11,8 @@ from . import knn_db
 # 用于文件图片的预测线程
 def predict_thread(face_algorithm, model_name, image_file, group_id='', data_type='base64'):
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
-    import keras.backend.tensorflow_backend as tb
-    tb._SYMBOLIC_SCOPE.value = True
+    #import keras.backend.tensorflow_backend as tb
+    #tb._SYMBOLIC_SCOPE.value = True
     return knn.predict(image_file, 
         model_path=model_name, 
         distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
@@ -22,8 +22,8 @@ def predict_thread(face_algorithm, model_name, image_file, group_id='', data_typ
 # data_type: 'base64', 'encodings'
 def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64'): 
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
-    import keras.backend.tensorflow_backend as tb
-    tb._SYMBOLIC_SCOPE.value = True
+    #import keras.backend.tensorflow_backend as tb
+    #tb._SYMBOLIC_SCOPE.value = True
     #model_path, _ = os.path.split(model_name) # 取得模型所在路径
     if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值
         image_data = [image_data[ALGORITHM[face_algorithm]['index']]]

@@ -29,6 +29,7 @@ db_primary = db_web
     plus                1.45    1.56
     fnet                0.78    1.0
     deep                0.84    1.03
+    isit                1.02    1.03
 '''
 ALGORITHM = {
     'rec'   : { 'index': 2, 'distance_threshold' : 0.58, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
@@ -37,6 +38,7 @@ ALGORITHM = {
     'plus'  : { 'index': 5, 'distance_threshold' : 1.45, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },  # 1.4,
     'fnet'  : { 'index': 4, 'distance_threshold' : 0.78, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
     'deep'  : { 'index': 3, 'distance_threshold' : 1.03, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },  # 0.9,
+    'isit'  : { 'index': 6, 'distance_threshold' : 1.03, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },  # ,
 }
 
 # 并行算法设置
@@ -48,12 +50,12 @@ algorithm_settings = {
 }
 
 # 特征值训练模型保存路径
-TRAINED_MODEL_PATH = '/opt/data/model'
-#TRAINED_MODEL_PATH = '../data/model'
+#TRAINED_MODEL_PATH = '/opt/data/model'
+TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
-EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
-#EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
+#EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 # faceNET 模型l路径
 #FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'
