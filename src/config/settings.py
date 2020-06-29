@@ -20,11 +20,11 @@ db_primary = db_web
 ############# 算法相关设置
 
 '''
-                        train2  train3  train8  train9
-    rec                 0.43    0.58    0.38    0.52
-    vgg     senet50     0.79    0.92    0.73    0.85
+                        train2  train3  train4  train8  train9  
+    rec                 0.43    0.58    0.45    0.38    0.52
+    vgg     senet50     0.79    0.92    0.85    0.73    0.85    
     vgg     resnet50    0.86    0.99
-    evo     ir152       1.15    1.22
+    evo     ir152       1.15    1.22    1.19                    
     evo     bh-ir50     1.12    1.14
     plus                1.45    1.56
     fnet                0.78    1.0
@@ -43,10 +43,10 @@ ALGORITHM = {
 
 # 并行算法设置
 algorithm_settings = {
-    1 : [ 'vgg', '../data/model/train2_senet.vgg.clf' ], # 优先返回
-    2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
+    1 : [ 'vgg', '../data/model/train4.vgg.clf' ], # 优先返回
+    #2 : [ 'evo', '../data/model/train4.evo.clf' ],
     #2 : [ 'deep', '../data/model/train2.deep.clf' ],
-    #2 : [ 'rec', '../data/model/train2.rec.clf' ],
+    2 : [ 'rec', '../data/model/train4.rec.clf' ],
 }
 
 # 特征值训练模型保存路径

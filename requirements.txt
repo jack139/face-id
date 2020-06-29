@@ -1,6 +1,6 @@
 face-recognition
-Keras==2.2.5
-tensorflow==1.15.3
+Keras==2.3.1
+tensorflow==2.2.0
 tensolayer==1.8.0
 scikit-learn
 torch==1.4.0

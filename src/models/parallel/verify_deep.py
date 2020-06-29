@@ -16,8 +16,8 @@ from models.deepface import verify as verify_deep
 def get_features_b64_thread(face_algorithm, b64_data):
     start_time = datetime.now()
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
-    #import keras.backend.tensorflow_backend as tb
-    #tb._SYMBOLIC_SCOPE.value = True
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
 
     if face_algorithm=='vgg':
         encoding_list, face_boxes = verify_vgg.get_features_b64(b64_data)

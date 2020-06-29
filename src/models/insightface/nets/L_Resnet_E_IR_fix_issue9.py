@@ -1,9 +1,47 @@
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import tensorlayer as tl
-from tensorflow.contrib.layers.python.layers import utils
+#from tensorflow.contrib.layers.python.layers import utils
 import collections
 from tensorlayer.layers import Layer, list_remove_repeat
 
+def _get_dimension(shape, dim, min_rank=1):
+    """Returns the `dim` dimension of `shape`, while checking it has `min_rank`.
+    Args:
+    shape: A `TensorShape`.
+    dim: Integer, which dimension to return.
+    min_rank: Integer, minimum rank of shape.
+    Returns:
+    The value of the `dim` dimension.
+    Raises:
+    ValueError: if inputs don't have at least min_rank dimensions, or if the
+      first dimension value is not defined.
+    """
+    dims = shape.dims
+    if dims is None:
+        raise ValueError('dims of shape must be known but is None')
+    if len(dims) < min_rank:
+        raise ValueError('rank of shape must be at least %d not: %d' % (min_rank,
+                                                                    len(dims)))
+    value = dims[dim].value
+    if value is None:
+        raise ValueError(
+            'dimension %d of shape must be known but is None: %s' % (dim, shape))
+    return value
+
+
+def last_dimension(shape, min_rank=1):
+    """Returns the last dimension of shape while checking it has min_rank.
+    Args:
+    shape: A `TensorShape`.
+    min_rank: Integer, minimum rank of shape.
+    Returns:
+    The value of the last dimension.
+    Raises:
+    ValueError: if inputs don't have at least min_rank dimensions, or if the
+      last dimension value is not defined.
+    """
+    return _get_dimension(shape, -1, min_rank=min_rank)
 
 class ElementwiseLayer(Layer):
     """
@@ -226,7 +264,7 @@ def conv2d_same(inputs, num_outputs, kernel_size, strides, rate=1, w_init=None, 
 
 def bottleneck_IR(inputs, depth, depth_bottleneck, stride, rate=1, w_init=None, scope=None, trainable=None):
     with tf.variable_scope(scope, 'bottleneck_v1') as sc:
-        depth_in = utils.last_dimension(inputs.outputs.get_shape(), min_rank=4)
+        depth_in = last_dimension(inputs.outputs.get_shape(), min_rank=4)
         if depth == depth_in:
             shortcut = subsample(inputs, stride, 'shortcut')
         else:
@@ -251,7 +289,7 @@ def bottleneck_IR(inputs, depth, depth_bottleneck, stride, rate=1, w_init=None, 
 
 def bottleneck_IR_SE(inputs, depth, depth_bottleneck, stride, rate=1, w_init=None, scope=None, trainable=None):
     with tf.variable_scope(scope, 'bottleneck_v1') as sc:
-        depth_in = utils.last_dimension(inputs.outputs.get_shape(), min_rank=4)
+        depth_in = last_dimension(inputs.outputs.get_shape(), min_rank=4)
         if depth == depth_in:
             shortcut = subsample(inputs, stride, 'shortcut')
         else:
