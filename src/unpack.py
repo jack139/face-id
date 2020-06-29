@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # unpack faces_glintasia dataset
+# https://github.com/deepinsight/insightface/wiki/Dataset-Zoo#asian-celeb-94k-ids28m-images8-recommend
+#
 
 import os
 import mxnet as mx

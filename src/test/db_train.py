@@ -14,7 +14,7 @@ if __name__ == "__main__":
     group_id = sys.argv[1]
 
 
-    face_algorithm = ['vgg', 'evo', 'rec', 'deep'] # 
+    face_algorithm = ['vgg', 'evo', 'rec' ] #, 'deep'] # 
 
     for algorithm in face_algorithm:
         # Train the KNN classifier and save it to disk
