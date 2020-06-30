@@ -229,7 +229,7 @@ def show_prediction_labels_on_image(img_path, predictions):
 
 
 # 计算X.y的f1和acc,确定threshold值
-def score_acc_f1(X, y, face_algorithm='rec', title=''):
+def score_acc_f1(X, y, face_algorithm='rec', title='', show=True):
     from sklearn.metrics import f1_score, accuracy_score
     import matplotlib.pyplot as plt
     import numpy as np
@@ -262,11 +262,14 @@ def score_acc_f1(X, y, face_algorithm='rec', title=''):
     # Accuracy at maximal F1 score
     opt_acc = accuracy_score(identical, distances < opt_tau)
 
-    # Plot F1 score and accuracy as function of distance threshold
-    plt.plot(thresholds, f1_scores, label='F1 score')
-    plt.plot(thresholds, acc_scores, label='Accuracy')
-    plt.axvline(x=opt_tau, linestyle='--', lw=1, c='lightgrey', label='Threshold')
-    plt.title('Accuracy at threshold {:.4} = {:.4}'.format(opt_tau, opt_acc))
-    plt.xlabel(title + ' Distance threshold')
-    plt.legend()
-    plt.show()
+    if show:
+        # Plot F1 score and accuracy as function of distance threshold
+        plt.plot(thresholds, f1_scores, label='F1 score')
+        plt.plot(thresholds, acc_scores, label='Accuracy')
+        plt.axvline(x=opt_tau, linestyle='--', lw=1, c='lightgrey', label='Threshold')
+        plt.title('Accuracy at threshold {:.4} = {:.4}'.format(opt_tau, opt_acc))
+        plt.xlabel(title + ' Distance threshold')
+        plt.legend()
+        plt.show()
+
+    return opt_tau, opt_acc

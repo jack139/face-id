@@ -11,13 +11,24 @@ from facelib import dbport
 
 if __name__ == "__main__":
     if len(sys.argv)<3:
-        print("usage: python3 %s <group_id> <test_group_id>" % sys.argv[0])
+        print("usage: python3 %s <group_id> <test_group_id> [length_num] [last_face_num]" % sys.argv[0])
         sys.exit(2)
 
     group_id = sys.argv[1]
     test_group_id = sys.argv[2]
 
-    user_list = dbport.user_list_by_group(test_group_id, length=1000)
+    if len(sys.argv)>3:
+        length_num = int(sys.argv[3])
+    else:
+        length_num = 1000
+
+    if len(sys.argv)>4:
+        last_face_num = int(sys.argv[4])
+    else:
+        last_face_num = 1000
+
+
+    user_list = dbport.user_list_by_group(test_group_id, length=length_num)
 
     #persons = os.listdir(test_path)
     total_acc = total_acc2 = 0
@@ -32,14 +43,14 @@ if __name__ == "__main__":
         faces_list = dbport.user_face_list(test_group_id, user_list[i])
 
         # Using the trained classifier, make predictions for unknown images
-        total = len(faces_list)
+        total = len(faces_list[-last_face_num:])
         correct = 0
         wrong = 0
         fail = 0
         multi = 0 # 匹配多个结果
         second = 0 # 不是首个匹配结果
         start_time = datetime.now()
-        for face in faces_list:
+        for face in faces_list[-last_face_num:]: # 指定人的倒数几个人脸，用于使用train做测试
             # 识别每个人脸
             r = dbport.face_info(face)
             if r is None:

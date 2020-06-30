@@ -17,6 +17,7 @@ from facelib import dbport
 from config.settings import ALGORITHM, TRAINED_MODEL_PATH
 from facelib.utils import import_verify
 from tqdm import tqdm
+from .knn import score_acc_f1
 
 CLF_CACHE = {}
 
@@ -24,7 +25,7 @@ CLF_CACHE = {}
 # 训练
 # face_algorithm 只 支持 evo 和 vgg
 def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', 
-    verbose=False, face_algorithm='rec'):
+    verbose=False, face_algorithm='rec', face_num=1000):
     """
     Trains a k-nearest neighbors classifier for face recognition.
 
@@ -45,7 +46,7 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
         user_list = dbport.user_list_by_group(group_id, start=start, length=max_length)
         for i in tqdm(range(len(user_list))):
             faces = dbport.user_face_list(group_id, user_list[i])
-            for f in faces:
+            for f in faces[:face_num]: # 同一个人，只训练指定数量的人脸，默认1000
                 r = dbport.face_info(f)
                 if r:
                     X.append(r['encodings'][encodings_index])
@@ -75,6 +76,10 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
     if model_save_path is not None:
         with open(model_save_path, 'wb') as f:
             pickle.dump(knn_clf, f)
+
+    # 计算 threshold
+    opt_tau, opt_acc = score_acc_f1(X, y, show=False)
+    print('{}: Accuracy at threshold {:.4} = {:.4}'.format(face_algorithm, opt_tau, opt_acc))
 
     return knn_clf
 
