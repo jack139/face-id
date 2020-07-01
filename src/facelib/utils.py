@@ -113,3 +113,12 @@ def load_image_to_base64(image_file):
     with open(image_file, 'rb') as f:
         image_data = f.read()
     return base64.b64encode(image_data)
+
+# 根据两点坐标，旋转图片使两点水平
+def _HorizontalEyes(PILImg, pts):
+    x1, y1 = pts[0]
+    x2, y2 = pts[1]
+    k = (y2-y1) / (x2-x1)
+    angle = np.arctan(k)/np.pi*180
+    #print('rotate angle:', angle)
+    return PILImg.rotate(angle)

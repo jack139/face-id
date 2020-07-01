@@ -79,16 +79,19 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            face_encodings, _ = module_verify.get_features(img_path)
+            #for angle in [None, 0, -20, -5, 5, 20]: # 旋转不同角度训练 multi2
+            for angle in [None]: # 不旋转（不修正）
+            #for angle in [0]: # 旋转（修正）
+                face_encodings, _ = module_verify.get_features(img_path, angle)
 
-            if len(face_encodings) != 1:
-                # If there are no people (or too many people) in a training image, skip the image.
-                if verbose:
-                    print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_encodings) < 1 else "Found more than one face"))
-            else:
-                # Add face encoding for current image to the training set
-                X.append(face_encodings[0])
-                y.append(class_dir)
+                if len(face_encodings) != 1:
+                    # If there are no people (or too many people) in a training image, skip the image.
+                    if verbose:
+                        print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_encodings) < 1 else "Found more than one face"))
+                elif len(face_encodings)>0:
+                    # Add face encoding for current image to the training set
+                    X.append(face_encodings[0])
+                    y.append(class_dir)
 
     # Determine how many neighbors to use for weighting in the KNN classifier
     if n_neighbors is None:
@@ -143,7 +146,8 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, f
 
     # Load image file and find face locations
     # Find encodings for faces in the test iamge
-    faces_encodings, X_face_locations = module_verify.get_features(X_img_path)
+    #  angle=None 识别时不修正角度， angle=0 识别时修正角度
+    faces_encodings, X_face_locations = module_verify.get_features(X_img_path, angle=None)
 
     if len(X_face_locations) == 0:
         return []
@@ -152,7 +156,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, f
 
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
-    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
+    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=10)
     #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 
     # Predict classes and remove classifications that aren't within the threshold
@@ -179,7 +183,8 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, f
                     temp_result.append([
                         l, 
                         X_face_locations[i], 
-                        round(closest_distances[0][i][j], 6)
+                        #round(closest_distances[0][i][j], 6)
+                        closest_distances[0][i][j]/distance_threshold
                     ])
                     labels[l] = 1
                 else:

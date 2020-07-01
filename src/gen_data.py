@@ -2,29 +2,50 @@
 
 import os, shutil
 import face_recognition
+from PIL import Image
+import numpy as np
 
 ratio = 0.5  # train/total
-max_person = 93980 # 人脸数量
+max_person = 50 # 人脸数量
 max_images = 20 # 使用的照片数量
 
 
-#path = '../../face_data/AFDB_face_dataset'
-#train = 'data/train8'
-#test = 'data/test8'
+path = '../../face_data/AFDB_face_dataset'
+train = 'data/train2a'
+test = 'data/test2a'
 
 #path = '../../face_data/CASIA-maxpy-clean'
 #train = 'data/train9'
 #test = 'data/test9'
 
-path = '../../face_data/glint_asia'
-train = 'data/train6'
-test = 'data/test6'
+#path = '../../face_data/glint_asia'
+#train = 'data/train6'
+#test = 'data/test6'
+
+
+def _HorizontalEyes(PILImg, pts):
+    x1, y1 = pts[0]
+    x2, y2 = pts[1]
+    k = (y2-y1) / (x2-x1)
+    angle = np.arctan(k)/np.pi*180
+    #print('rotate angle:', angle)
+    return PILImg.rotate(angle)
+
 
 # 获取能取得人脸的照片
 def get_face_image(path, file_list): 
     face_file = []
     for i in file_list:
         image = face_recognition.load_image_file(os.path.join(path, i))
+        # 调整人脸角度， 按第一个人的角度调整
+        face_landmarks_list = face_recognition.face_landmarks(image)
+        pil_image = Image.fromarray(image)
+        if len(face_landmarks_list)==0:
+            continue
+        pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+        #pil_image.show()
+        image = np.array(pil_image)
+        # 获取人脸
         face_bounding_boxes = face_recognition.face_locations(image)
         if len(face_bounding_boxes) == 1:
             face_file.append(i)

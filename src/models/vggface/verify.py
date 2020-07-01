@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
-if __name__ == '__main__':
-    if len(sys.argv)<3:
-        print("usage: python3 %s <img1> <img2>" % sys.argv[0])
-        sys.exit(2)
-
-
 # face verification with the VGGFace2 model
+
+import sys
 from PIL import Image
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -16,7 +10,7 @@ from keras.preprocessing import image
 from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
 import face_recognition
-from facelib.utils import extract_face_b64
+from facelib.utils import extract_face_b64, _HorizontalEyes
 from config.settings import ALGORITHM
 
 import tensorflow.compat.v1 as tf
@@ -32,10 +26,24 @@ with graph.as_default():
         # https://stackoverflow.com/questions/40850089/is-keras-thread-safe
         model._make_predict_function() # have to initialize before threading
 
+
 # 从照片中获取人脸数据，返回所有能识别的人脸
-def extract_face(filename, required_size=(224, 224)):
+def extract_face(filename, angle, required_size=(224, 224)):
     # load image from file
     pixels = face_recognition.load_image_file(filename)
+    # 调整人脸角度
+    if angle!=None:
+        # 寻找特征点
+        face_landmarks_list = face_recognition.face_landmarks(pixels)
+        if len(face_landmarks_list)>0:
+            # 先修改角度
+            pil_image = Image.fromarray(pixels)        
+            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+            # 旋转
+            if angle!=0:
+                pil_image.rotate(angle)
+            #pil_image.show()
+            pixels = np.array(pil_image)
     # extract the bounding box from the first face
     face_bounding_boxes = face_recognition.face_locations(pixels)
 
@@ -73,9 +81,9 @@ def load_face(filename, required_size=(224, 224)):
 
 
 # 返回图片中所有人脸的特征
-def get_features(filename):
+def get_features(filename, angle=None): # angle=None 识别时不修正角度， angle=0 识别时修正角度
     # extract faces
-    faces, face_boxs = extract_face(filename)
+    faces, face_boxs = extract_face(filename, angle)
     if len(faces) == 0:
         return [], []
     # convert into an array of samples

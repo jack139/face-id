@@ -3,13 +3,27 @@
 import sys
 import numpy as np
 import face_recognition
-from facelib.utils import load_image_b64, extract_face_b64
+from facelib.utils import load_image_b64, extract_face_b64, _HorizontalEyes
+from PIL import Image
 
 
 # 返回图片中所有人脸的特征
-def get_features(filename):
-    # extract faces
+def get_features(filename, angle=None):
+    # load image
     image = face_recognition.load_image_file(filename)
+    # 调整人脸角度
+    if angle!=None:
+        # 先修改角度
+        face_landmarks_list = face_recognition.face_landmarks(image)
+        if len(face_landmarks_list)>0:
+            pil_image = Image.fromarray(image)        
+            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+            # 旋转
+            if angle!=0:
+                pil_image.rotate(angle)
+            #pil_image.show()
+            image = np.array(pil_image)
+            # extract faces
     face_bounding_boxes = face_recognition.face_locations(image)
     if len(face_bounding_boxes)==0:
         return [], []

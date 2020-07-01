@@ -7,7 +7,7 @@ import numpy as np
 from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
 from .extract_feature_v2 import extract_feature, load_model
-from facelib.utils import extract_face_b64
+from facelib.utils import extract_face_b64, _HorizontalEyes
 from config.settings import EVO_MODEL_BASE as MODEL_BASE
 from config.settings import ALGORITHM
 
@@ -43,9 +43,22 @@ print('Model: ', MODEL_LIST[CURRENT_MODEL][0])
 BACKBONE = load_model(BACKBONE, MODEL_ROOT)
 
 # 从照片中获取人脸数据，返回所有能识别的人脸
-def extract_face(filename, required_size=[112, 112]):
+def extract_face(filename, angle, required_size=[112, 112]):
     # load image from file
     pixels = face_recognition.load_image_file(filename)
+    # 调整人脸角度
+    if angle!=None:
+        # 寻找特征点
+        face_landmarks_list = face_recognition.face_landmarks(pixels)
+        if len(face_landmarks_list)>0:
+            # 先修改角度
+            pil_image = Image.fromarray(pixels)        
+            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+            # 旋转
+            if angle!=0:
+                pil_image.rotate(angle)
+            #pil_image.show()
+            pixels = np.array(pil_image)
     # extract the bounding box from the first face
     face_bounding_boxes = face_recognition.face_locations(pixels)
 
@@ -77,8 +90,8 @@ def extract_face(filename, required_size=[112, 112]):
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸
-def get_features(filename):
-    face_list, face_boxes = extract_face(filename, required_size=INPUT_SIZE)
+def get_features(filename, angle=None): # angle=None 识别时不修正角度， angle=0 识别时修正角度
+    face_list, face_boxes = extract_face(filename, angle, required_size=INPUT_SIZE)
     encoding_list = []
     for face in face_list:
         open_cv_face = face[:, :, ::-1].copy() 
