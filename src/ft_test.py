@@ -114,7 +114,7 @@ def get_model(input_dim, output_dim):
 
 
 if __name__ == '__main__':
-    X_train, y_train, X_test, y_test, label_y = load_data('train9', ratio=0.3, max_user=400, method='evo')
+    X_train, y_train, X_test, y_test, label_y = load_data('test8y', ratio=0.3, max_user=400, method='plus')
 
     input_dim = len(X_train[0])
     output_dim = len(y_train[0])
@@ -130,3 +130,21 @@ if __name__ == '__main__':
     # 评估预测结果
     results = model.evaluate(X_test, y_test, verbose=1)
     print('predict: ', results)
+
+    model.save('ft_test.h5')
+
+    #from keras.models import load_model
+    #load_model('ft_test.h5')
+
+    # 保存模型 和 标签数据
+    import pickle
+    with open('ft_test.h5', 'wb') as f:
+        pickle.dump((model, label_y), f)
+
+    # 读取模型，并识别
+    with open('ft_test.h5', 'rb') as f:
+        model, label_y = pickle.load(f)
+
+    result = model.predict_classes(X_test[:1])
+    name = label_y.inverse_transform(result)
+    print(name[0])

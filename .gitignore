@@ -69,3 +69,4 @@ face-id/
 *.model
 *.clf
 *.xy
+*.h5
