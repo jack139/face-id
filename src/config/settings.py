@@ -32,26 +32,33 @@ db_primary = db_web
     isit                1.02    1.03
 '''
 ALGORITHM = {
-    'rec'   : { 'index': 2, 'distance_threshold' : 0.58, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
-    'vgg'   : { 'index': 0, 'distance_threshold' : 0.92, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },   # 0.86
-    'evo'   : { 'index': 1, 'distance_threshold' : 1.18, 'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },  # 1.2,
-    'plus'  : { 'index': 5, 'distance_threshold' : 1.45, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },  # 1.4,
-    'fnet'  : { 'index': 4, 'distance_threshold' : 0.78, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
-    'deep'  : { 'index': 3, 'distance_threshold' : 1.03, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },  # 0.9,
-    'isit'  : { 'index': 6, 'distance_threshold' : 1.03, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },  # ,
+    'rec'   : { 'index': 2, 'distance_threshold' : 0.58, 'p_angle':None, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
+    'vgg'   : { 'index': 0, 'distance_threshold' : 0.92, 'p_angle':None, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },   # 0.86
+    'evo'   : { 'index': 1, 'distance_threshold' : 1.22, 'p_angle':0,    'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },  # 1.2,
+    'plus'  : { 'index': 5, 'distance_threshold' : 1.45, 'p_angle':None, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },  # 1.4,
+    'fnet'  : { 'index': 4, 'distance_threshold' : 0.78, 'p_angle':None, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
+    'deep'  : { 'index': 3, 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },  # 0.9,
+    'isit'  : { 'index': 6, 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },  # ,
 }
 
 # 并行算法设置
 algorithm_settings = {
     1 : [ 'vgg', '../data/model/train2a.norotated.vgg.clf' ], # 优先返回
-    2 : [ 'evo', '../data/model/train2a.norotated.evo.clf' ],
+    2 : [ 'evo', '../data/model/train2a.multi1.evo.clf' ],
     #2 : [ 'deep', '../data/model/train2.deep.clf' ],
     #2 : [ 'rec', '../data/model/train4.rec.clf' ],
 }
 
+# 训练时角度修正：
+TRAINING_ANGLE = [None] # 不修正
+#TRAINING_ANGLE = [0] # 按双眼连线修正
+#TRAINING_ANGLE = [None, 0] # 按各个角度修正 multi1
+#TRAINING_ANGLE = [None, 0, -20, -5, 5, 20] # 按各个角度修正 multi2
+
+
 # 特征值训练模型保存路径
 #TRAINED_MODEL_PATH = '/opt/data/model'
-TRAINED_MODEL_PATH = '../data/model'
+TRAINED_MODEL_PATH = '../data/model.bak'
 
 # face.evoLVe 模型l路径
 #EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'

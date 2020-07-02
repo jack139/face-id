@@ -40,7 +40,7 @@ if __name__ == "__main__":
     module_verify = [ 
         import_verify('vgg'), 
         import_verify('evo'), 
-        import_verify('rec'), 
+        #import_verify('rec'), 
         #import_verify('deep') 
     ]
 
@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            face_encodings_vgg, _ = module_verify[0].get_features(img_path)
-            face_encodings_evo, _ = module_verify[1].get_features(img_path)
-            face_encodings_rec, _ = module_verify[2].get_features(img_path)
+            face_encodings_vgg, _ = module_verify[0].get_features(img_path, angle=None)
+            face_encodings_evo, _ = module_verify[1].get_features(img_path, angle=0)
+            #face_encodings_rec, _ = module_verify[2].get_features(img_path)
             #face_encodings_deep, _ = module_verify[3].get_features(img_path)
 
             if len(face_encodings_vgg) != 1:
@@ -69,21 +69,21 @@ if __name__ == "__main__":
                 # Add face encoding for current image to the training set
                 encoding_vgg = face_encodings_vgg[0]
                 encoding_evo = face_encodings_evo[0]
-                encoding_rec = face_encodings_rec[0]
+                #encoding_rec = face_encodings_rec[0]
                 #encoding_deep = face_encodings_deep[0]
                 if type(encoding_vgg)!=type([]):
                     encoding_vgg = encoding_vgg.tolist()
                 if type(encoding_evo)!=type([]):
                     encoding_evo = encoding_evo.tolist()
-                if type(encoding_rec)!=type([]):
-                    encoding_rec = encoding_rec.tolist()
+                #if type(encoding_rec)!=type([]):
+                #    encoding_rec = encoding_rec.tolist()
                 #if type(encoding_deep)!=type([]):
                 #    encoding_deep = encoding_deep.tolist()
 
                 # 添加人脸特征
                 filepath, filename = os.path.split(img_path)
                 #face_id = dbport.face_new('vgg_evo_rec_deep', [ encoding_vgg, encoding_evo, encoding_rec, encoding_deep], filename)
-                face_id = dbport.face_new('vgg_evo_rec_x', [ encoding_vgg, encoding_evo, encoding_rec, [] ], filename)
+                face_id = dbport.face_new('vgg_evo_x_x', [ encoding_vgg, encoding_evo, [], [] ], filename)
                 # 人脸数据添加到用户信息
                 dbport.user_add_face(group_id, class_dir, face_id)
 

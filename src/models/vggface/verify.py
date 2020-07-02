@@ -31,19 +31,6 @@ with graph.as_default():
 def extract_face(filename, angle, required_size=(224, 224)):
     # load image from file
     pixels = face_recognition.load_image_file(filename)
-    # 调整人脸角度
-    if angle!=None:
-        # 寻找特征点
-        face_landmarks_list = face_recognition.face_landmarks(pixels)
-        if len(face_landmarks_list)>0:
-            # 先修改角度
-            pil_image = Image.fromarray(pixels)        
-            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-            # 旋转
-            if angle!=0:
-                pil_image.rotate(angle)
-            #pil_image.show()
-            pixels = np.array(pil_image)
     # extract the bounding box from the first face
     face_bounding_boxes = face_recognition.face_locations(pixels)
 
@@ -58,16 +45,25 @@ def extract_face(filename, angle, required_size=(224, 224)):
         x2, y2 = x1 + width, y1 + height
         # extract the face
         face = pixels[y1:y2, x1:x2]
-        # resize pixels to the model size
         image = Image.fromarray(face)
+
+        # 调整人脸角度
+        if angle!=None:
+            # 寻找特征点
+            face_landmarks_list = face_recognition.face_landmarks(face)
+            if len(face_landmarks_list)>0:
+                # 先修正角度
+                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+                # 旋转
+                image = image.rotate(angle+angle_0)
+                #image.show()
+
+        # 调整尺寸
         image = image.resize(required_size)
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
 
         # show face
-        #from PIL import ImageDraw
-        #draw = ImageDraw.Draw(image)
-        #del draw
         #image.show()
 
     return face_list, face_bounding_boxes
@@ -109,9 +105,9 @@ def is_match(known_embedding, candidate_embedding, thresh=0.5):
 
 
 # 返回图片中所有人脸的特征
-def get_features_b64(base64_data):
+def get_features_b64(base64_data, angle=None):
     # extract faces
-    faces, face_boxs = extract_face_b64(base64_data, required_size=(224, 224))
+    faces, face_boxs = extract_face_b64(base64_data, angle=angle, required_size=(224, 224))
     if len(faces) == 0:
         return [], []
     # convert into an array of samples

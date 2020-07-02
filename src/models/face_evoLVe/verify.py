@@ -46,19 +46,6 @@ BACKBONE = load_model(BACKBONE, MODEL_ROOT)
 def extract_face(filename, angle, required_size=[112, 112]):
     # load image from file
     pixels = face_recognition.load_image_file(filename)
-    # 调整人脸角度
-    if angle!=None:
-        # 寻找特征点
-        face_landmarks_list = face_recognition.face_landmarks(pixels)
-        if len(face_landmarks_list)>0:
-            # 先修改角度
-            pil_image = Image.fromarray(pixels)        
-            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-            # 旋转
-            if angle!=0:
-                pil_image.rotate(angle)
-            #pil_image.show()
-            pixels = np.array(pil_image)
     # extract the bounding box from the first face
     face_bounding_boxes = face_recognition.face_locations(pixels)
 
@@ -73,17 +60,26 @@ def extract_face(filename, angle, required_size=[112, 112]):
         x2, y2 = x1 + width, y1 + height
         # extract the face
         face = pixels[y1:y2, x1:x2]
-        # resize pixels to the model size
         image = Image.fromarray(face)
+
+        # 调整人脸角度
+        if angle!=None:
+            # 寻找特征点
+            face_landmarks_list = face_recognition.face_landmarks(face)
+            if len(face_landmarks_list)>0:
+                # 先修正角度
+                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+                # 旋转
+                image = image.rotate(angle+angle_0)
+                #image.show()
+
+        # 调整尺寸
         image = image.resize(required_size)
         # transfer to opencv image
         open_cv_image = np.array(image) 
         face_list.append(open_cv_image)
 
         # show face
-        #from PIL import ImageDraw
-        #draw = ImageDraw.Draw(image)
-        #del draw
         #image.show()
 
     return face_list, face_bounding_boxes
@@ -121,8 +117,8 @@ def test(filename):
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
-def get_features_b64(base64_data):
-    face_list, face_boxes = extract_face_b64(base64_data, required_size=INPUT_SIZE)
+def get_features_b64(base64_data, angle=None):
+    face_list, face_boxes = extract_face_b64(base64_data, angle=angle, required_size=INPUT_SIZE)
     encoding_list = []
     for face in face_list:
         open_cv_face = face[:, :, ::-1].copy() 
@@ -141,8 +137,8 @@ def face_distance(face_encodings, face_to_compare):
 # 比较两个人脸是否同一人
 def is_match_b64(b64_data1, b64_data2):
     # calculate distance between embeddings
-    encoding_list1, face_boxes1 = get_features_b64(b64_data1)
-    encoding_list2, face_boxes2 = get_features_b64(b64_data2)
+    encoding_list1, face_boxes1 = get_features_b64(b64_data1, angle=0)
+    encoding_list2, face_boxes2 = get_features_b64(b64_data2, angle=0)
 
     if len(face_boxes1)==0 or len(face_boxes2)==0:
         return False, [999]
@@ -158,7 +154,7 @@ def is_match_b64_2(encoding_list_db, b64_data):
         encoding_list1[1].append(encoding_list_db[i][1])
 
     # calculate distance between embeddings
-    encoding_list2, face_boxes = get_features_b64(b64_data)
+    encoding_list2, face_boxes = get_features_b64(b64_data, angle=0)
 
     if len(face_boxes)==0:
         return False, [999]

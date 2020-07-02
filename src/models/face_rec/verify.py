@@ -17,10 +17,9 @@ def get_features(filename, angle=None):
         face_landmarks_list = face_recognition.face_landmarks(image)
         if len(face_landmarks_list)>0:
             pil_image = Image.fromarray(image)        
-            pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+            angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
             # 旋转
-            if angle!=0:
-                pil_image.rotate(angle)
+            pil_image = pil_image.rotate(angle+angle_0)
             #pil_image.show()
             image = np.array(pil_image)
             # extract faces

@@ -30,7 +30,7 @@ import pickle
 from PIL import Image, ImageDraw
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, TRAINING_ANGLE
 from facelib.utils import import_verify
 
 #from . import verify
@@ -79,10 +79,8 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            #for angle in [None, 0, -20, -5, 5, 20]: # 旋转不同角度训练 multi2
-            for angle in [None]: # 不旋转（不修正）
-            #for angle in [0]: # 旋转（修正）
-                face_encodings, _ = module_verify.get_features(img_path, angle)
+            for angle in TRAINING_ANGLE: # 旋转不同角度训练 multi2
+                face_encodings, _ = module_verify.get_features(img_path, angle=angle)
 
                 if len(face_encodings) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.
@@ -147,7 +145,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, f
     # Load image file and find face locations
     # Find encodings for faces in the test iamge
     #  angle=None 识别时不修正角度， angle=0 识别时修正角度
-    faces_encodings, X_face_locations = module_verify.get_features(X_img_path, angle=None)
+    faces_encodings, X_face_locations = module_verify.get_features(X_img_path, angle=ALGORITHM[face_algorithm]['p_angle'])
 
     if len(X_face_locations) == 0:
         return []

@@ -18,7 +18,7 @@ if __name__ == "__main__":
     else:
         face_num = 1000
 
-    face_algorithm = ['vgg', 'evo', 'rec' ] #, 'deep'] # 
+    face_algorithm = ['vgg', 'evo' ] #, 'deep', 'rec'
 
     for algorithm in face_algorithm:
         # Train the KNN classifier and save it to disk

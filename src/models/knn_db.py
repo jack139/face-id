@@ -78,8 +78,8 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
             pickle.dump(knn_clf, f)
 
     # 计算 threshold
-    opt_tau, opt_acc = score_acc_f1(X, y, show=False)
-    print('{}: Accuracy at threshold {:.4} = {:.4}'.format(face_algorithm, opt_tau, opt_acc))
+    #opt_tau, opt_acc = score_acc_f1(X, y, show=False)
+    #print('{}: Accuracy at threshold {:.4} = {:.4}'.format(face_algorithm, opt_tau, opt_acc))
 
     return knn_clf
 
@@ -120,7 +120,7 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
         # Load image file and find face locations
         # Find encodings for faces in the test iamge
-        faces_encodings, X_face_locations = module_verify.get_features_b64(X_base64)
+        faces_encodings, X_face_locations = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
 
         if len(X_face_locations) == 0:
             return []

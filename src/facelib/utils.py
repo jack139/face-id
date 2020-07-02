@@ -56,7 +56,7 @@ def face_locations_b64(b64_data):
 
 
 # 从照片中获取人脸数据，返回所有能识别的人脸， 图片输入为 base64 编码
-def extract_face_b64(b64_data, required_size=(224, 224)):
+def extract_face_b64(b64_data, angle=None, required_size=(224, 224)):
     #start_time = datetime.now()
     # load image from file
     pixels = load_image_b64(b64_data)
@@ -81,8 +81,20 @@ def extract_face_b64(b64_data, required_size=(224, 224)):
         x2, y2 = x1 + width, y1 + height
         # extract the face
         face = pixels[y1:y2, x1:x2]
-        # resize pixels to the model size
         image = Image.fromarray(face)
+
+        # 调整人脸角度
+        if angle!=None:
+            # 寻找特征点
+            face_landmarks_list = face_recognition.face_landmarks(face)
+            if len(face_landmarks_list)>0:
+                # 先修正角度
+                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+                # 旋转
+                image = image.rotate(angle+angle_0)
+                #image.show()
+
+        # 调整尺寸
         image = image.resize(required_size)
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
@@ -115,10 +127,9 @@ def load_image_to_base64(image_file):
     return base64.b64encode(image_data)
 
 # 根据两点坐标，旋转图片使两点水平
-def _HorizontalEyes(PILImg, pts):
+def _HorizontalEyes(pts):
     x1, y1 = pts[0]
     x2, y2 = pts[1]
     k = (y2-y1) / (x2-x1)
     angle = np.arctan(k)/np.pi*180
-    #print('rotate angle:', angle)
-    return PILImg.rotate(angle)
+    return angle

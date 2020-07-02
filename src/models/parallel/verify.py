@@ -20,9 +20,9 @@ def get_features_b64_thread(face_algorithm, b64_data):
     tb._SYMBOLIC_SCOPE.value = True
 
     if face_algorithm=='vgg':
-        encoding_list, face_boxes = verify_vgg.get_features_b64(b64_data)
+        encoding_list, face_boxes = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
     else:
-        encoding_list, face_boxes = verify_evo.get_features_b64(b64_data)
+        encoding_list, face_boxes = verify_evo.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
     print('[{} - Time taken: {!s}]'.format(face_algorithm, datetime.now() - start_time))
     return encoding_list, face_boxes
 
@@ -58,8 +58,8 @@ def is_match_b64(b64_data1, b64_data2):
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
 def get_features_b64(b64_data):
-    encoding_list1, face_boxes1 = verify_vgg.get_features_b64(b64_data)
-    encoding_list2, face_boxes2 = verify_evo.get_features_b64(b64_data)
+    encoding_list1, face_boxes1 = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM['vgg']['p_angle'])
+    encoding_list2, face_boxes2 = verify_evo.get_features_b64(b64_data, angle=ALGORITHM['evo']['p_angle'])
 
     if len(face_boxes1) == 0:
         return [], []
