@@ -60,10 +60,10 @@ def VGGFace(include_top=True, model='vgg16', weights='vggface',
             or invalid input shape.
     """
 
-    if weights not in {'vggface', None}:
-        raise ValueError('The `weights` argument should be either '
-                         '`None` (random initialization) or `vggface`'
-                         '(pre-training on VGGFace Datasets).')
+    #if weights not in {'vggface', None}:
+    #    raise ValueError('The `weights` argument should be either '
+    #                     '`None` (random initialization) or `vggface`'
+    #                     '(pre-training on VGGFace Datasets).')
 
     if model == 'vgg16':
 

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+# 特征值分类器训练
+
 import numpy as np
 from sklearn import preprocessing
 
@@ -131,10 +134,6 @@ if __name__ == '__main__':
     results = model.evaluate(X_test, y_test, verbose=1)
     print('predict: ', results)
 
-    model.save('ft_test.h5')
-
-    #from keras.models import load_model
-    #load_model('ft_test.h5')
 
     # 保存模型 和 标签数据
     import pickle

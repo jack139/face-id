@@ -514,6 +514,8 @@ def SENET50(include_top=True, weights='vggface',
                           'your Keras config '
                           'at ~/.keras/keras.json.')
     elif weights is not None:
+        print('Vggface SENET50 - loading custom weights: ', weights)
+        
         model.load_weights(weights)
 
     return model
