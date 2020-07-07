@@ -22,8 +22,8 @@ from models.vggface.keras_vggface.vggface import VGGFace
 
 
 # 模型参数
-epochs_num = 2
-batch_size = 50
+epochs_num = 100
+batch_size = 20
 target_size = (224, 224)
 output_dim = 412
 train_dir = '../data/train8'
@@ -34,8 +34,9 @@ def get_model(output_dim):
     vgg_model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') 
     last_layer = vgg_model.get_layer('avg_pool').output
     x = layers.Flatten(name='flatten_added')(last_layer) # 
-    #x2 = layers.Dense(1024, activation = 'relu')(x)
-    out = layers.Dense(output_dim, activation='softmax', name='classifier')(x) 
+    x2 = layers.Dense(1024, activation = 'relu')(x)
+    x3 = layers.Dropout(0.2)(x2)
+    out = layers.Dense(output_dim, activation='softmax', name='classifier')(x3) 
     custom_vgg_model = models.Model(vgg_model.input, out)
     return custom_vgg_model
 
@@ -110,10 +111,10 @@ if __name__ == '__main__':
 
     history = model.fit_generator(
         train_generator,
-        steps_per_epoch=80,
+        steps_per_epoch=200,
         epochs=epochs_num,
         validation_data=validation_generator,
-        validation_steps=40)
+        validation_steps=100)
 
     # 解冻 conv5_3_1x1_reduce 以下后再次训练
 
@@ -125,10 +126,10 @@ if __name__ == '__main__':
 
     history = model.fit_generator(
         train_generator,
-        steps_per_epoch=80,
+        steps_per_epoch=200,
         epochs=epochs_num,
         validation_data=validation_generator,
-        validation_steps=40)
+        validation_steps=100)
 
 
     # 评估预测结果
