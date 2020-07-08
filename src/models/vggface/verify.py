@@ -11,7 +11,7 @@ from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
 import face_recognition
 from facelib.utils import extract_face_b64, _HorizontalEyes
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, VGGFACE_WEIGHTS
 
 import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
@@ -20,9 +20,8 @@ graph = tf.Graph()  # 解决多线程不同模型时，keras或tensorflow冲突�
 session = tf.Session(graph=graph)
 with graph.as_default():
     with session.as_default():
-
         # 装入识别模型 # pooling: None, avg or max # model: vgg16, senet50, resnet50
-        model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg', weights='no_classifier.h5') 
+        model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg', weights=VGGFACE_WEIGHTS) 
         # https://stackoverflow.com/questions/40850089/is-keras-thread-safe
         model._make_predict_function() # have to initialize before threading
 

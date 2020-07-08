@@ -15,15 +15,18 @@ from tqdm import tqdm
 from facelib import dbport
 from models.vggface.keras_vggface.vggface import VGGFace
 
-# 1. 取得训练集 features(从db)
-# 2. 取得测试集 features
-# 3. 构建网络
-# 4. 训练 softmax
+# 1. 生成训练集和验证集
+# 2. 构建网络
+# 3. 训练新增的 classifier
+# 4. 解冻conv5_3，训练
+# 5. 解冻conv5_2，训练
+#
 
 
 # 模型参数
 epochs_num = 100
-batch_size = 20
+batch_size = 50
+steps_per_epoch = 80  # batch_size * steps_per_epoch < 训练样本数 （train8 = 412*10）
 target_size = (224, 224)
 output_dim = 412
 train_dir = '../data/train8'
@@ -34,9 +37,9 @@ def get_model(output_dim):
     vgg_model = VGGFace(model='senet50', include_top=False, input_shape=(224, 224, 3), pooling='avg') 
     last_layer = vgg_model.get_layer('avg_pool').output
     x = layers.Flatten(name='flatten_added')(last_layer) # 
-    x2 = layers.Dense(1024, activation = 'relu')(x)
-    x3 = layers.Dropout(0.2)(x2)
-    out = layers.Dense(output_dim, activation='softmax', name='classifier')(x3) 
+    #x2 = layers.Dense(1024, activation = 'relu')(x)
+    #x3 = layers.Dropout(0.2)(x2)
+    out = layers.Dense(output_dim, activation='softmax', name='classifier')(x) 
     custom_vgg_model = models.Model(vgg_model.input, out)
     return custom_vgg_model
 
@@ -78,10 +81,6 @@ if __name__ == '__main__':
 
     model = get_model(output_dim)
 
-    # 只训练新加的层
-
-    model = freeze(model, 'flatten_added')
-    model.summary()
 
     print('output_dim=', output_dim, ' batch_size=', batch_size, ' epochs_num=', epochs_num)
 
@@ -102,6 +101,7 @@ if __name__ == '__main__':
         target_size=target_size,
         batch_size=batch_size,
         class_mode='categorical')
+
     validation_generator = test_datagen.flow_from_directory(
         validation_dir,
         target_size=target_size,
@@ -109,35 +109,26 @@ if __name__ == '__main__':
         class_mode='categorical')
 
 
-    history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=200,
-        epochs=epochs_num,
-        validation_data=validation_generator,
-        validation_steps=100)
+    # 顺序训练时，冻结、解冻的层
+    freeze_layers = ['flatten_added', 'conv5_3_1x1_reduce', 'conv5_2_1x1_reduce']
 
-    # 解冻 conv5_3_1x1_reduce 以下后再次训练
+    for i in range(len(freeze_layers)):
+        # 冻结相应的层
+        model = freeze(model, freeze_layers[i])
+        model.summary()
 
-    model = freeze(model, 'conv5_3_1x1_reduce')
-    model.summary()
+        #if i==0: # 装入预训练的权重
+        #    print('load pretrained weights')
+        #    model.load_weights('trained2_1594028604.h5')
 
-    print('output_dim=', output_dim, ' batch_size=', batch_size, ' epochs_num=', epochs_num)
+        history = model.fit_generator(
+            train_generator,
+            steps_per_epoch=steps_per_epoch,
+            epochs=epochs_num,
+            validation_data=validation_generator,
+            validation_steps=steps_per_epoch//2)
 
-
-    history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=200,
-        epochs=epochs_num,
-        validation_data=validation_generator,
-        validation_steps=100)
-
-
-    # 评估预测结果
-    #results = model.evaluate(X_test, y_test, verbose=1)
-    #print('predict: ', results)
-
-
-    # 保存权重
-    model.save('trained_'+str(int(time.time()))+'.h5')
+        # 保存权重
+        model.save('trained%d_%d.h5'%(i, int(time.time())))
 
 
