@@ -83,19 +83,12 @@ def extract_face_b64(b64_data, angle=None, required_size=(224, 224)):
         face = pixels[y1:y2, x1:x2]
         image = Image.fromarray(face)
 
-        # 调整人脸角度
-        if angle!=None:
-            # 寻找特征点
-            face_landmarks_list = face_recognition.face_landmarks(face)
-            if len(face_landmarks_list)>0:
-                # 先修正角度
-                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-                # 旋转
-                image = image.rotate(angle+angle_0)
-                #image.show()
-
         # 调整尺寸
         image = image.resize(required_size)
+
+        # 调整人脸角度
+        image = ajust_face_angle(face, image, angle)
+
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
         #print('[3 Time taken: {!s}]'.format(datetime.now() - start_time))
@@ -132,4 +125,25 @@ def _HorizontalEyes(pts):
     x2, y2 = pts[1]
     k = (y2-y1) / (x2-x1)
     angle = np.arctan(k)/np.pi*180
+    #print('angle: ', angle)
+    angle = angle if abs(angle)>3 else 0 # 大于3度才修正
     return angle
+
+# angle: None 不变， 0 只水平修正， 360 水平修正后左右镜面， 非0 水平修正后旋转
+def ajust_face_angle(face, image, angle): # face为array, image为对应Image图像
+    if angle is None:
+        return image
+    # 寻找特征点
+    face_landmarks_list = face_recognition.face_landmarks(face)
+    if len(face_landmarks_list)>0:
+        # 先修正角度, 
+        angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+        if angle==360:
+            # 修正水平后，左右镜像
+            image = image.rotate(angle_0) if angle_0!=0 else image 
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        else:
+            # 旋转
+            image = image.rotate(angle_0+angle) if (angle_0+angle)!=0 else image
+        #image.show()
+    return image

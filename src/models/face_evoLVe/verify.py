@@ -7,7 +7,7 @@ import numpy as np
 from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
 from .extract_feature_v2 import extract_feature, load_model
-from facelib.utils import extract_face_b64, _HorizontalEyes
+from facelib.utils import extract_face_b64, ajust_face_angle
 from config.settings import EVO_MODEL_BASE as MODEL_BASE
 from config.settings import ALGORITHM
 
@@ -62,19 +62,12 @@ def extract_face(filename, angle, required_size=[112, 112]):
         face = pixels[y1:y2, x1:x2]
         image = Image.fromarray(face)
 
-        # 调整人脸角度
-        if angle!=None:
-            # 寻找特征点
-            face_landmarks_list = face_recognition.face_landmarks(face)
-            if len(face_landmarks_list)>0:
-                # 先修正角度
-                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-                # 旋转
-                image = image.rotate(angle+angle_0)
-                #image.show()
-
         # 调整尺寸
         image = image.resize(required_size)
+
+        # 调整人脸角度
+        image = ajust_face_angle(face, image, angle)
+
         # transfer to opencv image
         open_cv_image = np.array(image) 
         face_list.append(open_cv_image)

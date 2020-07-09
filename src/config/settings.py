@@ -43,21 +43,23 @@ ALGORITHM = {
 
 # 并行算法设置
 algorithm_settings = {
-    1 : [ 'vgg', '../data/model/train2ft.vgg.clf' ], # 优先返回
+    1 : [ 'vgg', '../data/model/train2ft4x3.vgg.clf' ], # 优先返回
     2 : [ 'evo', '../data/model.bak/train2_ir152.evo.clf' ],
     #2 : [ 'deep', '../data/model/train2.deep.clf' ],
     #2 : [ 'rec', '../data/model/train4.rec.clf' ],
 }
 
 # 训练时角度修正：
-TRAINING_ANGLE = [None] # 不修正
+#TRAINING_ANGLE = [None] # 不修正
+TRAINING_ANGLE = [None, 360] # 水平镜像
+#TRAINING_ANGLE = [None, 0, 360] # 按修正双眼水平，水平镜像
 #TRAINING_ANGLE = [0] # 按双眼连线修正
 #TRAINING_ANGLE = [None, 0] # 按各个角度修正 multi1
 #TRAINING_ANGLE = [None, 0, -20, -5, 5, 20] # 按各个角度修正 multi2
 
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
-VGGFACE_WEIGHTS = 'vggface'
-#VGGFACE_WEIGHTS = './no_classifier.h5'
+#VGGFACE_WEIGHTS = 'vggface'
+VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
 
 # 特征值训练模型保存路径
 #TRAINED_MODEL_PATH = '/opt/data/model'

@@ -10,7 +10,7 @@ from keras.preprocessing import image
 from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
 import face_recognition
-from facelib.utils import extract_face_b64, _HorizontalEyes
+from facelib.utils import extract_face_b64, ajust_face_angle
 from config.settings import ALGORITHM, VGGFACE_WEIGHTS
 
 import tensorflow.compat.v1 as tf
@@ -46,19 +46,12 @@ def extract_face(filename, angle, required_size=(224, 224)):
         face = pixels[y1:y2, x1:x2]
         image = Image.fromarray(face)
 
-        # 调整人脸角度
-        if angle!=None:
-            # 寻找特征点
-            face_landmarks_list = face_recognition.face_landmarks(face)
-            if len(face_landmarks_list)>0:
-                # 先修正角度
-                angle_0 = _HorizontalEyes([face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-                # 旋转
-                image = image.rotate(angle+angle_0)
-                #image.show()
-
         # 调整尺寸
         image = image.resize(required_size)
+
+        # 调整人脸角度
+        image = ajust_face_angle(face, image, angle)
+
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
 
