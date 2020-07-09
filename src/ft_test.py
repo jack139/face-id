@@ -28,18 +28,19 @@ def to_one_hot(labels, dimension):
 
 def get_encodings(encodings_set, method):
     if method=='vgg':
-        return encodings_set[0]
+        return encodings_set['vgg'].values()
     elif method=='evo':
-        return encodings_set[1]
-    elif method=='rec':
-        return encodings_set[2]
-    #elif method=='mean':
-    #    return (np.array(encodings_set[0])+np.array(encodings_set[1]))/2
-    elif method=='plus':
-        return encodings_set[0]+encodings_set[1]
-    elif method=='tri':
-        return encodings_set[0]+encodings_set[1]+encodings_set[2]
-
+        return encodings_set['evo'].values()
+    #elif method=='rec':
+    #    return encodings_set[2]
+    elif method=='plus': # vgg+evo
+        plus = []
+        for i in encodings_set['vgg'].keys()
+            plus.append(encodings_set['vgg'][i]+encodings_set['evo'][i])
+        return plus
+    #elif method=='tri':
+    #    return encodings_set[0]+encodings_set[1]+encodings_set[2]
+    return []
 
 def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
 
@@ -65,8 +66,9 @@ def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
             for f in faces[:face_num]: # 使用指定数量人脸 
                 r = dbport.face_info(f)
                 if r:
-                    X.append(get_encodings(r['encodings'], method))
-                    y.append(str(user_list[i]))
+                    e_list = get_encodings(r['encodings'], method)
+                    X.extend(e_list)
+                    y.extend([user_list[i]]*len(e_list))
 
             # 划分训练集和测试集
             train_num = int(len(X)*ratio)

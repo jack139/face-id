@@ -80,7 +80,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
             for angle in TRAINING_ANGLE: # 旋转不同角度训练 multi2
-                face_encodings, _ = module_verify.get_features(img_path, angle=angle)
+                face_encodings, _, _ = module_verify.get_features(img_path, angle=angle)
 
                 if len(face_encodings) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.
@@ -145,7 +145,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6, f
     # Load image file and find face locations
     # Find encodings for faces in the test iamge
     #  angle=None 识别时不修正角度， angle=0 识别时修正角度
-    faces_encodings, X_face_locations = module_verify.get_features(X_img_path, angle=ALGORITHM[face_algorithm]['p_angle'])
+    faces_encodings, X_face_locations, _ = module_verify.get_features(X_img_path, angle=ALGORITHM[face_algorithm]['p_angle'])
 
     if len(X_face_locations) == 0:
         return []

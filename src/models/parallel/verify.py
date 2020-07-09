@@ -65,7 +65,11 @@ def get_features_b64(b64_data):
         return [], []
     else:
         # 返回4个，第3个位置留给rec，第4个给deep, 保持一直， 2020-06-25
-        return [encoding_list1[0], encoding_list2[0], [], []], face_boxes1
+        #return [encoding_list1[0], encoding_list2[0], [], []], face_boxes1
+        return {
+            'vgg' : { 'None' : encoding_list1[0] },
+            'evo' : { 'None' : encoding_list2[0] }
+        } , face_boxes1
 
 
 # 特征值距离
@@ -73,41 +77,13 @@ def face_distance(face_encodings, face_to_compare):
     return face_recognition.face_distance(np.array(face_encodings), np.array(face_to_compare))
 
 
-# 比较两个人脸是否同一人，--------- 顺序执行
-def is_match_b64_serial(b64_data1, b64_data2):
-    start_time = datetime.now()
-    # calculate distance between embeddings
-    encoding_list1, face_boxes1 = get_features_b64(b64_data1)
-    encoding_list2, face_boxes2 = get_features_b64(b64_data2)
-
-    print('[Time taken: {!s}]'.format(datetime.now() - start_time))
-
-    if len(face_boxes1)==0 or len(face_boxes2)==0:
-        return False, [999]
-
-    distance_vgg = face_distance([encoding_list1[0]], encoding_list2[0])
-    if distance_vgg <= ALGORITHM['vgg']['distance_threshold']:
-        return True, distance_vgg
-
-    distance_evo = face_distance([encoding_list1[1]], encoding_list2[1])
-    if distance_evo <= ALGORITHM['evo']['distance_threshold']:
-        return True, distance_evo
-
-    # 均为匹配
-    return False, distance_vgg # 只返回 vgg 结果
-
 
 # 比较两个人脸是否同一人, encoding_list1来自已知db用户, 多对1, db里可能有多个脸，base64只取一个脸， 多线程处理
 def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list1 = [[], []]  # [ vgg, evo ]
     for i in range(len(encoding_list_db)):
-        encoding_list1[0].append(encoding_list_db[i][0]) # vgg index=0
-        encoding_list1[1].append(encoding_list_db[i][2]) # evo index=1  2020-06-23
-
-    # calculate distance between embeddings
-    #encoding_list2, face_boxes = get_features_b64(b64_data)
-    #if len(face_boxes)==0:
-    #    return False, [999]
+        encoding_list1[0].extend(encoding_list_db[i]['vgg'].values()) # vgg 
+        encoding_list1[1].extend(encoding_list_db[i]['evo'].values()) # evo db中特征值，使用新结构  2020-07-09
 
     results = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:

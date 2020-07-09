@@ -187,16 +187,30 @@ def user_remove_face(group_id, user_id, face_id):
 #################### 特征数据操作
 
 # 新建人脸特征
-def face_new(model_id, encodings, file_ref=''):
+#   encodings 结构: 
+#   {
+#       'vgg' : { 'None' : [...], '0' : [...], '360' : [...] },
+#       'evo' : { 'None' : [...], '0' : [...], '360' : [...] },
+#       'rec' : { 'None' : [...], '0' : [...], '360' : [...] },
+#   }
+def face_new(model_id, encodings, image=[], file_ref='', weight_ref=''):
     r2 = db.faces.insert_one({
         'model_id'  : model_id, 
         'encodings' : encodings, 
+        'image'     : image,
         'time_t'    : utils.time_str(),
         'ref_count' : 1,
         'file_ref'  : file_ref,
+        'weight_ref': weight_ref,
     })
     face_id = str(r2.inserted_id)
     return face_id
+
+
+# 修改人脸特征值
+def face_update(face_id, encodings):
+    r2 = db.faces.update_one({'_id':ObjectId(face_id)}, { '$set' : { 'encodings' : encodings }})
+    return r2.modified_count
 
 
 # 删除人脸特征
@@ -221,10 +235,15 @@ def face_ref_inc(face_id):
     r = db.faces.update_one({'_id':ObjectId(face_id)}, {'$inc' : {'ref_count' : 1}})
     return r.modified_count
 
-# 人脸数据
+
+# 人脸特征数据
 def face_info(face_id):
-    # 引用计数加一
-    r = db.faces.find_one({'_id':ObjectId(face_id)}, {'_id' : 0})
+    r = db.faces.find_one({'_id':ObjectId(face_id)}, {'_id' : 0, 'encodings' : 1, 'weight_ref': 1})
+    return r
+
+# 人脸图片
+def face_image(face_id):
+    r = db.faces.find_one({'_id':ObjectId(face_id)}, {'_id' : 0, 'image' : 1})
     return r
 
 

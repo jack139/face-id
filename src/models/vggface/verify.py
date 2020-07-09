@@ -83,7 +83,7 @@ def get_features(filename, angle=None): # angle=None 识别时不修正角度，
         with session.as_default():
             yhat = model.predict(samples)
     yhat2 = yhat / np.linalg.norm(yhat)
-    return yhat2, face_boxs
+    return yhat2, face_boxs, faces
 
 
 # determine if a candidate face is a match for a known face
@@ -136,8 +136,7 @@ def is_match_b64(b64_data1, b64_data2):
 def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list1 = [[], []]
     for i in range(len(encoding_list_db)):
-        encoding_list1[0].append(encoding_list_db[i][0])
-        encoding_list1[1].append(encoding_list_db[i][1])
+        encoding_list1[0].extend(encoding_list_db[i]['vgg'].values()) # db中特征值，使用新结构  2020-07-09
 
     # calculate distance between embeddings
     encoding_list2, face_boxes = get_features_b64(b64_data)

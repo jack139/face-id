@@ -88,7 +88,7 @@ def get_features(filename, angle=None): # angle=None 识别时不修正角度，
         face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
         encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
 
-    return encoding_list, face_boxes
+    return encoding_list, face_boxes, face_list
 
 # 直接返回特征值
 def get_features2(filename):
@@ -143,8 +143,7 @@ def is_match_b64(b64_data1, b64_data2):
 def is_match_b64_2(encoding_list_db, b64_data):
     encoding_list1 = [[], []]
     for i in range(len(encoding_list_db)):
-        encoding_list1[0].append(encoding_list_db[i][0])
-        encoding_list1[1].append(encoding_list_db[i][1])
+        encoding_list1[1].extend(encoding_list_db[i]['evo'].values())
 
     # calculate distance between embeddings
     encoding_list2, face_boxes = get_features_b64(b64_data, angle=0)
@@ -152,6 +151,6 @@ def is_match_b64_2(encoding_list_db, b64_data):
     if len(face_boxes)==0:
         return False, [999]
 
-    distance_evo = face_distance(encoding_list1[1], encoding_list2[1])
+    distance_evo = face_distance(encoding_list1[1], encoding_list2[0])
     x = distance_evo <= ALGORITHM['evo']['distance_threshold']
     return x.any(), distance_evo

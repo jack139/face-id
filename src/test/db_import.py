@@ -3,9 +3,10 @@
 import sys
 import os
 import os.path
+import numpy as np
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
-from config.settings import ALGORITHM
+from config.settings import TRAINING_ANGLE
 from facelib.utils import import_verify
 from facelib import dbport
 
@@ -40,8 +41,6 @@ if __name__ == "__main__":
     module_verify = [ 
         import_verify('vgg'), 
         import_verify('evo'), 
-        #import_verify('rec'), 
-        #import_verify('deep') 
     ]
 
     # Loop through each person in the training set
@@ -57,33 +56,38 @@ if __name__ == "__main__":
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            face_encodings_vgg, _ = module_verify[0].get_features(img_path, angle=None)
-            face_encodings_evo, _ = module_verify[1].get_features(img_path, angle=0)
-            #face_encodings_rec, _ = module_verify[2].get_features(img_path)
-            #face_encodings_deep, _ = module_verify[3].get_features(img_path)
+            encodings = {
+                'vgg' : { },
+                'evo' : { }
+            }
+            face_image = []
 
-            if len(face_encodings_vgg) != 1:
-                # If there are no people (or too many people) in a training image, skip the image.
-                print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_encodings) < 1 else "Found more than one face"))
-            else:
-                # Add face encoding for current image to the training set
-                encoding_vgg = face_encodings_vgg[0]
-                encoding_evo = face_encodings_evo[0]
-                #encoding_rec = face_encodings_rec[0]
-                #encoding_deep = face_encodings_deep[0]
-                if type(encoding_vgg)!=type([]):
-                    encoding_vgg = encoding_vgg.tolist()
-                if type(encoding_evo)!=type([]):
-                    encoding_evo = encoding_evo.tolist()
-                #if type(encoding_rec)!=type([]):
-                #    encoding_rec = encoding_rec.tolist()
-                #if type(encoding_deep)!=type([]):
-                #    encoding_deep = encoding_deep.tolist()
+            for angle in TRAINING_ANGLE: # 旋转不同角度训练 multi2
+                face_encodings_vgg, _, face_list = module_verify[0].get_features(img_path, angle=angle)
+                face_encodings_evo, _, _ = module_verify[1].get_features(img_path, angle=angle)
 
-                # 添加人脸特征
-                filepath, filename = os.path.split(img_path)
-                #face_id = dbport.face_new('vgg_evo_rec_deep', [ encoding_vgg, encoding_evo, encoding_rec, encoding_deep], filename)
-                face_id = dbport.face_new('vgg_evo_x_x', [ encoding_vgg, encoding_evo, [], [] ], filename)
-                # 人脸数据添加到用户信息
-                dbport.user_add_face(group_id, class_dir, face_id)
+                if len(face_encodings_vgg) != 1:
+                    # If there are no people (or too many people) in a training image, skip the image.
+                    print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_encodings) < 1 else "Found more than one face"))
+                else:
+                    # Add face encoding for current image to the training set
+                    encoding_vgg = face_encodings_vgg[0]
+                    encoding_evo = face_encodings_evo[0]
+                    if type(encoding_vgg)!=type([]):
+                        encoding_vgg = encoding_vgg.tolist()
+                    if type(encoding_evo)!=type([]):
+                        encoding_evo = encoding_evo.tolist()
+
+                    encodings['vgg'][str(angle)] = encoding_vgg
+                    encodings['evo'][str(angle)] = encoding_evo
+
+                    if angle==None:
+                        face_image = np.uint8(face_list[0]).tolist()
+
+            # 添加人脸特征
+            filepath, filename = os.path.split(img_path)
+
+            face_id = dbport.face_new('vgg_evo', encodings, image=face_image, file_ref=filename)
+            # 人脸数据添加到用户信息
+            dbport.user_add_face(group_id, class_dir, face_id)
 

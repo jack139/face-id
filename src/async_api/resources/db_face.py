@@ -77,7 +77,7 @@ class DbFaceReg(Resource):
                 return {"code": 9005, "msg": "user_id已存在"}
 
             # 添加人脸信息
-            face_id = dbport.face_new("vgg_x_rec", encodings)
+            face_id = dbport.face_new("vgg_evo", encodings)
             dbport.user_add_face(group_id, user_id, face_id)
 
             r2 = dbport.user_list_by_group(group_id)

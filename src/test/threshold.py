@@ -31,8 +31,9 @@ if __name__ == "__main__":
             for face in faces_list:
                 r = dbport.face_info(face)
 
-                X.append(r['encodings'][ALGORITHM[method[-3:]]['index']])
-                y.append(user_list[i])
+                e_list = r['encodings'][method[-3:]].values()
+                X.extend(e_list)
+                y.extend([user_list[i]]*len(e_list))
         print('Calculating...')
         score_acc_f1(X, y, title=method[-3:])
 

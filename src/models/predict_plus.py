@@ -25,8 +25,8 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
     #model_path, _ = os.path.split(model_name) # 取得模型所在路径
-    if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值
-        image_data = [image_data[ALGORITHM[face_algorithm]['index']]]
+    if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值, 
+        image_data = [image_data[face_algorithm][str(ALGORITHM[face_algorithm]['p_angle'])]]
     return knn_db.predict(image_data, group_id,
         model_path=TRAINED_MODEL_PATH, 
         distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
