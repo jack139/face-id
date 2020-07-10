@@ -3,6 +3,7 @@
 # face verification with the VGGFace2 model
 
 import sys
+import concurrent.futures
 from PIL import Image
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -13,8 +14,11 @@ import face_recognition
 from facelib.utils import extract_face_b64, ajust_face_angle
 from config.settings import ALGORITHM, VGGFACE_WEIGHTS
 
+
 import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
+
+INPUT_SIZE = (224, 224)
 
 graph = tf.Graph()  # 解决多线程不同模型时，keras或tensorflow冲突的问题
 session = tf.Session(graph=graph)
@@ -74,15 +78,7 @@ def get_features(filename, angle=None): # angle=None 识别时不修正角度，
     faces, face_boxs = extract_face(filename, angle)
     if len(faces) == 0:
         return [], []
-    # convert into an array of samples
-    samples = np.asarray(faces, 'float32')
-    # prepare the face for the model, e.g. center pixels
-    samples = preprocess_input(samples, version=2)
-    # perform prediction
-    with graph.as_default(): # 解决多线程不同模型时，keras或tensorflow冲突的问题
-        with session.as_default():
-            yhat = model.predict(samples)
-    yhat2 = yhat / np.linalg.norm(yhat)
+    yhat2 = get_features_array(faces)
     return yhat2, face_boxs, faces
 
 
@@ -99,9 +95,16 @@ def is_match(known_embedding, candidate_embedding, thresh=0.5):
 # 返回图片中所有人脸的特征
 def get_features_b64(base64_data, angle=None):
     # extract faces
-    faces, face_boxs = extract_face_b64(base64_data, angle=angle, required_size=(224, 224))
+    faces, face_boxs = extract_face_b64(base64_data, angle=angle, required_size=INPUT_SIZE)
+    faces = np.float32(faces)
     if len(faces) == 0:
         return [], []
+    yhat2 = get_features_array(faces)
+    return yhat2, face_boxs
+
+
+# 根据人脸列表返回特征
+def get_features_array(faces):
     # convert into an array of samples
     samples = np.asarray(faces, 'float32')
     # prepare the face for the model, e.g. center pixels
@@ -111,7 +114,7 @@ def get_features_b64(base64_data, angle=None):
         with session.as_default():
             yhat = model.predict(samples)
     yhat2 = yhat / np.linalg.norm(yhat)
-    return yhat2, face_boxs
+    return yhat2
 
 
 # 特征值距离
@@ -119,8 +122,69 @@ def face_distance(face_encodings, face_to_compare):
     return face_recognition.face_distance(np.array(face_encodings), np.array(face_to_compare))
 
 
-# 比较两个人脸是否同一人
+
+# 比较两个人脸是否同一人, 多线程处理
 def is_match_b64(b64_data1, b64_data2):
+    from models.parallel.verify import get_features_b64_thread
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_list = [
+            executor.submit(get_features_b64_thread, 'vgg', b64_data1), # 0
+            executor.submit(get_features_b64_thread, 'vgg', b64_data2), # 2
+        ]
+        for future in concurrent.futures.as_completed(future_list):
+            pos = future_list.index(future)
+            results[pos] = future.result()
+
+    if len(results[0][1])==0 or len(results[1][1])==0:
+        return False, [999]
+
+    distance_vgg = face_distance([results[0][0][0]], results[1][0][0])
+    if distance_vgg <= ALGORITHM['vgg']['distance_threshold']:
+        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold']
+
+    # 均为匹配
+    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
+
+
+# 比较两个人脸是否同一人, encoding_list1来自已知db用户, 多对1, db里可能有多个脸，base64只取一个脸， 多线程处理
+def is_match_b64_2(encoding_list_db, b64_data):
+    from models.parallel.verify import get_features_b64_thread
+
+    encoding_list1 = [[], []]  
+    for i in range(len(encoding_list_db)):
+        encoding_list1[0].extend(encoding_list_db[i]['vgg'].values()) # vgg 
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_list = [
+            executor.submit(get_features_b64_thread, 'vgg', b64_data), # 0
+        ]
+        for future in concurrent.futures.as_completed(future_list):
+            pos = future_list.index(future)
+            results[pos] = future.result()
+
+    if len(results[0][1])==0:
+        return False, [999]
+
+    distance_vgg = face_distance(encoding_list1[0], results[0][0][0])
+    x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
+    if x.any():
+        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold']
+
+    # 均未匹配
+    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
+
+
+#############################################################################################3 
+### 以下串行方式在kafka发消息时不可用，会导致producer.send挂起，所以废弃不用！！！！
+### 怀疑是 kafka-python 与 keras 有冲突。 所以要使用上面两个 线程版本，把keras隔离开。
+##
+
+'''
+# 比较两个人脸是否同一人  
+def is_match_b64_serial(b64_data1, b64_data2):
     # calculate distance between embeddings
     encoding_list1, face_boxes1 = get_features_b64(b64_data1)
     encoding_list2, face_boxes2 = get_features_b64(b64_data2)
@@ -129,11 +193,10 @@ def is_match_b64(b64_data1, b64_data2):
         return False, [999]
 
     distance = face_distance([encoding_list1[0]], encoding_list2[0])
-    return distance <= ALGORITHM['vgg']['distance_threshold'], distance
-
+    return distance[0]<=ALGORITHM['vgg']['distance_threshold'], distance/ALGORITHM['vgg']['distance_threshold']
 
 # 比较两个人脸是否同一人, encoding_list1来自已知db用户
-def is_match_b64_2(encoding_list_db, b64_data):
+def is_match_b64_2_serial(encoding_list_db, b64_data):
     encoding_list1 = [[], []]
     for i in range(len(encoding_list_db)):
         encoding_list1[0].extend(encoding_list_db[i]['vgg'].values()) # db中特征值，使用新结构  2020-07-09
@@ -147,3 +210,4 @@ def is_match_b64_2(encoding_list_db, b64_data):
     distance_vgg = face_distance(encoding_list1[0], encoding_list2[0])
     x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
     return x.any(), distance_vgg
+'''

@@ -6,10 +6,10 @@ from async_api.utils import helper
 
 urllib3.disable_warnings()
 
-with open('../data/test2/aidai/1_0_aidai_0033.jpg', 'rb') as f:
+with open('../data/train/obama/obama2.jpg', 'rb') as f:
     img_data = f.read()
 
-with open('../data/test2/aidai/1_0_aidai_0041.jpg', 'rb') as f:
+with open('../data/test/obama1.jpg', 'rb') as f:
     img_data2 = f.read()
 
 
@@ -17,10 +17,10 @@ if __name__ == '__main__':
 
     body = {
         'image'    : base64.b64encode(img_data).decode('utf-8'),
-        'image2'    : base64.b64encode(img_data2).decode('utf-8'),
-        'group_id' : 'train8',
-        #'user_id'  : 'aidai',
-        'name'     : 'aidai',
+        #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
+        'group_id' : 'debug',
+        'user_id'  : 'obama2',
+        'name'     : 'obama',
         #'max_face_num' : 10
     }
 
@@ -40,8 +40,8 @@ if __name__ == '__main__':
     pool = urllib3.PoolManager(num_pools=2, timeout=180, retries=False)
     #url = 'http://172.17.0.3:5000/face/verify'
     #url = 'http://172.17.0.3:5000/face/locate'
-    url = 'http://172.17.0.3:5000/face/search'
-    #url = 'http://172.17.0.3:5000/facedb/face/reg'
+    #url = 'http://172.17.0.3:5000/face/search'
+    url = 'http://172.17.0.3:5000/facedb/face/reg'
     #url = 'http://172.17.0.3:5000/facedb/face/update'
 
     start_time = datetime.now()

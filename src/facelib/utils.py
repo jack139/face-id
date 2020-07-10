@@ -89,7 +89,7 @@ def extract_face_b64(b64_data, angle=None, required_size=(224, 224)):
         # 调整人脸角度
         image = ajust_face_angle(face, image, angle)
 
-        face_array = np.asarray(image, 'float32')
+        face_array = np.array(image, 'uint8')
         face_list.append(face_array)
         #print('[3 Time taken: {!s}]'.format(datetime.now() - start_time))
 
@@ -106,7 +106,6 @@ def train_by_group(group_id):
     for algorithm in face_algorithm:
         # Train the KNN classifier and save it to disk
         classifier = knn_db.train(group_id, 
-            encodings_index=ALGORITHM[algorithm]['index'],
             model_save_path=os.path.join(TRAINED_MODEL_PATH, group_id + ALGORITHM[algorithm]['ext']), 
             n_neighbors=10,
             face_algorithm=algorithm)

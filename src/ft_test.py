@@ -35,7 +35,7 @@ def get_encodings(encodings_set, method):
     #    return encodings_set[2]
     elif method=='plus': # vgg+evo
         plus = []
-        for i in encodings_set['vgg'].keys()
+        for i in encodings_set['vgg'].keys():
             plus.append(encodings_set['vgg'][i]+encodings_set['evo'][i])
         return plus
     #elif method=='tri':

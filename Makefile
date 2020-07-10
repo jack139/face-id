@@ -13,6 +13,6 @@ $(TARGETS):
 
 clean:
 	@echo "Clean ..." 
-	@find . -name "__pycache__" | xargs rm -rf
-	@find . -name '*.pyc' -delete
+	@find $(SRC) -name "__pycache__" | xargs rm -rf
+	@find $(SRC) -name '*.pyc' -delete
 	@rm -rf $(TARGETS) $(TEMP)

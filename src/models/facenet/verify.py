@@ -66,12 +66,6 @@ def get_features(filename):
     encoding_list = extract_embeddings(G, images)
     return encoding_list, face_boxes
 
-# 直接返回特征值
-def get_features2(filename):
-    images = load_data([ filename ], False, False, INPUT_SIZE[0])
-    face_encodings = extract_embeddings(G, images)
-    return face_encodings
-
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
 def get_features_b64(base64_data):

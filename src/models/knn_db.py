@@ -14,7 +14,7 @@ from datetime import datetime
 from sklearn import neighbors
 import pickle
 from facelib import dbport
-from config.settings import ALGORITHM, TRAINED_MODEL_PATH
+from config.settings import ALGORITHM, TRAINING_ANGLE
 from facelib.utils import import_verify
 from tqdm import tqdm
 from .knn import score_acc_f1
@@ -24,7 +24,7 @@ CLF_CACHE = {}
 
 # 训练
 # face_algorithm 只 支持 evo 和 vgg
-def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', 
+def train(group_id, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', 
     verbose=False, face_algorithm='rec', face_num=1000):
     """
     Trains a k-nearest neighbors classifier for face recognition.
@@ -49,8 +49,9 @@ def train(group_id, encodings_index=0, model_save_path=None, n_neighbors=None, k
             for f in faces[:face_num]: # 同一个人，只训练指定数量的人脸，默认1000
                 r = dbport.face_info(f)
                 if r:
-                    X.append(r['encodings'][encodings_index])
-                    y.append(user_list[i])
+                    for angle in TRAINING_ANGLE: # 旋转不同角度训练 multi2
+                        X.append(r['encodings'][face_algorithm][str(angle)])
+                        y.append(user_list[i])
 
         total += len(user_list)
         if len(user_list)<max_length: 
@@ -170,9 +171,14 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
         # 找到labels里count最大值
         max_count = max(labels.items(), key=operator.itemgetter(1))[1]
         # 相同人脸位置，labels 里 count最大的认为就是结果，如果count相同才返回多结果
-        results.extend([i+[labels[i[0]]] for i in temp_result if labels[i[0]]==max_count])
+        #results.extend([i+[labels[i[0]]] for i in temp_result if labels[i[0]]==max_count])
         # 当count最大的不是距离最短的结果时，同时返回距离最短的结果
         #results.extend( [result+[labels[result[0]]] for i,result in enumerate(temp_result) \
         #    if labels[result[0]]==max_count or (i==0 and labels[result[0]]!=max_count)] )
+        # 最短距离的不是最大count，且距离短很多时，也加入结果
+        temp_result2 = [i+[labels[i[0]]] for i in temp_result if labels[i[0]]==max_count]
+        if labels[temp_result[0][0]]!=max_count and temp_result[0][2]/temp_result2[0][2]<0.5:
+            temp_result2.insert(0, temp_result[0]+[labels[temp_result[0][0]]])
+        results.extend(temp_result2)
 
     return results

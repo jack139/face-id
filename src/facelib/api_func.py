@@ -2,18 +2,10 @@
 
 import os
 #from datetime import datetime
+import numpy as np
 from facelib import utils
-from facelib.dbport import user_info, user_face_list, face_info
-from config.settings import ALGORITHM, TRAINED_MODEL_PATH
-
-#FACE_MODEL = 'para'
-#
-#if FACE_MODEL=='vgg':
-#    from models.vggface import verify
-#elif FACE_MODEL=='evo':
-#    from models.face_evoLVe import verify
-#else:
-#    from models.parallel import verify
+from facelib.dbport import user_info, user_face_list, face_info, face_update, user_list_by_group
+from config.settings import ALGORITHM
 
 from models.parallel import verify
 from models.predict_plus import predict_parallel, predict_thread_db
@@ -30,9 +22,7 @@ def face_locations(b64_data, max_face_num=1):
 
 # 人脸对比
 def face_verify(b64_data1, b64_data2):
-    #start_time = datetime.now()
-    is_match, score = verify.is_match_b64(b64_data1, b64_data2)
-    #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
+    is_match, score = verify.verify_vgg.is_match_b64(b64_data1, b64_data2)
     if type(score)!=type([]):
         score = score.tolist() # np.array
     return is_match, score
@@ -46,9 +36,7 @@ def face_verify_db(b64_data, group_id, user_id):
         return None, -1
     face_encodings = [face_info(i)['encodings'] for i in face_list]
     # 进行比较验证
-    #start_time = datetime.now()
-    is_match, score = verify.is_match_b64_2(face_encodings, b64_data)
-    #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
+    is_match, score = verify.verify_vgg.is_match_b64_2(face_encodings, b64_data)
     if type(score)!=type([]):
         score = score.tolist() # np.array
     return is_match, score
@@ -59,7 +47,6 @@ def face_search(b64_data, group_id='DEFAULT', max_user_num=5, face_algorithm='pa
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
-    #start_time = datetime.now()
     if face_algorithm=='parallel':
         predictions = predict_parallel(predict_thread_db, b64_data, group_id)
     elif face_algorithm in ('evo', 'vgg'):
@@ -69,7 +56,6 @@ def face_search(b64_data, group_id='DEFAULT', max_user_num=5, face_algorithm='pa
             face_algorithm=face_algorithm)
     else:
         return []
-    #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
     #print(predictions)
 
@@ -94,12 +80,31 @@ def face_search(b64_data, group_id='DEFAULT', max_user_num=5, face_algorithm='pa
 
 
 # 计算特征值
-def face_features(b64_data):
-    #start_time = datetime.now()
-    encodings, boxes = verify.get_features_b64(b64_data)
-    encodings = [i.tolist() if type(i)!=type([]) else i for i in encodings]
-    #print('[Time taken: {!s}]'.format(datetime.now() - start_time))
-    return encodings, boxes
+def face_features(b64_data, face_id, group_id):
+    encodings_result = {'vgg':{}, 'evo':{}}
+    face_image = []
 
+    # 保存特征值：1. 原始，2. 水平后镜像
+    for angle in [None, 360]:
+        encodings, boxes, face_list = verify.get_features_b64(b64_data, angle)
+        if len(boxes)==0: # 未检测到人脸
+            return False
+
+        encodings_result['vgg'][str(angle)] = encodings['vgg'].tolist()
+        encodings_result['evo'][str(angle)] = encodings['evo'].tolist()
+
+        if angle==None:
+            face_image = np.uint8(face_list[0]).tolist()
+
+    # 更新数据库：特征值、人脸图片
+    r = face_update(face_id, encodings=encodings_result, image=face_image)
+
+    # 重新训练模型
+    r2 = user_list_by_group(group_id)
+    if len(r2)>0: 
+        # 重新训练模型, 至少需要1个用户
+        utils.train_by_group(group_id)
+
+    return r
 
 

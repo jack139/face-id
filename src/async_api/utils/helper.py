@@ -170,7 +170,7 @@ def kafka_send_return(request_id, data):
     }
     #msg_body = json.dumps(msg_body).encode('utf-8')
 
-    logger.info('send RETURN to kafka: ' + request_id) 
+    #logger.info(data) 
 
     producer = KafkaProducer(bootstrap_servers=KAFKA_CONFIG['SERVER'], 
         value_serializer = lambda v: json.dumps(v).encode('utf-8'),
@@ -181,6 +181,7 @@ def kafka_send_return(request_id, data):
     # Block for 'synchronous' sends
     try:
         record_metadata = future.get(timeout=10)
+        logger.info('sent RETURN to kafka: ' + request_id) 
     except KafkaError as e:
         # Decide what to do if produce request failed...
         logger.error("send RETURN to Kafka FAIL: %s"%e) 

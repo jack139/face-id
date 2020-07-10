@@ -32,13 +32,13 @@ db_primary = db_web
     isit                1.02    1.03
 '''
 ALGORITHM = {
-    'rec'   : { 'index': 2, 'distance_threshold' : 0.58, 'p_angle':None, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },  # 0.6,
-    'vgg'   : { 'index': 0, 'distance_threshold' : 0.92, 'p_angle':None, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' },   # 0.86
-    'evo'   : { 'index': 1, 'distance_threshold' : 1.22, 'p_angle':0,    'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },  # 1.2,
-    'plus'  : { 'index': 5, 'distance_threshold' : 1.45, 'p_angle':None, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },  # 1.4,
-    'fnet'  : { 'index': 4, 'distance_threshold' : 0.78, 'p_angle':None, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },  # 0.9,
-    'deep'  : { 'index': 3, 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },  # 0.9,
-    'isit'  : { 'index': 6, 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },  # ,
+    'rec'   : { 'distance_threshold' : 0.58, 'p_angle':None, 'ext' : '.rec.clf',  'module' : 'models.face_rec.verify' },
+    'vgg'   : { 'distance_threshold' : 0.92, 'p_angle':None, 'ext' : '.vgg.clf',  'module' : 'models.vggface.verify' }, 
+    'evo'   : { 'distance_threshold' : 1.22, 'p_angle':0,    'ext' : '.evo.clf',  'module' : 'models.face_evoLVe.verify' },
+    'plus'  : { 'distance_threshold' : 1.45, 'p_angle':None, 'ext' : '.plus.clf', 'module' : 'models.verify_plus' },
+    'fnet'  : { 'distance_threshold' : 0.78, 'p_angle':None, 'ext' : '.fnet.clf', 'module' : 'models.facenet.verify' },
+    'deep'  : { 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.deep.clf', 'module' : 'models.deepface.verify' },
+    'isit'  : { 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },
 }
 
 # 并行算法设置
@@ -50,24 +50,23 @@ algorithm_settings = {
 }
 
 # 训练时角度修正：
-#TRAINING_ANGLE = [None] # 不修正
-TRAINING_ANGLE = [None, 360] # 水平镜像
+TRAINING_ANGLE = [None] # 不修正
+#TRAINING_ANGLE = [None, 360] # 水平镜像
 #TRAINING_ANGLE = [None, 0, 360] # 按修正双眼水平，水平镜像
-#TRAINING_ANGLE = [0] # 按双眼连线修正
-#TRAINING_ANGLE = [None, 0] # 按各个角度修正 multi1
-#TRAINING_ANGLE = [None, 0, -20, -5, 5, 20] # 按各个角度修正 multi2
+#TRAINING_ANGLE = [None, 0, -20, -5, 5, 20] # 水平修正后转多个角度
 
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
 #VGGFACE_WEIGHTS = 'vggface'
-VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
+VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4.h5'
+#VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
 
 # 特征值训练模型保存路径
-#TRAINED_MODEL_PATH = '/opt/data/model'
-TRAINED_MODEL_PATH = '../data/model.bak'
+TRAINED_MODEL_PATH = '/opt/data/model'
+#TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
-#EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
-EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
+EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+#EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 # faceNET 模型l路径
 #FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'
@@ -79,7 +78,7 @@ APP_NAME = 'face-id'
 APP_NAME_FORMATED = 'Face-ID'
 
 # 参数设置
-DEBUG_MODE = True
+DEBUG_MODE = False
 BIND_ADDR = '0.0.0.0'
 BIND_PORT = '5000'
 

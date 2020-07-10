@@ -42,12 +42,14 @@ def process_api(request_msg):
             # 准备结果
             result = { 'code' : 200, 'data' : { 'face_num' : r[0], 'locations' : r[1] } }
 
-        elif request['api']=='face_features': # 计算特征值
-            encodings, boxes = api_func.face_features(request['image'])
+        elif request['api']=='face_features': # 计算特征值,  不返回结果
+            ret = api_func.face_features(request['image'], request['face_id'], request['group_id'])
+            if ret==False:
+                logger.info('face_features 未检测到人脸: '+request['face_id'])
             # 准备结果
-            result = { 'code' : 200, 'data' : { 'encodings' : encodings, 'boxes' : boxes } }
+            result = { 'code' : 200, 'data' : {} }
 
-        elif request['api']=='train_by_group': # 重新训练模型
+        elif request['api']=='train_by_group': # 重新训练模型,  不返回结果
             utils.train_by_group(request['group_id'])
             result = { 'code' : 200, 'data' : {} }
 

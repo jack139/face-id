@@ -35,14 +35,15 @@ class DbFaceReg(Resource):
             if len(image)>MAX_IMAGE_SIZE:
                 return {"code": 9002, "msg": "图片数据太大"}
 
-            # 计算人脸特征值
+            # 定位人脸
 
             # 准备发队列消息
             request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
 
             request_msg = {
-                'api'   : 'face_features',
-                'image' : image,
+                'api'          : 'face_locate',
+                'image'        : image,
+                'max_face_num' : 10,
             }
 
             # 在发kafka消息前生成 consumer, 防止消息漏掉
@@ -54,19 +55,15 @@ class DbFaceReg(Resource):
                 logger.error("消息队列异常")
                 return {"code": 9099, "msg": "消息队列异常"}
 
-            ## 通过redis订阅等待结果返回
-            #ret = helper.redis_subscribe(request_id)
-            #ret2 = json.loads(ret['data'].decode('utf-8'))
-
             # 通过kafka 等待结果返回
             ret = helper.kafka_recieve_return(consumer, request_id)
             ret2 = ret['data']
             if ret2['code']!=200:
                 return ret2
 
-            encodings, boxes = ret2['data']['encodings'], ret2['data']['boxes']
+            face_num = ret2['data']['face_num']
 
-            if len(boxes)==0:
+            if face_num==0:
                 return {"code": 9003, "msg": "未定位到人脸"}
 
             # 注册用户信息
@@ -77,18 +74,32 @@ class DbFaceReg(Resource):
                 return {"code": 9005, "msg": "user_id已存在"}
 
             # 添加人脸信息
-            face_id = dbport.face_new("vgg_evo", encodings)
+            face_id = dbport.face_new("vgg_evo", [])
             dbport.user_add_face(group_id, user_id, face_id)
 
-            r2 = dbport.user_list_by_group(group_id)
-            if len(r2)>0: 
-                # 重新训练模型, 至少需要1个用户
-                request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
-                # 发消息给 kafka
-                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
-                if r is None:
-                    logger.error("消息队列异常")
-                    return {"code": 9099, "msg": "消息队列异常"}
+            #r2 = dbport.user_list_by_group(group_id)
+            #if len(r2)>0: 
+            #    # 重新训练模型, 至少需要1个用户
+            #    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
+            #    # 发消息给 kafka
+            #    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+            #    if r is None:
+            #        logger.error("消息队列异常")
+            #        return {"code": 9099, "msg": "消息队列异常"}
+
+            # 异步生成特征值、训练
+            request_msg = {
+                'api'      : 'face_features',
+                'image'    : image,
+                'face_id'  : face_id,
+                'group_id' : group_id,
+            }
+            # 发消息给 kafka
+            r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+            if r is None:
+                logger.error("消息队列异常")
+                return {"code": 9099, "msg": "消息队列异常"}
+
 
             return { "code" : 200, "msg" : "success", 'data' : { 'face_id'  : face_id } }
 
@@ -123,14 +134,15 @@ class DbFaceUpdate(Resource):
                 return {"code": 9002, "msg": "图片数据太大"}
 
             if len(image)>0:
-                # 计算人脸特征值
+                # 定位人脸
 
                 # 准备发队列消息
                 request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
 
                 request_msg = {
-                    'api'   : 'face_features',
-                    'image' : image,
+                    'api'          : 'face_locate',
+                    'image'        : image,
+                    'max_face_num' : 10,
                 }
 
                 # 在发kafka消息前生成 consumer, 防止消息漏掉
@@ -142,20 +154,17 @@ class DbFaceUpdate(Resource):
                     logger.error("消息队列异常")
                     return {"code": 9099, "msg": "消息队列异常"}
 
-                # 通过redis订阅等待结果返回
-                #ret = helper.redis_subscribe(request_id)
-                #ret2 = json.loads(ret['data'].decode('utf-8'))
-
                 # 通过kafka 等待结果返回
                 ret = helper.kafka_recieve_return(consumer, request_id)
                 ret2 = ret['data']
                 if ret2['code']!=200:
                     return ret2
 
-                encodings, boxes = ret2['data']['encodings'], ret2['data']['boxes']
+                face_num = ret2['data']['face_num']
 
-                if len(boxes)==0:
+                if face_num==0:
                     return {"code": 9003, "msg": "未定位到人脸"}
+
 
             # 更新用户信息
             r = dbport.user_update(group_id, user_id, name=name, mobile=mobile, memo=memo)
@@ -164,18 +173,32 @@ class DbFaceUpdate(Resource):
 
             if len(image)>0:
                 # 添加人脸信息
-                face_id = dbport.face_new("vgg_evo", encodings)
+                face_id = dbport.face_new("vgg_evo", [])
                 dbport.user_add_face(group_id, user_id, face_id)
 
-                r2 = dbport.user_list_by_group(group_id)
-                if len(r2)>0: 
-                    # 重新训练模型, 至少需要1个用户
-                    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
-                    # 发消息给 kafka
-                    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
-                    if r is None:
-                        logger.error("消息队列异常")
-                        return {"code": 9099, "msg": "消息队列异常"}
+                #r2 = dbport.user_list_by_group(group_id)
+                #if len(r2)>0: 
+                #    # 重新训练模型, 至少需要1个用户
+                #    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
+                #    # 发消息给 kafka
+                #    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                #    if r is None:
+                #        logger.error("消息队列异常")
+                #        return {"code": 9099, "msg": "消息队列异常"}
+
+                # 异步生成特征值、训练
+                request_msg = {
+                    'api'      : 'face_features',
+                    'image'    : image,
+                    'face_id'  : face_id,
+                    'group_id' : group_id,
+                }
+                # 发消息给 kafka
+                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                if r is None:
+                    logger.error("消息队列异常")
+                    return {"code": 9099, "msg": "消息队列异常"}
+
 
             else:
                 face_id = 0

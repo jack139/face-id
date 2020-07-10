@@ -24,7 +24,6 @@ if __name__ == "__main__":
         # Train the KNN classifier and save it to disk
         print("Training KNN classifier...")
         classifier = knn_db.train(group_id, 
-            encodings_index=ALGORITHM[algorithm]['index'],
             model_save_path=group_id + ALGORITHM[algorithm]['ext'], 
             n_neighbors=10,
             face_algorithm=algorithm,

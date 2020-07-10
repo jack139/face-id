@@ -6,7 +6,7 @@ import os.path
 import numpy as np
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
-from config.settings import TRAINING_ANGLE
+from config.settings import TRAINING_ANGLE, VGGFACE_WEIGHTS
 from facelib.utils import import_verify
 from facelib import dbport
 
@@ -84,10 +84,14 @@ if __name__ == "__main__":
                     if angle==None:
                         face_image = np.uint8(face_list[0]).tolist()
 
+                        # 保存图片为文件
+                        #x=np.array(face_image, dtype=np.uint8)
+                        #Image.fromarray(x).save('test.jpg',quality=95)
+
             # 添加人脸特征
             filepath, filename = os.path.split(img_path)
 
-            face_id = dbport.face_new('vgg_evo', encodings, image=face_image, file_ref=filename)
+            face_id = dbport.face_new('vgg_evo', encodings, image=face_image, file_ref=filename, weight_ref=VGGFACE_WEIGHTS)
             # 人脸数据添加到用户信息
             dbport.user_add_face(group_id, class_dir, face_id)
 

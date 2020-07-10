@@ -81,45 +81,25 @@ def extract_face(filename, angle, required_size=[112, 112]):
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸
 def get_features(filename, angle=None): # angle=None 识别时不修正角度， angle=0 识别时修正角度
     face_list, face_boxes = extract_face(filename, angle, required_size=INPUT_SIZE)
-    encoding_list = []
-    for face in face_list:
-        open_cv_face = face[:, :, ::-1].copy() 
-
-        face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
-        encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
-
+    encoding_list = get_features_array(face_list)
     return encoding_list, face_boxes, face_list
-
-# 直接返回特征值
-def get_features2(filename):
-    img = cv2.imread(filename)
-    face_encodings = extract_feature(img, BACKBONE, MODEL_ROOT)
-    return face_encodings
-
-# 定位人脸测试
-def test(filename):
-    face_list, face_boxes = extract_face(filename, required_size=INPUT_SIZE)
-    print(face_boxes)
-
-    n=0
-    for face in face_list:
-        open_cv_face = face[:, :, ::-1].copy() 
-        cv2.imwrite(str(n)+'.jpg', open_cv_face)
-        n+=1
-
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 输入图片为 base64 编码
 def get_features_b64(base64_data, angle=None):
     face_list, face_boxes = extract_face_b64(base64_data, angle=angle, required_size=INPUT_SIZE)
+    encoding_list = get_features_array(face_list)
+    return encoding_list, face_boxes
+
+
+# 根据人脸列表返回特征
+def get_features_array(face_list):
     encoding_list = []
     for face in face_list:
         open_cv_face = face[:, :, ::-1].copy() 
-
         face_encodings = extract_feature(open_cv_face, BACKBONE, MODEL_ROOT)
         encoding_list.append(face_encodings.numpy()[0]) # torch.tensor to numpy.array
-
-    return encoding_list, face_boxes
+    return encoding_list
 
 
 # 特征值距离

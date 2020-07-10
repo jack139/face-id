@@ -208,8 +208,14 @@ def face_new(model_id, encodings, image=[], file_ref='', weight_ref=''):
 
 
 # 修改人脸特征值
-def face_update(face_id, encodings):
-    r2 = db.faces.update_one({'_id':ObjectId(face_id)}, { '$set' : { 'encodings' : encodings }})
+def face_update(face_id, encodings=None, image=None):
+    update_set = {}
+    if encodings:
+        update_set['encodings'] = encodings
+    if image:
+        update_set['image'] = image
+    if update_set!={}:
+        r2 = db.faces.update_one({'_id':ObjectId(face_id)}, { '$set' : update_set })
     return r2.modified_count
 
 

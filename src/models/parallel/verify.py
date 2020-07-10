@@ -7,6 +7,7 @@ import numpy as np
 import concurrent.futures
 import face_recognition
 from config.settings import ALGORITHM
+from facelib.utils import extract_face_b64
 
 # 双算法： vggface + evoLVe
 from models.vggface import verify as verify_vgg
@@ -57,7 +58,7 @@ def is_match_b64(b64_data1, b64_data2):
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
-def get_features_b64(b64_data):
+def get_features_b64_old(b64_data):
     encoding_list1, face_boxes1 = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM['vgg']['p_angle'])
     encoding_list2, face_boxes2 = verify_evo.get_features_b64(b64_data, angle=ALGORITHM['evo']['p_angle'])
 
@@ -70,6 +71,30 @@ def get_features_b64(b64_data):
             'vgg' : { 'None' : encoding_list1[0] },
             'evo' : { 'None' : encoding_list2[0] }
         } , face_boxes1
+
+
+# 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
+def get_features_b64(b64_data, angle=None):
+    # extract faces
+    faces, face_boxs = extract_face_b64(b64_data, angle=angle, required_size=verify_vgg.INPUT_SIZE)
+    if len(faces) == 0:
+        return [], []
+
+    # vgg 使用人脸
+    faces_vgg = np.float32(faces)
+
+    # evo 使用人脸
+    faces_evo = []
+    for i in faces:
+        image = Image.fromarray(i)
+        image = image.resize(verify_evo.INPUT_SIZE)
+        faces_evo.append(np.array(image, 'uint8'))
+
+    # 获取特征值
+    encoding_list1 = verify_vgg.get_features_array(faces_vgg)
+    encoding_list2 = verify_evo.get_features_array(faces_evo)
+
+    return { 'vgg' : encoding_list1[0], 'evo' : encoding_list2[0] } , face_boxs, faces
 
 
 # 特征值距离
