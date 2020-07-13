@@ -264,3 +264,39 @@ def log(api, param, result, extra=''):
         'extra'  : extra,
     })
     return str(r2.inserted_id)
+
+
+######################### 其他查询
+
+# 查询 手机号后4为的用户
+def user_list_by_mobile_tail(mobile_tail, group_id):
+    if len(mobile_tail)!=4 or not mobile_tail.isdigit():
+        return []
+    r = db.users.find({'group_id' : group_id, 'mobile' : { '$regex': mobile_tail+'$' }}, { '_id':0 })
+    return [i for i in r]
+
+
+# 人脸数据存入临时表 faces_temp, 以request_id为索引
+def face_save_to_temp(group_id, request_id, api_name=None, result=None, image=None):
+    update_set = {}
+    if api_name:
+        update_set['api_name'] = api_name 
+    if result:
+        update_set['result'] = result 
+    if image:
+        update_set['image'] = image
+
+    if len(update_set)>0: # 有数据更新
+        update_set['last_t'] = utils.time_str()
+        r = db.faces_temp.update_one({'request_id' : request_id, 'group_id' : group_id},
+                {'$set' : update_set}, upsert=True)
+        return r.modified_count
+    else:
+        return 0
+
+
+# 更新反馈情况
+def face_temp_update(group_id, request_id, is_correct):
+    r = db.faces_temp.update_one({'request_id' : request_id, 'group_id' : group_id},
+            {'$set' : { 'is_correct' : is_correct }})
+    return r.modified_count

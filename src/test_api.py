@@ -6,7 +6,7 @@ from async_api.utils import helper
 
 urllib3.disable_warnings()
 
-with open('../data/train/obama/obama2.jpg', 'rb') as f:
+with open('../data/test/obama1.jpg', 'rb') as f:
     img_data = f.read()
 
 with open('../data/test/obama1.jpg', 'rb') as f:
@@ -19,9 +19,12 @@ if __name__ == '__main__':
         'image'    : base64.b64encode(img_data).decode('utf-8'),
         #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
         'group_id' : 'debug',
+        #'mobile_tail' : '1234',
         'user_id'  : 'obama2',
-        'name'     : 'obama',
-        #'max_face_num' : 10
+        #'name'     : 'obama',
+        #'max_face_num' : 10,
+        'request_id' : '93271821f9c74c1cf21b812fce29944e',
+        'is_correct' : 1
     }
 
     appid = 'THISISTEST'
@@ -41,7 +44,8 @@ if __name__ == '__main__':
     #url = 'http://172.17.0.3:5000/face/verify'
     #url = 'http://172.17.0.3:5000/face/locate'
     #url = 'http://172.17.0.3:5000/face/search'
-    url = 'http://172.17.0.3:5000/facedb/face/reg'
+    url = 'http://172.17.0.3:5000/face/feedback'
+    #url = 'http://172.17.0.3:5000/facedb/face/reg'
     #url = 'http://172.17.0.3:5000/facedb/face/update'
 
     start_time = datetime.now()

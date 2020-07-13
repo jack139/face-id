@@ -20,7 +20,7 @@ def predict_thread(face_algorithm, model_name, image_file, group_id='', data_typ
 
 # 用于db和base64图片的预测线程
 # data_type: 'base64', 'encodings'
-def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64'): 
+def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64', request_id=''): 
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
@@ -34,13 +34,13 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
         data_type=data_type)
 
 # 启动并行算法
-def predict_parallel(thread_func, image_data, group_id='', data_type='base64'):
+def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id=''):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future1 = executor.submit(thread_func, algorithm_settings[1][0], algorithm_settings[1][1], 
-                image_data, group_id, data_type)
+                image_data, group_id, data_type, request_id)
         future2 = executor.submit(thread_func, algorithm_settings[2][0], algorithm_settings[2][1], 
-                image_data, group_id, data_type)
+                image_data, group_id, data_type, request_id)
         for future in concurrent.futures.as_completed([future1, future2]):
             predictions = future.result()
             if future==future1:

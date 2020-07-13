@@ -1,6 +1,6 @@
 # coding:utf-8
 
-import os, time, hashlib, json
+import os, time, json
 from flask_restful import reqparse, abort, Api, Resource, fields, marshal, request
 
 from ..utils import helper
@@ -13,7 +13,7 @@ class SyncTest(Resource):
     def post(self):  #  request --> kafka --> dispatcher --> redis --> return
         try:
             #time.sleep(1) # for test
-            request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+            request_id = helper.gen_request_id()
 
             request_msg = {
                 'api' : 'sync_test',
@@ -43,7 +43,7 @@ class SyncTest(Resource):
     def put(self):  #  request --> kafka --> dispatcher --> kafka --> return
         try:
             #time.sleep(1) # for test
-            request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+            request_id = helper.gen_request_id()
 
             request_msg = {
                 'api' : 'sync_test',

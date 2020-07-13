@@ -218,3 +218,7 @@ def kafka_recieve_return(consumer, request_id):
 
     return msg_body
 
+
+# 生成request_id
+def gen_request_id():
+    return hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()

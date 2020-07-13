@@ -86,7 +86,7 @@ def train(group_id, model_save_path=None, n_neighbors=None, knn_algo='ball_tree'
 
 
 # 识别
-def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algorithm='vgg', data_type='base64'): 
+def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algorithm='vgg', data_type='base64', request_id=''): 
     """
     Recognizes faces in given image using a trained KNN classifier
 
@@ -121,10 +121,15 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
         # Load image file and find face locations
         # Find encodings for faces in the test iamge
-        faces_encodings, X_face_locations = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
+        faces_encodings, X_face_locations, faces = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
 
         if len(X_face_locations) == 0:
             return []
+
+        # 保存人脸到临时表, 只保存vgg的
+        if request_id!='' and face_algorithm=='vgg':
+            dbport.face_save_to_temp(group_id, request_id, image=np.uint8(face_array[0]).tolist())
+
     else:
         # data_type = 'encodings'
         faces_encodings = X_base64

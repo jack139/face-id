@@ -2,7 +2,7 @@
 
 from flask_restful import reqparse, abort, Resource, fields, request
 
-import json, hashlib, time
+import json
 from ..utils import helper
 from .. import logger
 from facelib import dbport, utils
@@ -38,7 +38,7 @@ class DbFaceReg(Resource):
             # 定位人脸
 
             # 准备发队列消息
-            request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+            request_id = helper.gen_request_id()
 
             request_msg = {
                 'api'          : 'face_locate',
@@ -76,16 +76,6 @@ class DbFaceReg(Resource):
             # 添加人脸信息
             face_id = dbport.face_new("vgg_evo", [])
             dbport.user_add_face(group_id, user_id, face_id)
-
-            #r2 = dbport.user_list_by_group(group_id)
-            #if len(r2)>0: 
-            #    # 重新训练模型, 至少需要1个用户
-            #    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
-            #    # 发消息给 kafka
-            #    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
-            #    if r is None:
-            #        logger.error("消息队列异常")
-            #        return {"code": 9099, "msg": "消息队列异常"}
 
             # 异步生成特征值、训练
             request_msg = {
@@ -137,7 +127,7 @@ class DbFaceUpdate(Resource):
                 # 定位人脸
 
                 # 准备发队列消息
-                request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+                request_id = helper.gen_request_id()
 
                 request_msg = {
                     'api'          : 'face_locate',
@@ -175,16 +165,6 @@ class DbFaceUpdate(Resource):
                 # 添加人脸信息
                 face_id = dbport.face_new("vgg_evo", [])
                 dbport.user_add_face(group_id, user_id, face_id)
-
-                #r2 = dbport.user_list_by_group(group_id)
-                #if len(r2)>0: 
-                #    # 重新训练模型, 至少需要1个用户
-                #    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
-                #    # 发消息给 kafka
-                #    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
-                #    if r is None:
-                #        logger.error("消息队列异常")
-                #        return {"code": 9099, "msg": "消息队列异常"}
 
                 # 异步生成特征值、训练
                 request_msg = {

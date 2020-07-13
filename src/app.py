@@ -20,6 +20,7 @@ def hello_world():
 api.add_resource(FaceLocate, '/face/locate')
 api.add_resource(FaceVerify, '/face/verify')
 api.add_resource(FaceSearch, '/face/search')
+api.add_resource(Feedback, '/face/feedback')
 
 # 人脸特征库管理api，同步调用，同步处理
 api.add_resource(DbFaceReg,    '/facedb/face/reg')  # 异步处理（使用消息队列）

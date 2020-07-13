@@ -1,6 +1,5 @@
 # coding:utf-8
 
-import os, time, hashlib
 import json
 from datetime import datetime
 from flask_restful import reqparse, abort, Resource, fields, request
@@ -22,14 +21,18 @@ class FaceSearch(Resource):
  
             group_id = json_data.get('group_id', 'DEFAULT')
             user_id = json_data.get('user_id')
+            mobile_tail = json_data.get('mobile_tail', '')
             image = json_data.get('image', '')
             max_user_num = json_data.get('max_user_num', 5)
 
-            logger.info("入参: %s %s %s %d"%(group_id, user_id, max_user_num, len(image)))
+            logger.info("入参: %s %s %s %s %d"%(group_id, user_id, max_user_num, mobile_tail, len(image)))
 
             # 检查参数
             if len(image)==0:
                 return {"code": 9001, "msg": "缺少参数"}
+
+            if mobile_tail!='' and not mobile_tail.isdigit():
+                return {"code": 9003, "msg": "参数格式错误"}
 
             if len(image)>MAX_IMAGE_SIZE:
                 return {"code": 9002, "msg": "图片数据太大"}
@@ -38,13 +41,14 @@ class FaceSearch(Resource):
             max_user_num = min(5, int(max_user_num))
 
             # 准备发队列消息
-            request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+            request_id = helper.gen_request_id()
 
             request_msg = {
                 'api'          : 'face_search',
                 'image'        : image,
                 'group_id'     : group_id,
                 'user_id'      : user_id,
+                'mobile_tail'  : mobile_tail,
                 'max_user_num' : max_user_num,
             }
 
@@ -69,13 +73,10 @@ class FaceSearch(Resource):
                     logger.error("消息队列异常")
                     return {"code": 9099, "msg": "消息队列异常"}
 
-                # 通过redis订阅等待结果返回
-                #ret = helper.redis_subscribe(request_id)
-                #ret2 = json.loads(ret['data'].decode('utf-8'))
-
                 # 通过kafka 等待结果返回
                 ret = helper.kafka_recieve_return(consumer, request_id)
                 ret2 = ret['data']
+
 
             #print('<--', request_id, helper.time_str(), datetime.now() - start_time)
             logger.info('[Time taken: {!s}]'.format(datetime.now() - start_time))

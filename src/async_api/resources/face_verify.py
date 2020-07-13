@@ -1,6 +1,5 @@
 # coding:utf-8
 
-import os, time, hashlib
 import json
 from datetime import datetime
 from flask_restful import reqparse, abort, Resource, fields, request
@@ -32,7 +31,7 @@ class FaceVerify(Resource):
                 return {"code": 9002, "msg": "图片数据太大"}
 
             # 准备发队列消息
-            request_id = hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+            request_id = helper.gen_request_id()
 
             request_msg = {
                 'api'          : 'face_verify',

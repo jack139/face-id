@@ -7,7 +7,7 @@ import numpy as np
 from .backbone.model_irse import IR_50, IR_101, IR_152, IR_SE_50, IR_SE_101, IR_SE_152
 import face_recognition
 from .extract_feature_v2 import extract_feature, load_model
-from facelib.utils import extract_face_b64, ajust_face_angle
+from facelib.utils import extract_face_b64, adjust_face_angle
 from config.settings import EVO_MODEL_BASE as MODEL_BASE
 from config.settings import ALGORITHM
 
@@ -66,7 +66,7 @@ def extract_face(filename, angle, required_size=[112, 112]):
         image = image.resize(required_size)
 
         # 调整人脸角度
-        image = ajust_face_angle(face, image, angle)
+        image = adjust_face_angle(face, image, angle)
 
         # transfer to opencv image
         open_cv_image = np.array(image) 
@@ -89,7 +89,7 @@ def get_features(filename, angle=None): # angle=None 识别时不修正角度，
 def get_features_b64(base64_data, angle=None):
     face_list, face_boxes = extract_face_b64(base64_data, angle=angle, required_size=INPUT_SIZE)
     encoding_list = get_features_array(face_list)
-    return encoding_list, face_boxes
+    return encoding_list, face_boxes, face_list
 
 
 # 根据人脸列表返回特征
@@ -110,8 +110,8 @@ def face_distance(face_encodings, face_to_compare):
 # 比较两个人脸是否同一人
 def is_match_b64(b64_data1, b64_data2):
     # calculate distance between embeddings
-    encoding_list1, face_boxes1 = get_features_b64(b64_data1, angle=0)
-    encoding_list2, face_boxes2 = get_features_b64(b64_data2, angle=0)
+    encoding_list1, face_boxes1, _ = get_features_b64(b64_data1, angle=0)
+    encoding_list2, face_boxes2, _ = get_features_b64(b64_data2, angle=0)
 
     if len(face_boxes1)==0 or len(face_boxes2)==0:
         return False, [999]
@@ -126,7 +126,7 @@ def is_match_b64_2(encoding_list_db, b64_data):
         encoding_list1[1].extend(encoding_list_db[i]['evo'].values())
 
     # calculate distance between embeddings
-    encoding_list2, face_boxes = get_features_b64(b64_data, angle=0)
+    encoding_list2, face_boxes, _ = get_features_b64(b64_data, angle=0)
 
     if len(face_boxes)==0:
         return False, [999]

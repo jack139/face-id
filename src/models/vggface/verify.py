@@ -11,7 +11,7 @@ from keras.preprocessing import image
 from .keras_vggface.vggface import VGGFace
 from .keras_vggface.utils import preprocess_input
 import face_recognition
-from facelib.utils import extract_face_b64, ajust_face_angle
+from facelib.utils import extract_face_b64, adjust_face_angle
 from config.settings import ALGORITHM, VGGFACE_WEIGHTS
 
 
@@ -54,7 +54,7 @@ def extract_face(filename, angle, required_size=(224, 224)):
         image = image.resize(required_size)
 
         # 调整人脸角度
-        image = ajust_face_angle(face, image, angle)
+        image = adjust_face_angle(face, image, angle)
 
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)
@@ -100,7 +100,7 @@ def get_features_b64(base64_data, angle=None):
     if len(faces) == 0:
         return [], []
     yhat2 = get_features_array(faces)
-    return yhat2, face_boxs
+    return yhat2, face_boxs, faces
 
 
 # 根据人脸列表返回特征
@@ -166,15 +166,57 @@ def is_match_b64_2(encoding_list_db, b64_data):
             results[pos] = future.result()
 
     if len(results[0][1])==0:
-        return False, [999]
+        return False, [999], []
 
     distance_vgg = face_distance(encoding_list1[0], results[0][0][0])
     x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
     if x.any():
-        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold']
+        return True, distance_vgg/ALGORITHM['vgg']['distance_threshold'], results[0][2]
 
     # 均未匹配
-    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
+    return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'], results[0][2] # 只返回 vgg 结果
+
+
+
+# 与给定的若干人脸中识别, encoding_list_db来自已知db用户, 多对1, db里可能有多个脸，base64只取一个脸， 多线程处理
+# 因为数据集比较少，通过比较排序搜索，用于双因素识别
+def is_match_b64_3(encoding_list_data, b64_data):
+    from models.parallel.verify import get_features_b64_thread
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_list = [
+            executor.submit(get_features_b64_thread, 'vgg', b64_data), # 0
+        ]
+        for future in concurrent.futures.as_completed(future_list):
+            pos = future_list.index(future)
+            results[pos] = future.result()
+
+    if len(results[0][1])==0:
+        return []
+
+    # 搜索
+    face_X, face_y = encoding_list_data
+    # 计算距离
+    distance_list = face_distance(face_X, results[0][0][0])
+    # 合并结果，去掉大于阈值的结果
+    labels = {}
+    result_list = []
+    for i,j in zip(face_y, distance_list):
+        if j > ALGORITHM['vgg']['distance_threshold']:
+            continue
+        if i in labels.keys():
+            labels[i] += 1
+        else:
+            labels[i] = 1
+            result_list.append([i,j])
+
+    #result_list = [ (i,j) for i,j in zip(face_y, distance_list) if j<= ALGORITHM['vgg']['distance_threshold'] ]
+    # 按距离排序
+    result_list = sorted(result_list, key=lambda s: s[1])
+    result_list = [ i+[labels[i[0]]] for i in result_list ]
+    # 返回格式 [(user_id1, distance1), (user_id2, distance2), ... ], face_boxes, face_image_array
+    return result_list, results[0][1], results[0][2]
 
 
 #############################################################################################3 

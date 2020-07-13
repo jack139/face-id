@@ -18,19 +18,25 @@ import binascii
 logger = logger.get_logger(__name__)
 
 
-def process_api(request_msg):
+def process_api(request_id, request_msg):
     request = request_msg
     try:
         if request['api']=='face_search': # 人脸识别
-            if request['user_id'] is None: # 1:N
-                r = api_func.face_search(request['image'], request['group_id'], request['max_user_num'])
+            if request['user_id'] is None and request['mobile_tail']=='': # 1:N
+                r = api_func.face_search(request_id, request['image'], request['group_id'], request['max_user_num'])
                 # 准备结果
-                result = { 'code' : 200, 'data' : { 'user_list' : r } }
+                result = { 'code' : 200, 'data' : { 'user_list' : r, 'request_id' : request_id } }
+
+            elif request['user_id'] is None: # 双因素识别: 人脸+手机号后4位
+                r = api_func.face_search_mobile_tail(request_id, request['image'], request['mobile_tail'], 
+                        request['group_id'], request['max_user_num'])
+                # 准备结果
+                result = { 'code' : 200, 'data' : { 'user_list' : r, 'request_id' : request_id } }
 
             else: # 1:1 
-                r = api_func.face_verify_db(request['image'], request['group_id'], request['user_id'])
+                r = api_func.face_verify_db(request_id, request['image'], request['group_id'], request['user_id'])
                 # 准备结果
-                result = { 'code' : 200, 'data' : { 'is_match' : r[0], 'score' : r[1] } }
+                result = { 'code' : 200, 'data' : { 'is_match' : r[0], 'score' : r[1], 'request_id' : request_id } }
 
         elif request['api']=='face_verify': # 人脸验证
             r = api_func.face_verify(request['image1'], request['image2'])
@@ -84,7 +90,7 @@ def process_thread(msg_body):
 
     start_time = datetime.now()
 
-    api_result = process_api(msg_body['data'])
+    api_result = process_api(msg_body['request_id'], msg_body['data'])
 
     # 发布redis消息
     #helper.redis_publish(msg_body['request_id'], api_result)

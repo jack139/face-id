@@ -87,7 +87,7 @@ def extract_face_b64(b64_data, angle=None, required_size=(224, 224)):
         image = image.resize(required_size)
 
         # 调整人脸角度
-        image = ajust_face_angle(face, image, angle)
+        image = adjust_face_angle(face, image, angle)
 
         face_array = np.array(image, 'uint8')
         face_list.append(face_array)
@@ -125,11 +125,11 @@ def _HorizontalEyes(pts):
     k = (y2-y1) / (x2-x1)
     angle = np.arctan(k)/np.pi*180
     #print('angle: ', angle)
-    angle = angle if abs(angle)>3 else 0 # 大于3度才修正
+    #angle = angle if abs(angle)>3 else 0 # 大于3度才修正
     return angle
 
 # angle: None 不变， 0 只水平修正， 360 水平修正后左右镜面， 非0 水平修正后旋转
-def ajust_face_angle(face, image, angle): # face为array, image为对应Image图像
+def adjust_face_angle(face, image, angle): # face为array, image为对应Image图像
     if angle is None:
         return image
     # 寻找特征点

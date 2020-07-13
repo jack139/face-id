@@ -21,11 +21,11 @@ def get_features_b64_thread(face_algorithm, b64_data):
     tb._SYMBOLIC_SCOPE.value = True
 
     if face_algorithm=='vgg':
-        encoding_list, face_boxes = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
+        encoding_list, face_boxes, faces = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
     else:
-        encoding_list, face_boxes = verify_evo.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
+        encoding_list, face_boxes, faces = verify_evo.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
     print('[{} - Time taken: {!s}]'.format(face_algorithm, datetime.now() - start_time))
-    return encoding_list, face_boxes
+    return encoding_list, face_boxes, faces
 
 
 # 比较两个人脸是否同一人 --------- 不会被knn_db调用, 多线程实现 获取特征值
