@@ -25,10 +25,10 @@ from models.vggface.keras_vggface.vggface import VGGFace
 
 # 模型参数
 epochs_num = 100
-batch_size = 50
-steps_per_epoch = 80  # batch_size * steps_per_epoch < 训练样本数 （train8 = 412*10）
+batch_size = 20
+steps_per_epoch = 200  # batch_size * steps_per_epoch < 训练样本数 （train8 = 448*10）
 target_size = (224, 224)
-output_dim = 412
+output_dim = 448
 train_dir = '../data/train8'
 validation_dir = '../data/test8'
 
@@ -110,7 +110,8 @@ if __name__ == '__main__':
 
 
     # 顺序训练时，冻结、解冻的层
-    freeze_layers = ['flatten_added', 'conv5_3_1x1_reduce', 'conv5_2_1x1_reduce']
+    #freeze_layers = ['flatten_added', 'conv5_3_1x1_reduce', 'conv5_2_1x1_reduce', 'conv5_1_1x1_reduce']
+    freeze_layers = ['flatten_added', 'conv5_3_1x1_reduce']
 
     for i in range(len(freeze_layers)):
         # 冻结相应的层

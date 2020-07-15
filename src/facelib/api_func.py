@@ -6,7 +6,7 @@ import numpy as np
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info, face_update, \
     user_list_by_group, user_list_by_mobile_tail, face_save_to_temp
-from config.settings import ALGORITHM
+from config.settings import ALGORITHM, IMPORT_ANGLE
 
 from models.parallel import verify
 from models.predict_plus import predict_parallel, predict_thread_db
@@ -96,7 +96,7 @@ def face_features(b64_data, face_id, group_id):
     face_image = []
 
     # 保存特征值：1. 原始，2. 水平后镜像
-    for angle in [None, 360]:
+    for angle in IMPORT_ANGLE:
         encodings, boxes, face_list = verify.get_features_b64(b64_data, angle)
         if len(boxes)==0: # 未检测到人脸
             return False
@@ -110,7 +110,7 @@ def face_features(b64_data, face_id, group_id):
     # 更新数据库：特征值、人脸图片
     r = face_update(face_id, encodings=encodings_result, image=face_image)
 
-    # 重新训练模型
+    # 重新训练模型: TODO： 需要修改为集中训练，在这可能会频繁训练！！！
     r2 = user_list_by_group(group_id)
     if len(r2)>0: 
         # 重新训练模型, 至少需要1个用户

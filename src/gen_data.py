@@ -6,13 +6,13 @@ from PIL import Image
 import numpy as np
 
 ratio = 0.5  # train/total
-max_person = 50 # 人脸数量
+max_person = 50 # 人数量
 max_images = 20 # 使用的照片数量
 
 
 path = '../../face_data/AFDB_face_dataset'
-train = 'data/train2a'
-test = 'data/test2a'
+train = 'data/train2'
+test = 'data/test2'
 
 #path = '../../face_data/CASIA-maxpy-clean'
 #train = 'data/train9'
@@ -37,18 +37,23 @@ def get_face_image(path, file_list):
     face_file = []
     for i in file_list:
         image = face_recognition.load_image_file(os.path.join(path, i))
+
         # 调整人脸角度， 按第一个人的角度调整
-        face_landmarks_list = face_recognition.face_landmarks(image)
-        pil_image = Image.fromarray(image)
-        if len(face_landmarks_list)==0:
-            continue
-        pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
-        #pil_image.show()
-        image = np.array(pil_image)
+        #face_landmarks_list = face_recognition.face_landmarks(image)
+        #if len(face_landmarks_list)==0:
+        #    continue
+        #pil_image = Image.fromarray(image)
+        #pil_image = _HorizontalEyes(pil_image, [face_landmarks_list[0]['left_eye'][0]] + [face_landmarks_list[0]['right_eye'][0]])
+        #image = np.array(pil_image)
+
         # 获取人脸
         face_bounding_boxes = face_recognition.face_locations(image)
         if len(face_bounding_boxes) == 1:
             face_file.append(i)
+
+        if len(face_file)>max_images:
+            break
+
     return face_file
 
 
@@ -100,3 +105,29 @@ if __name__ == "__main__":
         # 生成test的数据
         for i in file_list[train_c:]: 
             shutil.copy(os.path.join(path,d,i), output_test)
+
+
+
+## 将图片调整为正方形
+#
+#    path = '../../face_data/AFDB_face_dataset'
+#
+#    dir_list = os.listdir(path)
+#    dir_list = sorted(dir_list)
+#
+#    n = 0
+#    for d in dir_list:
+#
+#        # 所以文件
+#        file_list = os.listdir(os.path.join(path, d))
+#        file_list = sorted(file_list)
+#
+#        print(d, len(file_list))
+#
+#        for i in file_list:
+#            file_path = os.path.join(path, d, i)
+#
+#            im = Image.open(file_path)
+#            n_size = max(im.size)
+#            im = im.resize((n_size, n_size))
+#            im.save(file_path, quality=95)

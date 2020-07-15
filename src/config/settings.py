@@ -50,23 +50,27 @@ algorithm_settings = {
 }
 
 # 训练时角度修正：
-TRAINING_ANGLE = [None] # 不修正
-#TRAINING_ANGLE = [None, 360] # 水平镜像
+#TRAINING_ANGLE = [None] # 不修正
+TRAINING_ANGLE = [None, 360] # 水平镜像
 #TRAINING_ANGLE = [None, 0, 360] # 按修正双眼水平，水平镜像
 #TRAINING_ANGLE = [None, 0, -20, -5, 5, 20] # 水平修正后转多个角度
 
+# 注册时角度修正：
+IMPORT_ANGLE = [None, 360] # 水平镜像
+
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
 #VGGFACE_WEIGHTS = 'vggface'
-VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4.h5'
-#VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
+#VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4.h5'
+VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
+#VGGFACE_WEIGHTS = '../data/h5/no_classifier.h5'
 
 # 特征值训练模型保存路径
-TRAINED_MODEL_PATH = '/opt/data/model'
-#TRAINED_MODEL_PATH = '../data/model'
+#TRAINED_MODEL_PATH = '/opt/data/model'
+TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
-EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
-#EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
+#EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
+EVO_MODEL_BASE = '/home/gt/Codes/yhtech/face_model/face.evoLVe.PyTorch/'
 
 # faceNET 模型l路径
 #FACENET_MODEL_BASE = '/opt/data/face_model/20180402-114759/'

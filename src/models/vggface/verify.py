@@ -77,7 +77,7 @@ def get_features(filename, angle=None): # angle=None 识别时不修正角度，
     # extract faces
     faces, face_boxs = extract_face(filename, angle)
     if len(faces) == 0:
-        return [], []
+        return [], [], []
     yhat2 = get_features_array(faces)
     return yhat2, face_boxs, faces
 
