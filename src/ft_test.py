@@ -119,7 +119,7 @@ def get_model(input_dim, output_dim):
 
 
 if __name__ == '__main__':
-    X_train, y_train, X_test, y_test, label_y = load_data('test8y', ratio=0.3, max_user=400, method='plus')
+    X_train, y_train, X_test, y_test, label_y = load_data('train8', ratio=0.3, max_user=40, method='plus')
 
     input_dim = len(X_train[0])
     output_dim = len(y_train[0])
@@ -146,6 +146,14 @@ if __name__ == '__main__':
     with open('ft_test.h5', 'rb') as f:
         model, label_y = pickle.load(f)
 
-    result = model.predict_classes(X_test[:1])
-    name = label_y.inverse_transform(result)
-    print(name[0])
+    #result = model.predict_classes(X_test[:1])
+    #name = label_y.inverse_transform(result)
+    #print(name[0])
+
+    # 按概率返回结果
+    result = model.predict(X_test[:1])
+    max_list = result[0].argsort()[-5:][::-1] # 返回 5 个概率最大的结果
+    percent_list = [result[0][i] for i in max_list]
+    class_list = label_y.inverse_transform(max_list)
+    result_list = [ i for i in zip(class_list, percent_list) if i[1]>0.5 ] # 保留概率大于 50% 的结果
+    print(result_list)

@@ -50,11 +50,11 @@ def extract_face(filename, angle, required_size=(224, 224)):
         face = pixels[y1:y2, x1:x2]
         image = Image.fromarray(face)
 
-        # 调整尺寸
-        image = image.resize(required_size)
-
         # 调整人脸角度
         image = adjust_face_angle(face, image, angle)
+
+        # 调整尺寸
+        image = image.resize(required_size)
 
         face_array = np.asarray(image, 'float32')
         face_list.append(face_array)

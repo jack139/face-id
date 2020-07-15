@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, time
 import os
 import os.path
 import signal
@@ -115,3 +115,4 @@ if __name__ == "__main__":
             # 人脸数据添加到用户信息
             dbport.user_add_face(group_id, class_dir, face_id)
 
+            time.sleep(0.5)

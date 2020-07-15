@@ -60,9 +60,8 @@ IMPORT_ANGLE = [None, 360] # 水平镜像
 
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
 #VGGFACE_WEIGHTS = 'vggface'
-#VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4.h5'
-VGGFACE_WEIGHTS = '../data/h5/train_ft4.h5'
-#VGGFACE_WEIGHTS = '../data/h5/no_classifier.h5'
+#VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4a.h5'
+VGGFACE_WEIGHTS = '../data/h5/train_ft4a.h5'
 
 # 特征值训练模型保存路径
 #TRAINED_MODEL_PATH = '/opt/data/model'

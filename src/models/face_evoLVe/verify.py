@@ -62,11 +62,11 @@ def extract_face(filename, angle, required_size=[112, 112]):
         face = pixels[y1:y2, x1:x2]
         image = Image.fromarray(face)
 
-        # 调整尺寸
-        image = image.resize(required_size)
-
         # 调整人脸角度
         image = adjust_face_angle(face, image, angle)
+
+        # 调整尺寸
+        image = image.resize(required_size)
 
         # transfer to opencv image
         open_cv_image = np.array(image) 
