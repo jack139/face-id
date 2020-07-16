@@ -37,7 +37,7 @@ if __name__ == "__main__":
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
         
-        predictions = api_func.face_search(image_b64, group_id)
+        predictions = api_func.face_search('', image_b64, group_id)
 
         #start_time = datetime.now()
         #predictions = predict_parallel(predict_thread_db, image_b64, group_id)

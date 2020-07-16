@@ -43,7 +43,7 @@ ALGORITHM = {
 
 # 并行算法设置
 algorithm_settings = {
-    #1 : [ 'vgg', '../data/model/train2ft4x3.vgg.clf' ], # 优先返回
+    #1 : [ 'vgg', '../data/model/train6.vgg.clf' ], # 优先返回
     #2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
     1 : [ 'plus', '' ], # 特征合并 vgg+evo
     #2 : [ 'plus2', '' ], # 特征合并 evo+vgg
