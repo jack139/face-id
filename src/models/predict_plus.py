@@ -20,27 +20,43 @@ def predict_thread(face_algorithm, model_name, image_file, group_id='', data_typ
 
 # 用于db和base64图片的预测线程
 # data_type: 'base64', 'encodings'
-def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64', request_id=''): 
+def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64', request_id='', classifier='knn'): 
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
-    #model_path, _ = os.path.split(model_name) # 取得模型所在路径
+
+    if face_algorithm=='null': # 空算法，直接返回
+        return []
+
     if data_type!='base64': # 不是base64时，是db里的特征值对，根据算法取相应特征值, 
-        image_data = [image_data[face_algorithm][str(ALGORITHM[face_algorithm]['p_angle'])]]
-    return knn_db.predict(image_data, group_id,
-        model_path=TRAINED_MODEL_PATH, 
-        distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
-        face_algorithm=face_algorithm,
-        data_type=data_type)
+        if face_algorithm=='plus':
+            image_data = [image_data['vgg']['None']+image_data['evo']['None']]
+        elif face_algorithm=='plus2':
+            image_data = [image_data['evo']['None']+image_data['vgg']['None']]
+        else:    
+            #image_data = [image_data[face_algorithm][str(ALGORITHM[face_algorithm]['p_angle'])]]
+            image_data = [image_data[face_algorithm]['None']] # 使用原始特征值
+
+    if classifier=='knn': # KNN classifier
+        return knn_db.predict(image_data, group_id,
+            model_path=TRAINED_MODEL_PATH, 
+            distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+            face_algorithm=face_algorithm,
+            data_type=data_type)
+    else: # Keras classifier
+        return knn_db.predict_K(image_data, group_id,
+            model_path=TRAINED_MODEL_PATH, 
+            face_algorithm=face_algorithm,
+            data_type=data_type)
 
 # 启动并行算法
-def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id=''):
+def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id='', classifier='knn'):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future1 = executor.submit(thread_func, algorithm_settings[1][0], algorithm_settings[1][1], 
-                image_data, group_id, data_type, request_id)
+                image_data, group_id, data_type, request_id, classifier)
         future2 = executor.submit(thread_func, algorithm_settings[2][0], algorithm_settings[2][1], 
-                image_data, group_id, data_type, request_id)
+                image_data, group_id, data_type, request_id, classifier)
         for future in concurrent.futures.as_completed([future1, future2]):
             predictions = future.result()
             if future==future1:

@@ -9,7 +9,7 @@ from models import knn_db
 
 if __name__ == "__main__":
     if len(sys.argv)<5:
-        print("usage: python3 %s <algorithm> <group_id> <model_path> <test dir or file>" % sys.argv[0])
+        print("usage: python3 %s <algorithm> <group_id> <model_path> <test dir or file> [keras]" % sys.argv[0])
         sys.exit(2)
 
     face_algorithm = sys.argv[1]
@@ -22,6 +22,10 @@ if __name__ == "__main__":
     model_path = sys.argv[3]
     test_thing = sys.argv[4]
 
+    if len(sys.argv)==6:
+        classifier = sys.argv[5]
+    else:
+        classifier = 'knn'
 
     if os.path.isdir(test_thing):
         images = os.listdir(test_thing)
@@ -41,10 +45,15 @@ if __name__ == "__main__":
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
         start_time = datetime.now()
-        predictions = knn_db.predict(image_b64, group_id,
-            model_path = model_path,
-            distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
-            face_algorithm=face_algorithm)
+        if classifier=='knn':
+            predictions = knn_db.predict(image_b64, group_id,
+                model_path = model_path,
+                distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
+                face_algorithm=face_algorithm)
+        else:
+            predictions = knn_db.predict_K(image_b64, group_id,
+                model_path = model_path,
+                face_algorithm=face_algorithm)
         print('[Time taken: {!s}]'.format(datetime.now() - start_time))
 
         # Print results on the console

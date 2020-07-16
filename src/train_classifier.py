@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # 特征值分类器训练
-
+import sys
 import numpy as np
 from sklearn import preprocessing
 
@@ -38,11 +38,16 @@ def get_encodings(encodings_set, method):
         for i in encodings_set['vgg'].keys():
             plus.append(encodings_set['vgg'][i]+encodings_set['evo'][i])
         return plus
+    elif method=='plus2': # evo+vgg
+        plus = []
+        for i in encodings_set['vgg'].keys():
+            plus.append(encodings_set['evo'][i]+encodings_set['vgg'][i])
+        return plus
     #elif method=='tri':
     #    return encodings_set[0]+encodings_set[1]+encodings_set[2]
     return []
 
-def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
+def load_data(group_id, ratio=0.8, face_num=10, max_user=None, method='vgg'):
 
     X_train = []
     y_train = []
@@ -56,7 +61,7 @@ def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
     while 1:
         user_list = dbport.user_list_by_group(group_id, start=start, length=max_length)
         for i in tqdm(range(len(user_list))):
-            if total>max_user:
+            if max_user and total>max_user:
                 break
 
             X = []
@@ -79,7 +84,7 @@ def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
 
             total += 1
 
-        if total>max_user:
+        if max_user and total>max_user:
             break
 
         if len(user_list)<max_length: 
@@ -99,11 +104,6 @@ def load_data(group_id, ratio=0.8, face_num=10, max_user=500, method='vgg'):
 
 
 
-# 模型参数
-epochs_num = 120
-batch_size = 50
-
-
 # 创建模型
 def get_model(input_dim, output_dim):
     # 三层网络 模型定义
@@ -118,8 +118,31 @@ def get_model(input_dim, output_dim):
     return model
 
 
+# 模型参数
+epochs_num = 100
+batch_size = 50
+
+
 if __name__ == '__main__':
-    X_train, y_train, X_test, y_test, label_y = load_data('train8', ratio=0.3, max_user=40, method='plus')
+    if len(sys.argv)<3:
+        print("usage: python3 %s <algorithm> <group_id> [max_user] [ratio]" % sys.argv[0])
+        sys.exit(2)
+
+    method = sys.argv[1]
+    group_id = sys.argv[2]
+
+    if len(sys.argv)>3:
+        max_user = int(sys.argv[3])
+    else:
+        max_user = None
+
+    if len(sys.argv)>4:
+        ratio = float(sys.argv[4])
+    else:
+        ratio = 1.0
+
+
+    X_train, y_train, X_test, y_test, label_y = load_data(group_id, ratio=ratio, max_user=max_user, method=method)
 
     input_dim = len(X_train[0])
     output_dim = len(y_train[0])
@@ -129,29 +152,41 @@ if __name__ == '__main__':
 
     print('input_dim=', input_dim, 'output_dim=', output_dim, ' batch_size=', batch_size, ' epochs_num=', epochs_num)
 
-    history = model.fit(X_train, y_train, epochs=epochs_num, batch_size=batch_size, verbose=1,
-        validation_data=(X_test, y_test))
+    history = model.fit(X_train, y_train, 
+            epochs=epochs_num, 
+            batch_size=batch_size, 
+            verbose=1,
+            #validation_data=(X_test, y_test)
+        )
 
     # 评估预测结果
-    results = model.evaluate(X_test, y_test, verbose=1)
-    print('predict: ', results)
+    #results = model.evaluate(X_test, y_test, verbose=1)
+    #print('predict: ', results)
 
 
     # 保存模型 和 标签数据
     import pickle
-    with open('ft_test.h5', 'wb') as f:
-        pickle.dump((model, label_y), f)
+
+    h5_filename = '%s.%s.h5'%(group_id, method)
+
+    model.save(h5_filename)
+
+    with open(h5_filename+'.save', 'wb') as f:
+        pickle.dump((input_dim, output_dim, label_y), f)
 
     # 读取模型，并识别
-    with open('ft_test.h5', 'rb') as f:
-        model, label_y = pickle.load(f)
+    with open(h5_filename+'.save', 'rb') as f:
+        input_dim, output_dim, label_y = pickle.load(f)
+
+    model = get_model(input_dim, output_dim)
+    model.load_weights(h5_filename)
 
     #result = model.predict_classes(X_test[:1])
     #name = label_y.inverse_transform(result)
     #print(name[0])
 
     # 按概率返回结果
-    result = model.predict(X_test[:1])
+    result = model.predict(X_train[:1])
     max_list = result[0].argsort()[-5:][::-1] # 返回 5 个概率最大的结果
     percent_list = [result[0][i] for i in max_list]
     class_list = label_y.inverse_transform(max_list)

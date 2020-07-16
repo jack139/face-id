@@ -10,20 +10,21 @@ from facelib import dbport
 
 
 if __name__ == "__main__":
-    if len(sys.argv)<3:
-        print("usage: python3 %s <group_id> <test_group_id> [length_num] [last_face_num]" % sys.argv[0])
+    if len(sys.argv)<4:
+        print("usage: python3 %s <group_id> <test_group_id> <knn|keras> [length_num] [last_face_num]" % sys.argv[0])
         sys.exit(2)
 
     group_id = sys.argv[1]
     test_group_id = sys.argv[2]
+    classifier = sys.argv[3]
 
-    if len(sys.argv)>3:
-        length_num = int(sys.argv[3])
+    if len(sys.argv)>4:
+        length_num = int(sys.argv[4])
     else:
         length_num = 1000
 
-    if len(sys.argv)>4:
-        last_face_num = int(sys.argv[4])
+    if len(sys.argv)>5:
+        last_face_num = int(sys.argv[5])
     else:
         last_face_num = 1000
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
                 continue
 
             # 并行识别
-            predictions = predict_parallel(predict_thread_db, r['encodings'], group_id, 'encodings')
+            predictions = predict_parallel(predict_thread_db, r['encodings'], group_id, 'encodings', classifier=classifier)
 
             # Print results on the console
             if len(predictions)==0:

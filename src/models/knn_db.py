@@ -1,14 +1,8 @@
-"""
-Algorithm Description:
-The knn classifier is first trained on a set of labeled (known) faces and can then predict the person
-in an unknown image by finding the k most similar faces (images with closet face-features under eucledian distance)
-in its training set, and performing a majority vote (possibly weighted) on their label.
+# -*- coding: utf-8 -*-
 
-For example, if k=3, and the three closest face images to the given image in the training set are one image of Biden
-and two images of Obama, The result would be 'Obama'.
-
-"""
 import os
+import threading
+import numpy as np
 import math, operator
 from datetime import datetime
 from sklearn import neighbors
@@ -19,8 +13,14 @@ from facelib.utils import import_verify
 from tqdm import tqdm
 from .knn import score_acc_f1
 
+import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
+graph = tf.Graph()
+session = tf.Session(graph=graph)
+
 CLF_CACHE = {}
 
+cache_lock = threading.Lock() # 修改 CLF_CACHE 时需要锁住
 
 # 训练
 # face_algorithm 只 支持 evo 和 vgg
@@ -92,10 +92,6 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
     :param X_base64: image data in base64 coding
     :param model_path: (optional) 已训练模型路径，默认当前路径
-    :param distance_threshold: (optional) distance threshold for face classification. the larger it is, the more chance
-           of mis-classifying an unknown person as a known one.
-    :return: a list of names and face locations for the recognized faces in the image: [(name, bounding box), ...].
-        For faces of unrecognized persons, the name 'unknown' will be returned.
     """
     global CLF_CACHE
 
@@ -105,15 +101,16 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
     # 检查是否已缓存clf
     mtime = int(os.path.getmtime(clf_path)) # 模型最近修改时间
 
-    if (clf_path in CLF_CACHE.keys()) and (CLF_CACHE[clf_path][1]==mtime): 
-        knn_clf = CLF_CACHE[clf_path][0]
-        #print('Bingo clf cache!', group_id)
-    else:
-        with open(clf_path, 'rb') as f:
-            knn_clf = pickle.load(f)
-        # 放进cache
-        CLF_CACHE[clf_path] = (knn_clf, mtime)
-        print('Feeding CLF cache: ', CLF_CACHE.keys())
+    with cache_lock:
+        if (clf_path in CLF_CACHE.keys()) and (CLF_CACHE[clf_path][1]==mtime): 
+            knn_clf = CLF_CACHE[clf_path][0]
+            #print('Bingo clf cache!', group_id)
+        else:
+            with open(clf_path, 'rb') as f:
+                knn_clf = pickle.load(f)
+            # 放进cache
+            CLF_CACHE[clf_path] = (knn_clf, mtime)
+            print('Feeding CLF cache: ', CLF_CACHE.keys())
 
     if data_type=='base64':
         # 动态载入 verify库
@@ -185,5 +182,83 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
         if labels[temp_result[0][0]]!=max_count and temp_result[0][2]/temp_result2[0][2]<0.5:
             temp_result2.insert(0, temp_result[0]+[labels[temp_result[0][0]]])
         results.extend(temp_result2)
+
+    return results
+
+
+# 识别， 使用 keras
+def predict_K(X_base64, group_id, model_path='', face_algorithm='vgg', data_type='base64', request_id=''): 
+    """
+    Recognizes faces in given image using a trained Keras classifier
+
+    """
+
+    global CLF_CACHE
+
+    # Load a trained Keras model (if one was passed in)
+    clf_path = os.path.join(model_path, '%s.%s.h5'%(group_id, face_algorithm))
+
+    # 检查是否已缓存clf
+    mtime = int(os.path.getmtime(clf_path)) # 模型最近修改时间
+
+    with cache_lock:
+        if (clf_path in CLF_CACHE.keys()) and (CLF_CACHE[clf_path][1]==mtime): 
+            model, label_y = CLF_CACHE[clf_path][0]
+            #print('Bingo clf cache!', group_id)
+        else:
+            with graph.as_default():
+                with session.as_default():
+                    #with open(clf_path, 'rb') as f:
+                    #    keras_clf = pickle.load(f)
+
+                    # 读取模型，并识别
+                    with open(clf_path+'.save', 'rb') as f:
+                        input_dim, output_dim, label_y = pickle.load(f)
+
+                    from train_classifier import get_model
+                    model = get_model(input_dim, output_dim)
+                    model.load_weights(clf_path)
+
+            # 放进cache
+            CLF_CACHE[clf_path] = ((model, label_y), mtime)
+            print('Feeding CLF cache: ', CLF_CACHE.keys())
+
+    if data_type=='base64':
+        # 动态载入 verify库
+        module_verify = import_verify(face_algorithm)
+
+        # Load image file and find face locations
+        # Find encodings for faces in the test iamge
+        faces_encodings, X_face_locations, faces = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
+
+        if len(X_face_locations) == 0:
+            return []
+
+        # 保存人脸到临时表, 只保存vgg的
+        if request_id!='' and face_algorithm=='vgg':
+            dbport.face_save_to_temp(group_id, request_id, image=np.uint8(face_array[0]).tolist())
+
+    else:
+        # data_type = 'encodings'
+        faces_encodings = X_base64
+        X_face_locations = [(0,0,0,0)] # 从db来的数据没有人脸框坐标，只有一个人脸
+
+
+    with graph.as_default():
+        with session.as_default():
+            results = []
+            for x in range(len(X_face_locations)):
+
+                # 按概率返回结果
+                result = model.predict(np.array([faces_encodings[x]]))
+
+                # 整理结果
+                max_list = result[0].argsort()[-5:][::-1] # 返回 5 个概率最大的结果
+                percent_list = [result[0][i] for i in max_list]
+                class_list = label_y.inverse_transform(max_list)
+                # 保留概率大于 10% 的结果, 这里返回的评分是（1-概率）, 为与距离表示一致：越小越接近
+                result_list = [ [i, X_face_locations[x], 1-j, 1] for i,j in zip(class_list, percent_list) if j>0.01 ] 
+                #print(result_list)
+                results.extend(result_list)
 
     return results

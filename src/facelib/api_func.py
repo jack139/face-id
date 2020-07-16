@@ -6,7 +6,7 @@ import numpy as np
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info, face_update, \
     user_list_by_group, user_list_by_mobile_tail, face_save_to_temp
-from config.settings import ALGORITHM, IMPORT_ANGLE
+from config.settings import ALGORITHM, IMPORT_ANGLE, CLASSIFIER_TYPE
 
 from models.parallel import verify
 from models.predict_plus import predict_parallel, predict_thread_db
@@ -55,7 +55,8 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5, face_a
     max_user_num = min(5, max_user_num)
 
     if face_algorithm=='parallel':
-        predictions = predict_parallel(predict_thread_db, b64_data, group_id, request_id=request_id)
+        predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
+                request_id=request_id, classifier=CLASSIFIER_TYPE)
     elif face_algorithm in ('evo', 'vgg'):
         predictions = predict(b64_data, group_id,
             model_path=TRAINED_MODEL_PATH,
