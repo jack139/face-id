@@ -6,11 +6,11 @@ import numpy as np
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info, face_update, \
     user_list_by_group, user_list_by_mobile_tail, face_save_to_temp, user_update
-from config.settings import ALGORITHM, IMPORT_ANGLE
+from config.settings import ALGORITHM, IMPORT_ANGLE, TRAINED_MODEL_PATH
 
 from models.parallel import verify
-from models.predict_plus import predict_parallel, predict_thread_db
-from models.knn_db import predict
+from models.predict_plus import predict_parallel, predict_thread_db, get_features_thread_db
+from models.knn_db import predict_K
 
 # 人脸定位
 def face_locations(b64_data, max_face_num=1):
@@ -60,8 +60,13 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
     # 如果未找到，再使用深度网络分类器（全量特征库）
     if len(predictions)==0 or predictions[0][0]=='unknown':
         print('search using keras classifier')
-        predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
+        plus_encodings = predict_parallel(get_features_thread_db, b64_data, group_id, 
                 request_id=request_id, classifier='keras')
+        predictions = predict_K(plus_encodings, group_id,
+            model_path=TRAINED_MODEL_PATH, 
+            face_algorithm="plus",
+            data_type="encodings")
+
         # 如果仍未识别，返回空
         if len(predictions)==0 or predictions[0][0]=='unknown':
             return []

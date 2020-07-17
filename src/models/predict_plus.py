@@ -3,8 +3,11 @@
 # 使用两个算法模型并行识别
 
 import os, sys
+import numpy as np
 import concurrent.futures
 from config.settings import TRAINED_MODEL_PATH, ALGORITHM, algorithm_settings
+from facelib.utils import import_verify
+from facelib.dbport import face_save_to_temp
 from . import knn
 from . import knn_db
 
@@ -49,6 +52,25 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
             face_algorithm=face_algorithm,
             data_type=data_type)
 
+def get_features_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64', request_id='', classifier='knn'): 
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
+
+    module_verify = import_verify(face_algorithm)
+
+    X_base64 = image_data
+    faces_encodings, X_face_locations, faces = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
+
+    # 保存人脸到临时表, 只保存vgg的
+    if request_id!='' and face_algorithm=='vgg':
+        face_save_to_temp(group_id, request_id, image=np.uint8(faces[0]).tolist())
+
+    if len(X_face_locations) == 0:
+        return []
+    else:
+        return faces_encodings
+
+
 # 启动并行算法
 def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id='', classifier='knn'):
     all_predictions = {}
@@ -65,7 +87,12 @@ def predict_parallel(thread_func, image_data, group_id='', data_type='base64', r
                 all_predictions[2] = predictions
     
     #print(all_predictions)
-    return merge_results(all_predictions)
+
+    if thread_func==get_features_thread_db: # 生成 合并的特征向量
+        plus_features = [all_predictions[1][0].tolist()+all_predictions[2][0].tolist()]
+        return plus_features
+    else: # 返回识别结果
+        return merge_results(all_predictions)
 
 
 # 合并两个算法的结果为最终结果
