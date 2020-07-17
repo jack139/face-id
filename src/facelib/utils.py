@@ -108,7 +108,8 @@ def train_by_group(group_id):
         classifier = knn_db.train(group_id, 
             model_save_path=os.path.join(TRAINED_MODEL_PATH, group_id + ALGORITHM[algorithm]['ext']), 
             n_neighbors=10,
-            face_algorithm=algorithm)
+            face_algorithm=algorithm,
+            need_train=1) # need_train 置 1 的进行训练
         print('[Time taken: {!s} ({}, {})]'.format(datetime.now() - start_time, algorithm, group_id))
 
 

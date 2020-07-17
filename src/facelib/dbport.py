@@ -86,16 +86,18 @@ def user_new(group_id, user_id, name='', mobile='', memo=''):
 
 
 # 更新用户信息，
-def user_update(group_id, user_id, name=None, mobile=None, memo=None):
+def user_update(group_id, user_id, name=None, mobile=None, memo=None, need_train=None):
     if user_info(group_id, user_id)==-1:
         return -1  # 用户不存在
     update_set = {}
-    if name:
+    if name is not None:
         update_set['name'] = name
-    if mobile:
+    if mobile is not None:
         update_set['mobile'] = mobile
-    if memo:
+    if memo is not None:
         update_set['memo'] = memo
+    if need_train is not None:
+        update_set['need_train'] = need_train
 
     if len(update_set)>0: # 有数据更新
         update_set['last_t'] = utils.time_str()
@@ -134,9 +136,13 @@ def user_remove(group_id, user_id):
 
 
 # 用户组里所有用户 user_id， 返回列表
-def user_list_by_group(group_id, start=0, length=100):
+def user_list_by_group(group_id, start=0, length=100, need_train=None):
     length = 1000 if length>1000 else length
-    r = db.users.find({'group_id' : group_id}, {'user_id' : 1}, sort=[('_id', 1)], limit=length, skip=start)
+    if need_train is None:
+        r = db.users.find({'group_id' : group_id}, {'user_id' : 1}, sort=[('_id', 1)], limit=length, skip=start)
+    else:
+        # 使用 need_train 标记
+        r = db.users.find({'group_id' : group_id, 'need_train' : need_train}, {'user_id' : 1}, sort=[('_id', 1)], limit=length, skip=start)
     return [i['user_id'] for i in r if i.get('user_id')]
 
 
@@ -152,6 +158,7 @@ def user_copy(user_id, src_group_id, dst_group_id):
     # 添加用户数据
     r['group_id'] = dst_group_id
     r['time_t'] = r['last_t'] = utils.time_str()
+    r['need_train'] = 1  # 需要重新训练
     r2 = db.users.insert_one(r)
 
     # 人脸引用计数增加
@@ -251,19 +258,6 @@ def face_info(face_id):
 def face_image(face_id):
     r = db.faces.find_one({'_id':ObjectId(face_id)}, {'_id' : 0, 'image' : 1})
     return r
-
-
-######################### 日志操作
-
-# 添加日志
-def log(api, param, result, extra=''):
-    r2 = db.facelog.insert_one({
-        'api'    : api,
-        'param'  : param,
-        'result' : result,
-        'extra'  : extra,
-    })
-    return str(r2.inserted_id)
 
 
 ######################### 其他查询

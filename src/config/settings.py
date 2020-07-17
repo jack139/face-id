@@ -41,19 +41,23 @@ ALGORITHM = {
     'isit'  : { 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },
 }
 
-# 并行算法设置
+# 并行算法设置， 已经分类器类型区分
 algorithm_settings = {
-    #1 : [ 'vgg', '../data/model/train6.vgg.clf' ], # 优先返回
-    #2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
-    1 : [ 'plus', '' ], # 特征合并 vgg+evo
-    #2 : [ 'plus2', '' ], # 特征合并 evo+vgg
-    #2 : [ 'deep', '../data/model/train2.deep.clf' ],
-    #2 : [ 'rec', '../data/model/train4.rec.clf' ],
-    2 : [ 'null', '' ], # 空算法 
+    'knn' : {
+        1 : [ 'vgg', '../data/model/train6.vgg.clf' ], # 优先返回
+        2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
+        #2 : [ 'deep', '../data/model/train2.deep.clf' ],
+        #2 : [ 'rec', '../data/model/train4.rec.clf' ],
+        #2 : [ 'null', '' ], # 空算法 
+    },
+    'keras' : {
+        1 : [ 'vgg', '' ], # 优先返回
+        2 : [ 'evo', ''],
+        #1 : [ 'plus', '' ], # 特征合并 vgg+evo
+        #2 : [ 'plus2', '' ], # 特征合并 evo+vgg
+        #2 : [ 'null', '' ], # 空算法 
+    }
 }
-
-#分类器类型 'knn' K临近算法， 'keras' 全连接网络
-CLASSIFIER_TYPE='keras' 
 
 # 训练时角度修正：
 #TRAINING_ANGLE = [None] # 不修正
@@ -64,14 +68,15 @@ TRAINING_ANGLE = [None, 360] # 水平镜像
 # 注册时角度修正：
 IMPORT_ANGLE = [None, 360] # 水平镜像
 
+# 特征值训练模型保存路径
+#TRAINED_MODEL_PATH = '/opt/data/model'
+TRAINED_MODEL_PATH = '../data/model'
+#TRAINED_MODEL_PATH = '../data/model_50_10'
+
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
 #VGGFACE_WEIGHTS = 'vggface'
 #VGGFACE_WEIGHTS = '/opt/data/h5/train_ft4a.h5'
 VGGFACE_WEIGHTS = '../data/h5/train_ft4a.h5'
-
-# 特征值训练模型保存路径
-#TRAINED_MODEL_PATH = '/opt/data/model'
-TRAINED_MODEL_PATH = '../data/model'
 
 # face.evoLVe 模型l路径
 #EVO_MODEL_BASE = '/opt/data/face_model/face.evoLVe.PyTorch/'
@@ -110,7 +115,8 @@ SECRET_KEY = {
 ############# 消息中间件设置
 
 KAFKA_CONFIG = {
-    'SERVER' : ['172.17.0.1:9092'],
+    #'SERVER' : ['172.17.0.1:9092'],
+    'SERVER' : ['127.0.0.1:9092'],
     'REQUEST-QUEUE' : 'synchronous-asynchronous-queue',
     'REQUEST-QUEUE-NUM' : 1,
     'RETURN-QUEUE' : 'synchronous-asynchronous-return',

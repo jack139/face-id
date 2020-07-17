@@ -221,4 +221,4 @@ def kafka_recieve_return(consumer, request_id):
 
 # 生成request_id
 def gen_request_id():
-    return hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()
+    return '%s%s'%(time_str(format=3)[2:],hashlib.md5(ranstr(10).encode('utf-8')).hexdigest())

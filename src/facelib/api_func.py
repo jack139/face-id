@@ -5,8 +5,8 @@ import os
 import numpy as np
 from facelib import utils
 from facelib.dbport import user_info, user_face_list, face_info, face_update, \
-    user_list_by_group, user_list_by_mobile_tail, face_save_to_temp
-from config.settings import ALGORITHM, IMPORT_ANGLE, CLASSIFIER_TYPE
+    user_list_by_group, user_list_by_mobile_tail, face_save_to_temp, user_update
+from config.settings import ALGORITHM, IMPORT_ANGLE
 
 from models.parallel import verify
 from models.predict_plus import predict_parallel, predict_thread_db
@@ -49,27 +49,22 @@ def face_verify_db(request_id, b64_data, group_id, user_id):
     return is_match, score
 
 
-# 人脸搜索， face_algorithm 取值： 'parallel' , 'vgg', 'evo'
-def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5, face_algorithm='parallel'):
+# 人脸搜索
+def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
-    if face_algorithm=='parallel':
-        predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
-                request_id=request_id, classifier=CLASSIFIER_TYPE)
-    elif face_algorithm in ('evo', 'vgg'):
-        predictions = predict(b64_data, group_id,
-            model_path=TRAINED_MODEL_PATH,
-            distance_threshold=ALGORITHM[face_algorithm]['distance_threshold'],
-            face_algorithm=face_algorithm)
-    else:
-        return []
-
-    #print(predictions)
-
+    # 先使用knn分类器搜索（临时特征库）
+    predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
+            request_id=request_id, classifier='knn')
+    # 如果未找到，再使用深度网络分类器（全量特征库）
     if len(predictions)==0 or predictions[0][0]=='unknown':
-        # 未识别
-        return []
+        print('search using keras classifier')
+        predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
+                request_id=request_id, classifier='keras')
+        # 如果仍未识别，返回空
+        if len(predictions)==0 or predictions[0][0]=='unknown':
+            return []
 
     # 准备返回结果
     user_list = []
@@ -92,7 +87,7 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5, face_a
 
 
 # 计算特征值
-def face_features(b64_data, face_id, group_id):
+def face_features(b64_data, face_id, group_id, user_id):
     encodings_result = {'vgg':{}, 'evo':{}}
     face_image = []
 
@@ -110,12 +105,10 @@ def face_features(b64_data, face_id, group_id):
 
     # 更新数据库：特征值、人脸图片
     r = face_update(face_id, encodings=encodings_result, image=face_image)
+    r3 = user_update(group_id, user_id, need_train=1) # 标记需要重新训练
 
     # 重新训练模型: TODO： 需要修改为集中训练，在这可能会频繁训练！！！
-    r2 = user_list_by_group(group_id)
-    if len(r2)>0: 
-        # 重新训练模型, 至少需要1个用户
-        utils.train_by_group(group_id)
+    utils.train_by_group(group_id)
 
     return r
 

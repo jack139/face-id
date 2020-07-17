@@ -47,7 +47,7 @@ def get_encodings(encodings_set, method):
     #    return encodings_set[0]+encodings_set[1]+encodings_set[2]
     return []
 
-def load_data(group_id, ratio=0.8, face_num=10, max_user=None, method='vgg'):
+def load_data(group_id, face_num=1000, max_user=None, method='vgg'):
 
     X_train = []
     y_train = []
@@ -61,30 +61,30 @@ def load_data(group_id, ratio=0.8, face_num=10, max_user=None, method='vgg'):
     while 1:
         user_list = dbport.user_list_by_group(group_id, start=start, length=max_length)
         for i in tqdm(range(len(user_list))):
-            if max_user and total>max_user:
+            if max_user and total>=max_user:
                 break
 
             X = []
             y = []
 
             faces = dbport.user_face_list(group_id, user_list[i])
-            for f in faces[:face_num]: # 使用指定数量人脸 
+            for f in faces[:face_num]: # 训练集
                 r = dbport.face_info(f)
                 if r:
                     e_list = get_encodings(r['encodings'], method)
-                    X.extend(e_list)
-                    y.extend([user_list[i]]*len(e_list))
+                    X_train.extend(e_list)
+                    y_train.extend([user_list[i]]*len(e_list))
 
-            # 划分训练集和测试集
-            train_num = int(len(X)*ratio)
-            X_train.extend(X[:train_num])
-            y_train.extend(y[:train_num])
-            X_test.extend(X[train_num:])
-            y_test.extend(y[train_num:])
+            for f in faces[face_num:]: # 验证集
+                r = dbport.face_info(f)
+                if r:
+                    e_list = get_encodings(r['encodings'], method)
+                    X_test.extend(e_list)
+                    y_test.extend([user_list[i]]*len(e_list))
 
             total += 1
 
-        if max_user and total>max_user:
+        if max_user and total>=max_user:
             break
 
         if len(user_list)<max_length: 
@@ -125,24 +125,24 @@ batch_size = 50
 
 if __name__ == '__main__':
     if len(sys.argv)<3:
-        print("usage: python3 %s <algorithm> <group_id> [max_user] [ratio]" % sys.argv[0])
+        print("usage: python3 %s <algorithm> <group_id> [max_user] [face_num]" % sys.argv[0])
         sys.exit(2)
 
     method = sys.argv[1]
     group_id = sys.argv[2]
 
     if len(sys.argv)>3:
-        max_user = int(sys.argv[3])
+        max_user = int(sys.argv[3]) # 最大训练人数
     else:
         max_user = None
 
     if len(sys.argv)>4:
-        ratio = float(sys.argv[4])
+        face_num = int(sys.argv[4]) # 同一个人训练的人脸数
     else:
-        ratio = 1.0
+        face_num = 1000
 
 
-    X_train, y_train, X_test, y_test, label_y = load_data(group_id, ratio=ratio, max_user=max_user, method=method)
+    X_train, y_train, X_test, y_test, label_y = load_data(group_id, face_num=face_num, max_user=max_user, method=method)
 
     input_dim = len(X_train[0])
     output_dim = len(y_train[0])

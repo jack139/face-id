@@ -53,9 +53,9 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
 def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id='', classifier='knn'):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future1 = executor.submit(thread_func, algorithm_settings[1][0], algorithm_settings[1][1], 
+        future1 = executor.submit(thread_func, algorithm_settings[classifier][1][0], algorithm_settings[classifier][1][1], 
                 image_data, group_id, data_type, request_id, classifier)
-        future2 = executor.submit(thread_func, algorithm_settings[2][0], algorithm_settings[2][1], 
+        future2 = executor.submit(thread_func, algorithm_settings[classifier][2][0], algorithm_settings[classifier][2][1], 
                 image_data, group_id, data_type, request_id, classifier)
         for future in concurrent.futures.as_completed([future1, future2]):
             predictions = future.result()

@@ -83,6 +83,7 @@ class DbFaceReg(Resource):
                 'image'    : image,
                 'face_id'  : face_id,
                 'group_id' : group_id,
+                'user_id'  : user_id,
             }
             # 发消息给 kafka
             r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
@@ -172,6 +173,7 @@ class DbFaceUpdate(Resource):
                     'image'    : image,
                     'face_id'  : face_id,
                     'group_id' : group_id,
+                    'user_id'  : user_id,
                 }
                 # 发消息给 kafka
                 r = helper.kafka_send_msg('NO_RECIEVER', request_msg)

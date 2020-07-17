@@ -25,7 +25,7 @@ cache_lock = threading.Lock() # 修改 CLF_CACHE 时需要锁住
 # 训练
 # face_algorithm 只 支持 evo 和 vgg
 def train(group_id, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', 
-    verbose=False, face_algorithm='rec', face_num=1000):
+    verbose=False, face_algorithm='rec', face_num=1000, max_user=None, need_train=None):
     """
     Trains a k-nearest neighbors classifier for face recognition.
 
@@ -43,8 +43,11 @@ def train(group_id, model_save_path=None, n_neighbors=None, knn_algo='ball_tree'
     max_length = 1000
     total = 0
     while 1:
-        user_list = dbport.user_list_by_group(group_id, start=start, length=max_length)
+        user_list = dbport.user_list_by_group(group_id, start=start, length=max_length, need_train=need_train)
         for i in tqdm(range(len(user_list))):
+            if max_user and total>=max_user:
+                break
+
             faces = dbport.user_face_list(group_id, user_list[i])
             for f in faces[:face_num]: # 同一个人，只训练指定数量的人脸，默认1000
                 r = dbport.face_info(f)
@@ -53,13 +56,21 @@ def train(group_id, model_save_path=None, n_neighbors=None, knn_algo='ball_tree'
                         X.append(r['encodings'][face_algorithm][str(angle)])
                         y.append(user_list[i])
 
-        total += len(user_list)
+            total += 1
+
+        if max_user and total>=max_user:
+            break
+
         if len(user_list)<max_length: 
             break
         else: # 未完，继续
             start += max_length
 
-    print('Data loaded:', total)
+    print('Data loaded:', total, len(X))
+
+    # 没有可训练数据
+    if len(X)==0:
+        return None
 
     # Determine how many neighbors to use for weighting in the KNN classifier
     if n_neighbors is None:
@@ -136,7 +147,7 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
     # Use the KNN model to find the first 5 best matches for the test face
     # 返回5个最佳结果
-    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=10)
+    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=5)
     #are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
 
     # Predict classes and remove classifications that aren't within the threshold

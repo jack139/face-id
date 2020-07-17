@@ -49,7 +49,7 @@ def process_api(request_id, request_msg):
             result = { 'code' : 200, 'data' : { 'face_num' : r[0], 'locations' : r[1] } }
 
         elif request['api']=='face_features': # 计算特征值,  不返回结果
-            ret = api_func.face_features(request['image'], request['face_id'], request['group_id'])
+            ret = api_func.face_features(request['image'], request['face_id'], request['group_id'], request['user_id'])
             if ret==False:
                 logger.info('face_features 未检测到人脸: '+request['face_id'])
             # 准备结果

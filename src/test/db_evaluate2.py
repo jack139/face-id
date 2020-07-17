@@ -18,6 +18,10 @@ if __name__ == "__main__":
     test_group_id = sys.argv[2]
     classifier = sys.argv[3]
 
+    if classifier not in ['knn', 'keras']:
+        print('invalid classifier!')
+        sys.exit(3)
+
     if len(sys.argv)>4:
         length_num = int(sys.argv[4])
     else:
