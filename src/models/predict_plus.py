@@ -3,7 +3,7 @@
 # 使用两个算法模型并行识别
 
 import os, sys
-from datetime import datetime
+#from datetime import datetime
 import numpy as np
 import concurrent.futures
 from config.settings import TRAINED_MODEL_PATH, ALGORITHM, algorithm_settings
@@ -78,7 +78,7 @@ def get_features_thread_db(face_algorithm, model_name, image_data, group_id, dat
 def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id='', classifier='knn'):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        start_time = datetime.now()
+        #start_time = datetime.now()
         future1 = executor.submit(thread_func, algorithm_settings[classifier][1][0], algorithm_settings[classifier][1][1], 
                 image_data, group_id, data_type, request_id, classifier)
         future2 = executor.submit(thread_func, algorithm_settings[classifier][2][0], algorithm_settings[classifier][2][1], 
@@ -87,10 +87,10 @@ def predict_parallel(thread_func, image_data, group_id='', data_type='base64', r
             predictions = future.result()
             if future==future1:
                 all_predictions[1] = predictions
-                print('[1 Time taken: {!s}]'.format(datetime.now() - start_time))
+                #print('[1 Time taken: {!s}]'.format(datetime.now() - start_time))
             else:
                 all_predictions[2] = predictions
-                print('[2 Time taken: {!s}]'.format(datetime.now() - start_time))
+                #print('[2 Time taken: {!s}]'.format(datetime.now() - start_time))
             
     
     #print(all_predictions)
