@@ -41,7 +41,10 @@ ALGORITHM = {
     'isit'  : { 'distance_threshold' : 1.03, 'p_angle':None, 'ext' : '.isit.clf', 'module' : 'models.insightface.verify' },
 }
 
-# 并行算法设置， 已经分类器类型区分
+# 深度网络分类器，百分比阈值
+KERAS_THRESHOLD_PERCENTAGE = 0.1
+
+# 并行算法设置， 按分类器类型区分
 algorithm_settings = {
     'knn' : {
         1 : [ 'vgg', '../data/model/train6.vgg.clf' ], # 优先返回
@@ -56,7 +59,11 @@ algorithm_settings = {
         #1 : [ 'plus', '' ], # 特征合并 vgg+evo
         #2 : [ 'plus2', '' ], # 特征合并 evo+vgg
         #2 : [ 'null', '' ], # 空算法 
-    }
+    },
+    'api' : { # api 中并行获取特征值的设置 -- 不要修改
+        1 : [ 'vgg', '' ], # 优先返回
+        2 : [ 'evo', ''],
+    },
 }
 
 # 训练时角度修正：

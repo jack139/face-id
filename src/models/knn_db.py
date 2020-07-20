@@ -8,7 +8,7 @@ from datetime import datetime
 from sklearn import neighbors
 import pickle
 from facelib import dbport
-from config.settings import ALGORITHM, TRAINING_ANGLE
+from config.settings import ALGORITHM, TRAINING_ANGLE, KERAS_THRESHOLD_PERCENTAGE
 from facelib.utils import import_verify
 from tqdm import tqdm
 from .knn import score_acc_f1
@@ -268,7 +268,8 @@ def predict_K(X_base64, group_id, model_path='', face_algorithm='vgg', data_type
                 percent_list = [result[0][i] for i in max_list]
                 class_list = label_y.inverse_transform(max_list)
                 # 保留概率大于 10% 的结果, 这里返回的评分是（1-概率）, 为与距离表示一致：越小越接近
-                result_list = [ [i, X_face_locations[x], 1-j, 1] for i,j in zip(class_list, percent_list) if j>0.01 ] 
+                result_list = [ [i, X_face_locations[x], 1-j, 1] for i,j in zip(class_list, percent_list) \
+                        if j>KERAS_THRESHOLD_PERCENTAGE ] 
                 #print(result_list)
                 results.extend(result_list)
 

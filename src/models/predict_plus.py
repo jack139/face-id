@@ -3,6 +3,7 @@
 # 使用两个算法模型并行识别
 
 import os, sys
+from datetime import datetime
 import numpy as np
 import concurrent.futures
 from config.settings import TRAINED_MODEL_PATH, ALGORITHM, algorithm_settings
@@ -52,6 +53,7 @@ def predict_thread_db(face_algorithm, model_name, image_data, group_id, data_typ
             face_algorithm=face_algorithm,
             data_type=data_type)
 
+# 并行算法获取人脸特征值
 def get_features_thread_db(face_algorithm, model_name, image_data, group_id, data_type='base64', request_id='', classifier='knn'): 
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
@@ -61,20 +63,22 @@ def get_features_thread_db(face_algorithm, model_name, image_data, group_id, dat
     X_base64 = image_data
     faces_encodings, X_face_locations, faces = module_verify.get_features_b64(X_base64, angle=ALGORITHM[face_algorithm]['p_angle'])
 
+    if len(X_face_locations) == 0:
+        return [],[]
+
     # 保存人脸到临时表, 只保存vgg的
     if request_id!='' and face_algorithm=='vgg':
         face_save_to_temp(group_id, request_id, image=np.uint8(faces[0]).tolist())
 
-    if len(X_face_locations) == 0:
-        return []
-    else:
-        return faces_encodings
+    return faces_encodings, X_face_locations
+
 
 
 # 启动并行算法
 def predict_parallel(thread_func, image_data, group_id='', data_type='base64', request_id='', classifier='knn'):
     all_predictions = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
+        start_time = datetime.now()
         future1 = executor.submit(thread_func, algorithm_settings[classifier][1][0], algorithm_settings[classifier][1][1], 
                 image_data, group_id, data_type, request_id, classifier)
         future2 = executor.submit(thread_func, algorithm_settings[classifier][2][0], algorithm_settings[classifier][2][1], 
@@ -83,14 +87,23 @@ def predict_parallel(thread_func, image_data, group_id='', data_type='base64', r
             predictions = future.result()
             if future==future1:
                 all_predictions[1] = predictions
+                print('[1 Time taken: {!s}]'.format(datetime.now() - start_time))
             else:
                 all_predictions[2] = predictions
+                print('[2 Time taken: {!s}]'.format(datetime.now() - start_time))
+            
     
     #print(all_predictions)
 
     if thread_func==get_features_thread_db: # 生成 合并的特征向量
-        plus_features = [all_predictions[1][0].tolist()+all_predictions[2][0].tolist()]
-        return plus_features
+        if len(all_predictions[1][1])>0:
+            plus_features = {
+                'vgg' : { 'None' : all_predictions[1][0][0].tolist() },
+                'evo' : { 'None' : all_predictions[2][0][0].tolist() }
+            }
+            return plus_features, all_predictions[1][1]
+        else:
+            return {}, []
     else: # 返回识别结果
         return merge_results(all_predictions)
 

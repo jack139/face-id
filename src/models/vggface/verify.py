@@ -98,7 +98,7 @@ def get_features_b64(base64_data, angle=None):
     faces, face_boxs = extract_face_b64(base64_data, angle=angle, required_size=INPUT_SIZE)
     faces = np.float32(faces)
     if len(faces) == 0:
-        return [], []
+        return [], [], []
     yhat2 = get_features_array(faces)
     return yhat2, face_boxs, faces
 

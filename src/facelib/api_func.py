@@ -54,14 +54,20 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
+    # 并行获取特征值
+    all_encodings, face_locations = predict_parallel(get_features_thread_db, b64_data, group_id, 
+            request_id=request_id, classifier='api')
+
+    if len(face_locations)==0: # 未取得特征值
+        return []
+
     # 先使用knn分类器搜索（临时特征库）
-    predictions = predict_parallel(predict_thread_db, b64_data, group_id, 
-            request_id=request_id, classifier='knn')
+    predictions = predict_parallel(predict_thread_db, all_encodings, group_id, 
+            request_id=request_id, classifier='knn', data_type='encodings')
     # 如果未找到，再使用深度网络分类器（全量特征库）
     if len(predictions)==0 or predictions[0][0]=='unknown':
         print('search using keras classifier')
-        plus_encodings = predict_parallel(get_features_thread_db, b64_data, group_id, 
-                request_id=request_id, classifier='keras')
+        plus_encodings = [all_encodings['vgg']['None']+all_encodings['evo']['None']]
         predictions = predict_K(plus_encodings, group_id,
             model_path=TRAINED_MODEL_PATH, 
             face_algorithm="plus",
@@ -80,7 +86,7 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
             'user_id'     : user_id,
             'mobile_tail' : info['mobile'][:-4], # 手机后4位
             'name'        : info['name'], # 用户姓名
-            'location'    : box,
+            'location'    : face_locations[0], # 只有一个人脸坐标
             'score'       : score,
         })
 

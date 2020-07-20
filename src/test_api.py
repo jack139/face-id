@@ -9,7 +9,7 @@ urllib3.disable_warnings()
 with open('../data/train2/aidai/0_0_aidai_0014.jpg', 'rb') as f:
     img_data = f.read()
 
-with open('../data/test/obama1.jpg', 'rb') as f:
+with open('../data/test/5.jpg', 'rb') as f:
     img_data2 = f.read()
 
 
