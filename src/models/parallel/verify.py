@@ -15,16 +15,16 @@ from models.face_evoLVe import verify as verify_evo
 
 
 def get_features_b64_thread(face_algorithm, b64_data):
-    start_time = datetime.now()
     # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
     import keras.backend.tensorflow_backend as tb
     tb._SYMBOLIC_SCOPE.value = True
 
+    #start_time = datetime.now()
     if face_algorithm=='vgg':
         encoding_list, face_boxes, faces = verify_vgg.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
     else:
         encoding_list, face_boxes, faces = verify_evo.get_features_b64(b64_data, angle=ALGORITHM[face_algorithm]['p_angle'])
-    print('[{} - Time taken: {!s}]'.format(face_algorithm, datetime.now() - start_time))
+    #print('[{} - Time taken: {!s}]'.format(face_algorithm, datetime.now() - start_time))
     return encoding_list, face_boxes, faces
 
 
@@ -74,6 +74,7 @@ def get_features_b64_old(b64_data):
 
 
 # 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
+# 串行版，api注册后，后台生成特征值时使用
 def get_features_b64(b64_data, angle=None):
     # extract faces
     faces, face_boxs = extract_face_b64(b64_data, angle=angle, required_size=verify_vgg.INPUT_SIZE)
@@ -135,3 +136,56 @@ def is_match_b64_2(encoding_list_db, b64_data):
 
     # 均未匹配
     return False, distance_vgg/ALGORITHM['vgg']['distance_threshold'] # 只返回 vgg 结果
+
+
+# 用于并行获取特征值的 thread
+def get_features_array_thread(face_algorithm, face_data):
+    # https://discuss.streamlit.io/t/attributeerror-thread-local-object-has-no-attribute-value/574/3
+    import keras.backend.tensorflow_backend as tb
+    tb._SYMBOLIC_SCOPE.value = True
+
+    #start_time = datetime.now()
+    if face_algorithm=='vgg':
+        encoding_list = verify_vgg.get_features_array(face_data)
+    else:
+        encoding_list = verify_evo.get_features_array(face_data)
+    #print('[{} - Time taken: {!s}]'.format(face_algorithm, datetime.now() - start_time))
+    return encoding_list
+
+
+# 定位人脸，然后人脸的特征值列表，可能不止一个脸, 只取最大的一个脸(第1个脸)
+# 并行版，api search时生成特征值时使用
+def get_features_b64_parallel(b64_data, request_id=''):
+    # extract faces
+    faces, face_boxs = extract_face_b64(b64_data, angle=ALGORITHM['evo']['p_angle'], required_size=verify_vgg.INPUT_SIZE)
+    if len(faces) == 0:
+        return [], []
+
+    # vgg 使用人脸
+    faces_vgg = np.float32(faces)
+
+    # evo 使用人脸
+    faces_evo = []
+    for i in faces:
+        image = Image.fromarray(i)
+        image = image.resize(verify_evo.INPUT_SIZE)
+        faces_evo.append(np.array(image, 'uint8'))
+
+    # 获取特征值
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_list = [
+            executor.submit(get_features_array_thread, 'vgg', faces_vgg), # 0
+            executor.submit(get_features_array_thread, 'evo', faces_evo), # 1
+        ]
+        for future in concurrent.futures.as_completed(future_list):
+            pos = future_list.index(future)
+            results[pos] = future.result()
+
+    # 生成返回结果
+    plus_features = {
+        'vgg' : { 'None' : results[0][0].tolist() },
+        'evo' : { 'None' : results[1][0].tolist() }
+    }
+    return plus_features, face_boxs, faces_vgg # 图片返回vgg的
+

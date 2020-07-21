@@ -294,3 +294,29 @@ def face_temp_update(group_id, request_id, is_correct):
     r = db.faces_temp.update_one({'request_id' : request_id, 'group_id' : group_id},
             {'$set' : { 'is_correct' : is_correct }})
     return r.modified_count
+
+
+# 复制用户组 -- 测试用
+def group_copy(src_group_id, dst_group_id):
+    if group_info(dst_group_id)==-1:
+        group_new(dst_group_id)
+
+    start = 0
+    max_length = 1000
+    total = 0
+    while 1:
+        user_list = user_list_by_group(src_group_id, start=start, length=max_length)
+        for i in range(len(user_list)):
+            r = user_copy(user_list[i], src_group_id, dst_group_id)
+            if r in (-1, -2):
+                print('error.', r)
+                break
+
+        total += len(user_list)
+
+        if len(user_list)<max_length: 
+            break
+        else: # 未完，继续
+            start += max_length
+
+    print(total)

@@ -6,10 +6,10 @@ from async_api.utils import helper
 
 urllib3.disable_warnings()
 
-with open('../data/train2/aidai/0_0_aidai_0014.jpg', 'rb') as f:
+with open('../data/test2/aidai/1_0_aidai_0013.jpg', 'rb') as f:
     img_data = f.read()
 
-with open('../data/test/5.jpg', 'rb') as f:
+with open('../data/test/6.jpg', 'rb') as f:
     img_data2 = f.read()
 
 

@@ -48,17 +48,17 @@ KERAS_THRESHOLD_PERCENTAGE = 0.1
 algorithm_settings = {
     'knn' : {
         1 : [ 'vgg', '../data/model/train6.vgg.clf' ], # 优先返回
-        #2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
+        2 : [ 'evo', '../data/model/train2_ir152.evo.clf' ],
         #2 : [ 'deep', '../data/model/train2.deep.clf' ],
         #2 : [ 'rec', '../data/model/train4.rec.clf' ],
-        2 : [ 'null', '' ], # 空算法 
+        #2 : [ 'null', '' ], # 空算法 
     },
     'keras' : {
-        1 : [ 'vgg', '' ], # 优先返回
-        2 : [ 'evo', ''],
-        #1 : [ 'plus', '' ], # 特征合并 vgg+evo
+        #1 : [ 'vgg', '' ], # 优先返回
+        #2 : [ 'evo', ''],
+        1 : [ 'plus', '' ], # 特征合并 vgg+evo
         #2 : [ 'plus2', '' ], # 特征合并 evo+vgg
-        #2 : [ 'null', '' ], # 空算法 
+        2 : [ 'null', '' ], # 空算法 
     },
     'api' : { # api 中并行获取特征值的设置 -- 不要修改
         1 : [ 'vgg', '' ], # 优先返回
@@ -77,8 +77,8 @@ IMPORT_ANGLE = [None, 360] # 水平镜像
 
 # 特征值训练模型保存路径
 #TRAINED_MODEL_PATH = '/opt/data/model'
-#TRAINED_MODEL_PATH = '../data/model'
-TRAINED_MODEL_PATH = '../data/model_400_10'
+TRAINED_MODEL_PATH = '../data/model'
+#TRAINED_MODEL_PATH = '../data/model_400_3'
 
 # vgg 预训练权重，vggface使用默认权重文件，其他为自定义文件路径
 #VGGFACE_WEIGHTS = 'vggface'

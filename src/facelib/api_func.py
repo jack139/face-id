@@ -54,9 +54,12 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
     # 最多返回5个相似用户
     max_user_num = min(5, max_user_num)
 
-    # 并行获取特征值
-    all_encodings, face_locations = predict_parallel(get_features_thread_db, b64_data, group_id, 
-            request_id=request_id, classifier='api')
+    # 并行获取特征值  --  分别检测人脸， 人脸角度可以分别调整
+    #all_encodings, face_locations = predict_parallel(get_features_thread_db, b64_data, group_id, 
+    #        request_id=request_id, classifier='api')
+
+    # 并行获取特征值  --  只检测人脸一次，人脸角度要一起调整 (由ALGORITHM['evo']['p_angle']确定)
+    all_encodings, face_locations, face_array = verify.get_features_b64_parallel(b64_data, request_id=request_id)
 
     if len(face_locations)==0: # 未取得特征值
         return []
@@ -92,7 +95,8 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
 
     # 只记录有结果的人脸数据，用于后面数据增强, 图片在预测时已保存
     if len(user_list)>0:
-        face_save_to_temp(group_id, request_id, 'face_search', user_list)
+        face_save_to_temp(group_id, request_id, 'face_search', user_list, image=np.uint8(face_array[0]).tolist())
+        #face_save_to_temp(group_id, request_id, 'face_search', user_list)
 
     return user_list
 
