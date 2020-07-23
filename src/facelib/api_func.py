@@ -43,8 +43,7 @@ def face_verify_db(request_id, b64_data, group_id, user_id):
 
     # 只记录结果正确的人脸数据，用于后面数据增强
     if is_match>0:
-        face_image = np.uint8(face_array[0]).tolist()
-        face_save_to_temp(group_id, request_id, 'face_verify_db', [user_id], face_image)
+        face_save_to_temp(group_id, request_id, 'face_verify_db', [user_id], face_array[0])
 
     return is_match, score
 
@@ -95,7 +94,7 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
 
     # 只记录有结果的人脸数据，用于后面数据增强, 图片在预测时已保存
     if len(user_list)>0:
-        face_save_to_temp(group_id, request_id, 'face_search', user_list, image=np.uint8(face_array[0]).tolist())
+        face_save_to_temp(group_id, request_id, 'face_search', user_list, image=face_array[0])
         #face_save_to_temp(group_id, request_id, 'face_search', user_list)
 
     return user_list
@@ -104,7 +103,7 @@ def face_search(request_id, b64_data, group_id='DEFAULT', max_user_num=5):
 # 计算特征值
 def face_features(b64_data, face_id, group_id, user_id):
     encodings_result = {'vgg':{}, 'evo':{}}
-    face_image = []
+    face_image = None
 
     # 保存特征值：1. 原始，2. 水平后镜像
     for angle in IMPORT_ANGLE:
@@ -116,7 +115,7 @@ def face_features(b64_data, face_id, group_id, user_id):
         encodings_result['evo'][str(angle)] = encodings['evo'].tolist()
 
         if angle==None:
-            face_image = np.uint8(face_list[0]).tolist()
+            face_image = face_list[0]
 
     # 更新数据库：特征值、人脸图片
     r = face_update(face_id, encodings=encodings_result, image=face_image)
@@ -164,7 +163,6 @@ def face_search_mobile_tail(request_id, b64_data, mobile_tail, group_id='DEFAULT
 
     # 只记录有结果的人脸数据，用于后面数据增强
     if len(user_list)>0:
-        face_image = np.uint8(face_array[0]).tolist()
-        face_save_to_temp(group_id, request_id, 'face_search_mobile_tail', user_list, face_image)
+        face_save_to_temp(group_id, request_id, 'face_search_mobile_tail', user_list, face_array[0])
 
     return user_list

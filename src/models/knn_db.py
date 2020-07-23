@@ -136,7 +136,7 @@ def predict(X_base64, group_id, model_path='', distance_threshold=0.6, face_algo
 
         # 保存人脸到临时表, 只保存vgg的
         if request_id!='' and face_algorithm=='vgg':
-            dbport.face_save_to_temp(group_id, request_id, image=np.uint8(faces[0]).tolist())
+            dbport.face_save_to_temp(group_id, request_id, image=faces[0])
 
     else:
         # data_type = 'encodings'
@@ -247,7 +247,7 @@ def predict_K(X_base64, group_id, model_path='', face_algorithm='vgg', data_type
 
         # 保存人脸到临时表, 只保存vgg的
         if request_id!='' and face_algorithm=='vgg':
-            dbport.face_save_to_temp(group_id, request_id, image=np.uint8(faces[0]).tolist())
+            dbport.face_save_to_temp(group_id, request_id, image=faces[0])
 
     else:
         # data_type = 'encodings'

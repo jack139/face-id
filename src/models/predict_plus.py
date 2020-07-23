@@ -68,7 +68,7 @@ def get_features_thread_db(face_algorithm, model_name, image_data, group_id, dat
 
     # 保存人脸到临时表, 只保存vgg的
     if request_id!='' and face_algorithm=='vgg':
-        face_save_to_temp(group_id, request_id, image=np.uint8(faces[0]).tolist())
+        face_save_to_temp(group_id, request_id, image=faces[0])
 
     return faces_encodings, X_face_locations
 

@@ -80,7 +80,7 @@ if __name__ == "__main__":
                 'vgg' : { },
                 'evo' : { }
             }
-            face_image = []
+            face_image = None
 
             for angle in IMPORT_ANGLE: # 旋转不同角度训练 multi2
                 face_encodings_vgg, _, face_list = module_verify[0].get_features(img_path, angle=angle)
@@ -102,11 +102,7 @@ if __name__ == "__main__":
                     encodings['evo'][str(angle)] = encoding_evo
 
                     if angle==None:
-                        face_image = np.uint8(face_list[0]).tolist()
-
-                        # 保存图片为文件
-                        #x=np.array(face_image, dtype=np.uint8)
-                        #Image.fromarray(x).save('test.jpg',quality=95)
+                        face_image = face_list[0]
 
             # 添加人脸特征
             filepath, filename = os.path.split(img_path)

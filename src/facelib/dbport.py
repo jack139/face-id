@@ -1,13 +1,27 @@
 # -*- coding: utf-8 -*-
 
 # 使用 mongodb 作为存储，数据库操作
-
+from io import BytesIO
+from PIL import Image
+import numpy as np
 from bson.objectid import ObjectId
 from . import utils
 from config import settings
 
 db = settings.db_web
 
+# 图片转换：从 array 转为 binary
+def image_from_list_to_binary(image_data):
+    if len(image_data)==0 or image_data is None:
+        return b''
+
+    tmp_buff = BytesIO()
+    image = Image.fromarray(np.uint8(image_data))
+    image.save(tmp_buff,format='jpeg',quality=95)
+    tmp_buff.seek(0)
+    jpg_data = tmp_buff.read()
+
+    return jpg_data
 
 
 ########### 用户组操作
@@ -200,11 +214,11 @@ def user_remove_face(group_id, user_id, face_id):
 #       'evo' : { 'None' : [...], '0' : [...], '360' : [...] },
 #       'rec' : { 'None' : [...], '0' : [...], '360' : [...] },
 #   }
-def face_new(model_id, encodings, image=[], file_ref='', weight_ref=''):
+def face_new(model_id, encodings, image=None, file_ref='', weight_ref=''):
     r2 = db.faces.insert_one({
         'model_id'  : model_id, 
         'encodings' : encodings, 
-        'image'     : image,
+        'image'     : image_from_list_to_binary(image),
         'time_t'    : utils.time_str(),
         'ref_count' : 1,
         'file_ref'  : file_ref,
@@ -217,10 +231,10 @@ def face_new(model_id, encodings, image=[], file_ref='', weight_ref=''):
 # 修改人脸特征值
 def face_update(face_id, encodings=None, image=None):
     update_set = {}
-    if encodings:
+    if encodings is not None:
         update_set['encodings'] = encodings
-    if image:
-        update_set['image'] = image
+    if image is not None:
+        update_set['image'] = image_from_list_to_binary(image)
     if update_set!={}:
         r2 = db.faces.update_one({'_id':ObjectId(face_id)}, { '$set' : update_set })
     return r2.modified_count
@@ -273,12 +287,12 @@ def user_list_by_mobile_tail(mobile_tail, group_id):
 # 人脸数据存入临时表 faces_temp, 以request_id为索引
 def face_save_to_temp(group_id, request_id, api_name=None, result=None, image=None):
     update_set = {}
-    if api_name:
+    if api_name is not None:
         update_set['api_name'] = api_name 
-    if result:
+    if result is not None:
         update_set['result'] = result 
-    if image:
-        update_set['image'] = image
+    if image is not None:
+        update_set['image'] = image_from_list_to_binary(image)
 
     if len(update_set)>0: # 有数据更新
         update_set['last_t'] = utils.time_str()
