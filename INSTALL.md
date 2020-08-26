@@ -61,6 +61,8 @@ server {
 ```Kafka
 message.max.bytes=5242880
 replica.fetch.max.bytes=6291456
+fetch.min.bytes=102400
+fetch.max.wait.ms=100
 ```
 
 
