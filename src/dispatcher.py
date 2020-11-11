@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# 后台调度程序，轮询kafka，异步执行，redis返回结果
+# 后台调度程序，轮询redis，异步执行，redis返回结果
 
 import sys, json, time, random
 import concurrent.futures
 from datetime import datetime
-from kafka import KafkaConsumer
 
 from async_api.utils import helper
 from async_api import logger
 
 from facelib import api_func, utils
-from config.settings import KAFKA_CONFIG, MAX_DISPATCHER_WORKERS
+from config.settings import REDIS_CONFIG, MAX_DISPATCHER_WORKERS
 
 import binascii
 
@@ -82,24 +81,28 @@ def process_api(request_id, request_msg):
 
 
 def process_thread(msg_body):
-    # for keras 2.3
-    import keras.backend.tensorflow_backend as tb
-    tb._SYMBOLIC_SCOPE.value = True
+    try:
+        # for keras 2.3
+        import keras.backend.tensorflow_backend as tb
+        tb._SYMBOLIC_SCOPE.value = True
 
-    logger.info('{} Calling api: {}'.format(msg_body['request_id'], msg_body['data'].get('api', 'Unknown'))) 
+        logger.info('{} Calling api: {}'.format(msg_body['request_id'], msg_body['data'].get('api', 'Unknown'))) 
 
-    start_time = datetime.now()
+        start_time = datetime.now()
 
-    api_result = process_api(msg_body['request_id'], msg_body['data'])
+        api_result = process_api(msg_body['request_id'], msg_body['data'])
 
-    # 发布redis消息
-    #helper.redis_publish(msg_body['request_id'], api_result)
-    # 送lkafka消息
-    helper.kafka_send_return(msg_body['request_id'], api_result)
-    
-    logger.info('{} {} [Time taken: {!s}]'.format(msg_body['request_id'], msg_body['data']['api'], datetime.now() - start_time))
+        logger.info('1 ===> [Time taken: {!s}]'.format(datetime.now() - start_time))
+        
+        # 发布redis消息
+        helper.redis_publish(msg_body['request_id'], api_result)
+        
+        logger.info('{} {} [Time taken: {!s}]'.format(msg_body['request_id'], msg_body['data']['api'], datetime.now() - start_time))
 
-    sys.stdout.flush()
+        sys.stdout.flush()
+
+    except Exception as e:
+        logger.error("process_thread异常: %s" % e, exc_info=True)
 
 
 if __name__ == '__main__':
@@ -112,24 +115,21 @@ if __name__ == '__main__':
     print('Request queue NO. ', queue_no)
 
     sys.stdout.flush()
-    
+
     while 1:
-        consumer = KafkaConsumer(KAFKA_CONFIG['REQUEST-QUEUE']+queue_no, bootstrap_servers=KAFKA_CONFIG['SERVER'],
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')), 
-            group_id='dispatcher',  # 相同分组，同时启动多个dispatcher不会重复处理请求
-            fetch_max_bytes=KAFKA_CONFIG['MAX_MESSAGE_SIZE'])
+        # redis queue
+        ps = helper.redis_subscribe(REDIS_CONFIG['REQUEST-QUEUE']+queue_no)
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_DISPATCHER_WORKERS) # 建议与cpu核数相同
 
-        for message in consumer:
-            # message value and key are raw bytes -- decode if necessary
-            #msg_body = json.loads(message.value.decode('utf-8'))
-            msg_body = message.value
+        for item in ps.listen():        #监听状态：有消息发布了就拿过来
+            logger.info('reveived: type=%s running=%d pending=%d'% \
+                (item['type'], len(executor._threads), executor._work_queue.qsize())) 
+            if item['type'] == 'message':
+                #print(item)
+                msg_body = json.loads(item['data'].decode('utf-8'))
 
-            #print('!!!', msg_body['request_id'], helper.time_str())
+                future = executor.submit(process_thread, msg_body)
+                logger.info('Thread future: '+str(future)) 
 
-            future = executor.submit(process_thread, msg_body)
-            #logger.info('Thread future: '+str(future)) 
-
-            #time.sleep(1)
-            sys.stdout.flush()
+                sys.stdout.flush()

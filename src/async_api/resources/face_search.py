@@ -54,28 +54,21 @@ class FaceSearch(Resource):
 
             start_time = datetime.now()
 
-            if 0:
-                # 同步处理 （用于对比测试）
-                import dispatcher  # 调用时载入，第一轮时间会有点久
+            # 异步处理
 
-                ret2 = dispatcher.process_api(request_msg)
 
-            else:
-                # 异步处理
+            # 在发redis消息前注册, 防止消息漏掉
+            ps = helper.redis_subscribe(request_id)
 
-                # 在发kafka消息前生成 consumer, 防止消息漏掉
-                consumer = helper.kafka_get_return_consumer()
+            # 发布消息给redis
+            r = helper.redis_publish_request(request_id, request_msg)
+            if r is None:
+                logger.error("消息队列异常")
+                return {"code": 9099, "msg": "消息队列异常"}
 
-                # 发消息给 kafka
-                #print('-->', request_id, helper.time_str())
-                r = helper.kafka_send_msg(request_id, request_msg)
-                if r is None:
-                    logger.error("消息队列异常")
-                    return {"code": 9099, "msg": "消息队列异常"}
-
-                # 通过kafka 等待结果返回
-                ret = helper.kafka_recieve_return(consumer, request_id)
-                ret2 = ret['data']
+            # 通过redis订阅等待结果返回
+            ret = helper.redis_sub_receive(ps, request_id)               
+            ret2 = json.loads(ret['data'].decode('utf-8'))
 
 
             #print('<--', request_id, helper.time_str(), datetime.now() - start_time)

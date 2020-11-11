@@ -6,7 +6,7 @@
 import sys
 import time, shutil, os
 from async_api.utils import helper
-from config.settings import KAFKA_CONFIG
+from config.settings import REDIS_CONFIG
 
 
 APP_DIR=''
@@ -46,7 +46,7 @@ if __name__=='__main__':
     #启动后台进程
     #
     kill_processor('%s/dispatcher' % APP_DIR)
-    for i in range(KAFKA_CONFIG['REQUEST-QUEUE-NUM']):
+    for i in range(REDIS_CONFIG['REQUEST-QUEUE-NUM']):
         start_processor('dispatcher', str(i+1))
 
     try:    
@@ -57,7 +57,7 @@ if __name__=='__main__':
             if pid==None:
                 # 进程已死, 重启进程
                 kill_processor('%s/dispatcher' % APP_DIR)
-                for i in range(KAFKA_CONFIG['REQUEST-QUEUE-NUM']):
+                for i in range(REDIS_CONFIG['REQUEST-QUEUE-NUM']):
                     start_processor('dispatcher', str(i+1))
                 _ins+=1
                 print("%s\tdispatcher restart" % helper.time_str())

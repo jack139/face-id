@@ -107,8 +107,8 @@ class DbUserCopy(Resource):
             if len(r2)>0: 
                 # 重新训练模型, 至少需要1个用户
                 request_msg = { 'api' : 'train_by_group', 'group_id' : dst_group_id }
-                # 发消息给 kafka
-                r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+                # 发布消息给redis
+                r = helper.redis_publish_request('NO_RECIEVER', request_msg)
                 if r is None:
                     logger.error("消息队列异常")
                     return {"code": 9099, "msg": "消息队列异常"}
@@ -148,8 +148,8 @@ class DbUserRemove(Resource):
             #if len(r2)>0: 
             #    # 重新训练模型, 至少需要1个用户
             #    request_msg = { 'api' : 'train_by_group', 'group_id' : group_id }
-            #    # 发消息给 kafka
-            #    r = helper.kafka_send_msg('NO_RECIEVER', request_msg)
+            #    # 发布消息给redis
+            #    r = helper.redis_publish_request('NO_RECIEVER', request_msg)
             #    if r is None:
             #        logger.error("消息队列异常")
             #        return {"code": 9099, "msg": "消息队列异常"}

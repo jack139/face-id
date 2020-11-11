@@ -218,38 +218,3 @@ def is_match_b64_3(encoding_list_data, b64_data):
     # 返回格式 [(user_id1, distance1), (user_id2, distance2), ... ], face_boxes, face_image_array
     return result_list, results[0][1], results[0][2]
 
-
-#############################################################################################3 
-### 以下串行方式在kafka发消息时不可用，会导致producer.send挂起，所以废弃不用！！！！
-### 怀疑是 kafka-python 与 keras 有冲突。 所以要使用上面两个 线程版本，把keras隔离开。
-##
-
-'''
-# 比较两个人脸是否同一人  
-def is_match_b64_serial(b64_data1, b64_data2):
-    # calculate distance between embeddings
-    encoding_list1, face_boxes1 = get_features_b64(b64_data1)
-    encoding_list2, face_boxes2 = get_features_b64(b64_data2)
-
-    if len(face_boxes1)==0 or len(face_boxes2)==0:
-        return False, [999]
-
-    distance = face_distance([encoding_list1[0]], encoding_list2[0])
-    return distance[0]<=ALGORITHM['vgg']['distance_threshold'], distance/ALGORITHM['vgg']['distance_threshold']
-
-# 比较两个人脸是否同一人, encoding_list1来自已知db用户
-def is_match_b64_2_serial(encoding_list_db, b64_data):
-    encoding_list1 = [[], []]
-    for i in range(len(encoding_list_db)):
-        encoding_list1[0].extend(encoding_list_db[i]['vgg'].values()) # db中特征值，使用新结构  2020-07-09
-
-    # calculate distance between embeddings
-    encoding_list2, face_boxes = get_features_b64(b64_data)
-
-    if len(face_boxes)==0:
-        return False, [999]
-
-    distance_vgg = face_distance(encoding_list1[0], encoding_list2[0])
-    x = distance_vgg <= ALGORITHM['vgg']['distance_threshold']
-    return x.any(), distance_vgg
-'''

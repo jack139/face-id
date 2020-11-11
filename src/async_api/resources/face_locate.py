@@ -38,22 +38,18 @@ class FaceLocate(Resource):
                 'max_face_num' : int(max_face_num),
             }
 
-            # 在发kafka消息前生成 consumer, 防止消息漏掉
-            consumer = helper.kafka_get_return_consumer()
+            # 在发redis消息前注册, 防止消息漏掉
+            ps = helper.redis_subscribe(request_id)
 
-            # 发消息给 kafka
-            r = helper.kafka_send_msg(request_id, request_msg)
+            # 发布消息给redis
+            r = helper.redis_publish_request(request_id, request_msg)
             if r is None:
                 logger.error("消息队列异常")
                 return {"code": 9099, "msg": "消息队列异常"}
 
             # 通过redis订阅等待结果返回
-            #ret = helper.redis_subscribe(request_id)
-            #ret2 = json.loads(ret['data'].decode('utf-8'))
-
-            # 通过kafka 等待结果返回
-            ret = helper.kafka_recieve_return(consumer, request_id)
-            ret2 = ret['data']
+            ret = helper.redis_sub_receive(ps, request_id)               
+            ret2 = json.loads(ret['data'].decode('utf-8'))
 
             if ret2['code']==200:
                 return {'code': 200, 'msg' : 'success', 'data' : ret2['data']}

@@ -121,14 +121,13 @@ SECRET_KEY = {
 
 ############# 消息中间件设置
 
-KAFKA_CONFIG = {
-    #'SERVER' : ['172.17.0.1:9092'],
-    'SERVER' : ['127.0.0.1:9092'],
-    'REQUEST-QUEUE' : 'synchronous-asynchronous-queue',
+REDIS_CONFIG = {
+    'SERVER' : '127.0.0.1',
+    'PORT'   : '7480',
+    'PASSWD' : 'e18ffb7484f4d69c2acb40008471a71c',
+    'REQUEST-QUEUE' : 'cardnum-synchronous-asynchronous-queue',
     'REQUEST-QUEUE-NUM' : 1,
-    'RETURN-QUEUE' : 'synchronous-asynchronous-return',
-    'MESSAGE_TIMEOUT' : 10000, # 结果返回消息超时，单位：毫秒
-    'MAX_MESSAGE_SIZE' : 5242880,  # 消息最大尺寸 5MB
+    'MESSAGE_TIMEOUT' : 10, # 结果返回消息超时，单位：秒
 }
 
 # 图片数据最大尺寸
