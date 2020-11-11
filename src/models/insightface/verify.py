@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tensorlayer as tl
 import cv2
 from PIL import Image
@@ -25,8 +25,6 @@ def init_nets():
     num_output = 85164
     ckpt_index_list = ['710000.ckpt']
     ckpt_file = '/home/gt/Codes/yhtech/face_model/ckpt_model_d/InsightFace_iter_best_'
-
-    tf.disable_eager_execution()
 
     images = tf.placeholder(name='img_inputs', shape=[None, *image_size, 3], dtype=tf.float32)
     labels = tf.placeholder(name='img_labels', shape=[None, ], dtype=tf.int64)

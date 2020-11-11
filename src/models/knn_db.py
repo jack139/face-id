@@ -13,8 +13,7 @@ from facelib.utils import import_verify
 from tqdm import tqdm
 from .knn import score_acc_f1
 
-import tensorflow.compat.v1 as tf
-tf.disable_eager_execution()
+import tensorflow as tf
 graph = tf.Graph()
 session = tf.Session(graph=graph)
 

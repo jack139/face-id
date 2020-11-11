@@ -3,7 +3,7 @@
 import cv2
 from PIL import Image
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import face_recognition
 from .extract_embeddings import extract_embeddings
 from facelib.utils import extract_face_b64

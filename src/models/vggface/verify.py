@@ -15,8 +15,7 @@ from facelib.utils import extract_face_b64, adjust_face_angle
 from config.settings import ALGORITHM, VGGFACE_WEIGHTS
 
 
-import tensorflow.compat.v1 as tf
-tf.disable_eager_execution()
+import tensorflow as tf
 
 INPUT_SIZE = (224, 224)
 

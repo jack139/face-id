@@ -4,8 +4,7 @@ import sys
 
 import cv2
 import numpy as np
-#import tensorflow as tf
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from scipy.io import loadmat
 import pickle
 

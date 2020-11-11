@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import numpy as np
 from . import facenet
 import math

@@ -18,7 +18,7 @@ if __name__ == '__main__':
     body = {
         'image'    : base64.b64encode(img_data).decode('utf-8'),
         #'image2'    : base64.b64encode(img_data2).decode('utf-8'),
-        #'group_id' : 'debug',
+        'group_id' : 'debug',
         #'mobile_tail' : '1234',
         #'user_id'  : 'aidai7',
         #'name'     : 'aidai7',
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     #host = 'http://172.17.0.3:5000'
     host = 'http://127.0.0.1:5000'
     #url = host+'/face/verify'
-    url = host+'/face/locate'
-    #url = host+'/face/search'
+    #url = host+'/face/locate'
+    url = host+'/face/search'
     #url = host+'/face/feedback'
     #url = host+'/facedb/face/reg'
     #url = host+'/facedb/face/update'
